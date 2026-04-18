@@ -11,9 +11,18 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as HistoryRouteImport } from './routes/history'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CasesIdRouteImport } from './routes/cases.$id'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminTsbRouteImport } from './routes/admin.tsb'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminMachinesRouteImport } from './routes/admin.machines'
+import { Route as AdminDealersRouteImport } from './routes/admin.dealers'
+import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
+import { Route as AdminTsbNewRouteImport } from './routes/admin.tsb.new'
+import { Route as AdminTsbIdRouteImport } from './routes/admin.tsb.$id'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -23,6 +32,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HistoryRoute = HistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -40,48 +54,159 @@ const CasesIdRoute = CasesIdRouteImport.update({
   path: '/cases/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTsbRoute = AdminTsbRouteImport.update({
+  id: '/admin/tsb',
+  path: '/admin/tsb',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/admin/settings',
+  path: '/admin/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminMachinesRoute = AdminMachinesRouteImport.update({
+  id: '/admin/machines',
+  path: '/admin/machines',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminDealersRoute = AdminDealersRouteImport.update({
+  id: '/admin/dealers',
+  path: '/admin/dealers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminDashboardRoute = AdminDashboardRouteImport.update({
+  id: '/admin/dashboard',
+  path: '/admin/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTsbNewRoute = AdminTsbNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AdminTsbRoute,
+} as any)
+const AdminTsbIdRoute = AdminTsbIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminTsbRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/dealers': typeof AdminDealersRoute
+  '/admin/machines': typeof AdminMachinesRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/tsb': typeof AdminTsbRouteWithChildren
+  '/admin/users': typeof AdminUsersRoute
   '/cases/$id': typeof CasesIdRoute
+  '/admin/tsb/$id': typeof AdminTsbIdRoute
+  '/admin/tsb/new': typeof AdminTsbNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/dealers': typeof AdminDealersRoute
+  '/admin/machines': typeof AdminMachinesRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/tsb': typeof AdminTsbRouteWithChildren
+  '/admin/users': typeof AdminUsersRoute
   '/cases/$id': typeof CasesIdRoute
+  '/admin/tsb/$id': typeof AdminTsbIdRoute
+  '/admin/tsb/new': typeof AdminTsbNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/dealers': typeof AdminDealersRoute
+  '/admin/machines': typeof AdminMachinesRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/tsb': typeof AdminTsbRouteWithChildren
+  '/admin/users': typeof AdminUsersRoute
   '/cases/$id': typeof CasesIdRoute
+  '/admin/tsb/$id': typeof AdminTsbIdRoute
+  '/admin/tsb/new': typeof AdminTsbNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/login' | '/reset-password' | '/cases/$id'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/history'
+    | '/login'
+    | '/reset-password'
+    | '/admin/dashboard'
+    | '/admin/dealers'
+    | '/admin/machines'
+    | '/admin/settings'
+    | '/admin/tsb'
+    | '/admin/users'
+    | '/cases/$id'
+    | '/admin/tsb/$id'
+    | '/admin/tsb/new'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/login' | '/reset-password' | '/cases/$id'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/history'
+    | '/login'
+    | '/reset-password'
+    | '/admin/dashboard'
+    | '/admin/dealers'
+    | '/admin/machines'
+    | '/admin/settings'
+    | '/admin/tsb'
+    | '/admin/users'
+    | '/cases/$id'
+    | '/admin/tsb/$id'
+    | '/admin/tsb/new'
   id:
     | '__root__'
     | '/'
     | '/dashboard'
+    | '/history'
     | '/login'
     | '/reset-password'
+    | '/admin/dashboard'
+    | '/admin/dealers'
+    | '/admin/machines'
+    | '/admin/settings'
+    | '/admin/tsb'
+    | '/admin/users'
     | '/cases/$id'
+    | '/admin/tsb/$id'
+    | '/admin/tsb/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
+  HistoryRoute: typeof HistoryRoute
   LoginRoute: typeof LoginRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  AdminDashboardRoute: typeof AdminDashboardRoute
+  AdminDealersRoute: typeof AdminDealersRoute
+  AdminMachinesRoute: typeof AdminMachinesRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminTsbRoute: typeof AdminTsbRouteWithChildren
+  AdminUsersRoute: typeof AdminUsersRoute
   CasesIdRoute: typeof CasesIdRoute
 }
 
@@ -99,6 +224,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/history': {
+      id: '/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof HistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -122,14 +254,91 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CasesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/tsb': {
+      id: '/admin/tsb'
+      path: '/admin/tsb'
+      fullPath: '/admin/tsb'
+      preLoaderRoute: typeof AdminTsbRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/admin/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/machines': {
+      id: '/admin/machines'
+      path: '/admin/machines'
+      fullPath: '/admin/machines'
+      preLoaderRoute: typeof AdminMachinesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/dealers': {
+      id: '/admin/dealers'
+      path: '/admin/dealers'
+      fullPath: '/admin/dealers'
+      preLoaderRoute: typeof AdminDealersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/dashboard': {
+      id: '/admin/dashboard'
+      path: '/admin/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AdminDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/tsb/new': {
+      id: '/admin/tsb/new'
+      path: '/new'
+      fullPath: '/admin/tsb/new'
+      preLoaderRoute: typeof AdminTsbNewRouteImport
+      parentRoute: typeof AdminTsbRoute
+    }
+    '/admin/tsb/$id': {
+      id: '/admin/tsb/$id'
+      path: '/$id'
+      fullPath: '/admin/tsb/$id'
+      preLoaderRoute: typeof AdminTsbIdRouteImport
+      parentRoute: typeof AdminTsbRoute
+    }
   }
 }
+
+interface AdminTsbRouteChildren {
+  AdminTsbIdRoute: typeof AdminTsbIdRoute
+  AdminTsbNewRoute: typeof AdminTsbNewRoute
+}
+
+const AdminTsbRouteChildren: AdminTsbRouteChildren = {
+  AdminTsbIdRoute: AdminTsbIdRoute,
+  AdminTsbNewRoute: AdminTsbNewRoute,
+}
+
+const AdminTsbRouteWithChildren = AdminTsbRoute._addFileChildren(
+  AdminTsbRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
+  HistoryRoute: HistoryRoute,
   LoginRoute: LoginRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  AdminDashboardRoute: AdminDashboardRoute,
+  AdminDealersRoute: AdminDealersRoute,
+  AdminMachinesRoute: AdminMachinesRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminTsbRoute: AdminTsbRouteWithChildren,
+  AdminUsersRoute: AdminUsersRoute,
   CasesIdRoute: CasesIdRoute,
 }
 export const routeTree = rootRouteImport
