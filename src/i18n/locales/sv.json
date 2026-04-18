@@ -1,0 +1,23 @@
+{
+  "app": { "title": "TSB Portal", "intern": "Intern" },
+  "nav": {
+    "dashboard": "Dashboard",
+    "myCases": "Mina ärenden",
+    "history": "Historik",
+    "tsb": "TSB:er",
+    "dealers": "Återförsäljare",
+    "machines": "Maskiner",
+    "users": "Användare",
+    "settings": "Inställningar"
+  },
+  "login": {
+    "heading": "Logga in på TSB Portal",
+    "email": "E-post",
+    "password": "Lösenord",
+    "submit": "Logga in",
+    "or": "eller",
+    "microsoft": "Logga in med Microsoft",
+    "forgot": "Glömt lösenord?"
+  },
+  "common": { "search": "Sök", "comingSoon": "Kommer snart", "logout": "Logga ut" }
+}
