@@ -1,0 +1,30 @@
+{
+  "app": {
+    "title": "TSB Portal",
+    "intern": "Intern"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "myCases": "Mine sager",
+    "history": "Historik",
+    "tsb": "TSB'er",
+    "dealers": "Forhandlere",
+    "machines": "Maskiner",
+    "users": "Brugere",
+    "settings": "Indstillinger"
+  },
+  "login": {
+    "heading": "Log ind på TSB Portal",
+    "email": "E-mail",
+    "password": "Adgangskode",
+    "submit": "Log ind",
+    "or": "eller",
+    "microsoft": "Log ind med Microsoft",
+    "forgot": "Glemt adgangskode?"
+  },
+  "common": {
+    "search": "Søg",
+    "comingSoon": "Kommer snart",
+    "logout": "Log ud"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "app": { "title": "TSB Portal", "intern": "Intern" },
+  "nav": {
+    "dashboard": "Dashboard",
+    "myCases": "Meine Fälle",
+    "history": "Verlauf",
+    "tsb": "TSBs",
+    "dealers": "Händler",
+    "machines": "Maschinen",
+    "users": "Benutzer",
+    "settings": "Einstellungen"
+  },
+  "login": {
+    "heading": "Anmeldung beim TSB Portal",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "submit": "Anmelden",
+    "or": "oder",
+    "microsoft": "Mit Microsoft anmelden",
+    "forgot": "Passwort vergessen?"
+  },
+  "common": { "search": "Suchen", "comingSoon": "Demnächst", "logout": "Abmelden" }
+}
