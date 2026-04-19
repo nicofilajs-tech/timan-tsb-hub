@@ -15,7 +15,12 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 async function fetchUserProfile(userId: string): Promise<AppUser | null> {
-  const { data: userData, error: userError } = await supabase
+  // NOTE: `users` and `user_roles` tables don't exist yet in the database.
+  // Cast to `any` until the schema is created via a migration and types are regenerated.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = supabase as any;
+
+  const { data: userData, error: userError } = await db
     .from("users")
     .select("id, email, full_name, company_name")
     .eq("id", userId)
@@ -23,13 +28,12 @@ async function fetchUserProfile(userId: string): Promise<AppUser | null> {
 
   if (userError || !userData) return null;
 
-  const { data: roleData } = await supabase
+  const { data: roleData } = await db
     .from("user_roles")
     .select("roles(code)")
     .eq("user_id", userId)
     .maybeSingle();
 
-  // PostgREST returns the joined row as a nested object
   const nested = roleData?.roles as { code: RoleCode } | null | undefined;
   const role = nested?.code ?? null;
 
