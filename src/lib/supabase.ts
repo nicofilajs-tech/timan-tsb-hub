@@ -1,6 +1,2 @@
-import { createClient } from "@supabase/supabase-js";
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
-
-export const supabase = createClient(supabaseUrl, supabaseKey);
+// Re-export the auto-generated Supabase client (handles SSR + lazy init).
+export { supabase } from "@/integrations/supabase/client";
