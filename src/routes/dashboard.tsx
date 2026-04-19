@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Search } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { StatCard } from "@/components/StatCard";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Input } from "@/components/ui/input";
@@ -62,6 +63,7 @@ const rows: Row[] = [
 function DashboardPage() {
   const navigate = useNavigate();
   return (
+    <ProtectedRoute>
     <AppLayout
       variant="dealer"
       company="Nordic Machinery Aps"
@@ -143,5 +145,6 @@ function DashboardPage() {
         </div>
       </div>
     </AppLayout>
+    </ProtectedRoute>
   );
 }

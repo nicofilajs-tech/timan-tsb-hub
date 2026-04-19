@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ExternalLink, Search } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { StatCard } from "@/components/StatCard";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
@@ -64,6 +65,7 @@ function CaseDetailPage() {
   const { id } = Route.useParams();
 
   return (
+    <ProtectedRoute>
     <AppLayout
       variant="dealer"
       company="Nordic Machinery Aps"
@@ -167,5 +169,6 @@ function CaseDetailPage() {
         </div>
       </div>
     </AppLayout>
+    </ProtectedRoute>
   );
 }

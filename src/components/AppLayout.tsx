@@ -1,4 +1,4 @@
-import { Link, useLocation } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   LayoutDashboard,
@@ -11,9 +11,12 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
+  LogOut,
 } from "lucide-react";
+import { toast } from "sonner";
 import { BrandHeader } from "./BrandHeader";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface NavItem {
   to: string;
@@ -47,7 +50,15 @@ const adminNav: NavItem[] = [
 export function AppLayout({ variant, company, user, breadcrumbs, children }: AppLayoutProps) {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const nav = variant === "dealer" ? dealerNav : adminNav;
+
+  const handleLogout = async () => {
+    await logout();
+    toast.success("Du er nu logget ud");
+    navigate({ to: "/login" });
+  };
 
   return (
     <div className="flex min-h-screen w-full bg-page-bg">
@@ -134,6 +145,13 @@ export function AppLayout({ variant, company, user, breadcrumbs, children }: App
             >
               {user.initials}
             </div>
+            <button
+              onClick={handleLogout}
+              title="Log ud"
+              className="flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-page-bg hover:text-foreground"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
           </div>
         </header>
         <main className="flex-1 p-6">{children}</main>
