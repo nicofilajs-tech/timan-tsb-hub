@@ -192,7 +192,26 @@ function CaseDetailPage() {
                   <td className="px-5 py-4">{m.model}</td>
                   <td className="px-5 py-4 text-muted-foreground">{m.customer}</td>
                   <td className="px-5 py-4">
-                    <StatusBadge variant={m.status.variant}>{m.status.label}</StatusBadge>
+                    <Select
+                      value={m.status}
+                      onValueChange={(v) => updateStatus(m.serial, v as StatusKey)}
+                    >
+                      <SelectTrigger className="h-8 w-[180px] rounded-full border-border-soft bg-page-bg">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {STATUS_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.key} value={opt.key}>
+                            <span className="flex items-center gap-2">
+                              <span
+                                className={cn("h-2 w-2 rounded-full", statusDotClass[opt.variant])}
+                              />
+                              {opt.label}
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </td>
                 </tr>
               ))}
