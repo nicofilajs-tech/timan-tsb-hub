@@ -10,12 +10,47 @@ export type Severity = 1 | 2 | 3 | 4;
 export type TsbStatus = "kladde" | "aktiv" | "lukket";
 export type DealerActivation = "afventer" | "accepteret" | "afvist";
 
+/** Partner type from SharePoint A_B_KUNDE field */
+export type PartnerType = "forhandler" | "servicepartner" | "importor";
+
+/** Map raw SharePoint A_B_KUNDE numeric value to internal partner type */
+export function mapPartnerType(raw: number | string | null | undefined): PartnerType {
+  const n = typeof raw === "string" ? Number(raw) : raw;
+  if (n === 2) return "servicepartner";
+  if (n === 3) return "importor";
+  return "forhandler"; // 1 or default
+}
+
+export const PARTNER_TYPE_LABEL: Record<PartnerType, string> = {
+  forhandler: "Forhandler",
+  servicepartner: "Servicepartner",
+  importor: "Importør",
+};
+
+export type SourceSystem = "sharepoint" | "manual";
+
 export interface Dealer {
   id: string;
   name: string;
   city: string;
   contact: string;
   machineCount: number;
+  // ---- Source sync fields (SharePoint: DebitorFiltered) ----
+  /** External account number from SharePoint "Account" field — stable across syncs */
+  sharepointAccount?: string;
+  /** Where the dealer record originated */
+  sourceSystem: SourceSystem;
+  /** Mapped from A_B_KUNDE: 1=forhandler, 2=servicepartner, 3=importor */
+  partnerType: PartnerType;
+  /** ISO country code from COUNTRY field */
+  country: string;
+  /** True if the dealer is currently present and active in SharePoint */
+  sourceActive: boolean;
+  /** True if the dealer has been removed from / no longer present in SharePoint.
+   *  We never hard-delete — we keep history and mark with a yellow warning badge. */
+  inactiveFromSource: boolean;
+  /** Last successful sync timestamp (ISO) */
+  lastSyncedAt?: string;
 }
 
 export interface MachineRef {
