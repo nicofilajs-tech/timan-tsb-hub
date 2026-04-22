@@ -165,40 +165,6 @@ function AdminDashboard() {
   );
 }
 
-function QuickAction({
-  to,
-  icon: Icon,
-  title,
-  description,
-}: {
-  to: string;
-  icon: React.ComponentType<{ className?: string }>;
-  title: string;
-  description: string;
-}) {
-  return (
-    <Link
-      to={to}
-      className="group rounded-[10px] border border-border-soft bg-white p-5 shadow-sm transition-colors hover:bg-page-bg"
-    >
-      <div className="flex items-start gap-3">
-        <div
-          className="flex h-10 w-10 items-center justify-center rounded-md"
-          style={{ backgroundColor: "var(--status-success-bg)", color: "var(--timan-green)" }}
-        >
-          <Icon className="h-5 w-5" />
-        </div>
-        <div className="flex-1">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold">{title}</h3>
-            <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-          </div>
-          <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-        </div>
-      </div>
-    </Link>
-  );
-}
 
 // Suppress unused-import warnings for components we may add later
 void Clock;
