@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { ExternalLink, Search } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -7,6 +8,30 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+type StatusVariant = "success" | "info" | "warning" | "neutral";
+type StatusKey = "udfoert" | "i_gang" | "venter" | "ikke_startet";
+
+const STATUS_OPTIONS: { key: StatusKey; label: string; variant: StatusVariant }[] = [
+  { key: "udfoert", label: "Udført", variant: "success" },
+  { key: "i_gang", label: "I gang", variant: "info" },
+  { key: "venter", label: "Venter på dele", variant: "warning" },
+  { key: "ikke_startet", label: "Ikke startet", variant: "neutral" },
+];
+
+const statusDotClass: Record<StatusVariant, string> = {
+  success: "bg-status-success-fg",
+  info: "bg-status-info-fg",
+  warning: "bg-status-warning-fg",
+  neutral: "bg-status-neutral-fg",
+};
 
 export const Route = createFileRoute("/cases/$id")({
   head: ({ params }) => ({
