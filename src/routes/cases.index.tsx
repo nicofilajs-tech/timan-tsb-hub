@@ -178,7 +178,7 @@ function CasesPage() {
                         params={{ id: r.id }}
                         className="font-mono text-sm font-medium hover:underline"
                         style={{ color: "var(--timan-green)" }}
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
                       >
                         {r.id}
                       </Link>
