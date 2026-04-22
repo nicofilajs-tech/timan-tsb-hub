@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo } from "react";
-import { Plus, FileText, Users, AlertTriangle, Clock, ArrowRight } from "lucide-react";
+import { AlertTriangle, Clock, ArrowRight } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { StatCard } from "@/components/StatCard";
@@ -81,27 +81,6 @@ function AdminDashboard() {
           />
         </div>
 
-        {/* Quick actions */}
-        <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
-          <QuickAction
-            to="/admin/tsb/new"
-            icon={Plus}
-            title="Opret ny TSB"
-            description="Definer detaljer, vælg forhandlere og maskiner, og aktivér."
-          />
-          <QuickAction
-            to="/admin/tsb"
-            icon={FileText}
-            title="Administrer TSB'er"
-            description="Se status, accept og fremdrift pr. forhandler."
-          />
-          <QuickAction
-            to="/admin/dealers"
-            icon={Users}
-            title="Forhandlere"
-            description="Hold styr på dine forhandlere og kontaktpersoner."
-          />
-        </div>
 
         {/* Requires attention */}
         <div className="mt-6 rounded-[10px] border border-border-soft bg-white shadow-sm">
@@ -186,40 +165,6 @@ function AdminDashboard() {
   );
 }
 
-function QuickAction({
-  to,
-  icon: Icon,
-  title,
-  description,
-}: {
-  to: string;
-  icon: React.ComponentType<{ className?: string }>;
-  title: string;
-  description: string;
-}) {
-  return (
-    <Link
-      to={to}
-      className="group rounded-[10px] border border-border-soft bg-white p-5 shadow-sm transition-colors hover:bg-page-bg"
-    >
-      <div className="flex items-start gap-3">
-        <div
-          className="flex h-10 w-10 items-center justify-center rounded-md"
-          style={{ backgroundColor: "var(--status-success-bg)", color: "var(--timan-green)" }}
-        >
-          <Icon className="h-5 w-5" />
-        </div>
-        <div className="flex-1">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold">{title}</h3>
-            <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-          </div>
-          <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-        </div>
-      </div>
-    </Link>
-  );
-}
 
 // Suppress unused-import warnings for components we may add later
 void Clock;
