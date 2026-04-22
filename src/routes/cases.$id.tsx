@@ -88,6 +88,13 @@ const initialMachines: Machine[] = [
 
 function CaseDetailPage() {
   const { id } = Route.useParams();
+  const [machines, setMachines] = useState<Machine[]>(initialMachines);
+
+  const updateStatus = (serial: string, status: StatusKey) => {
+    setMachines((prev) =>
+      prev.map((m) => (m.serial === serial ? { ...m, status } : m)),
+    );
+  };
 
   return (
     <ProtectedRoute>
