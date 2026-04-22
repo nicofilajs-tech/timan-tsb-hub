@@ -16,6 +16,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { formatDate, getMachines, useTsbs } from "@/lib/tsb-store";
+
+const CURRENT_DEALER_ID = "d-nordic";
 
 type StatusVariant = "success" | "info" | "warning" | "neutral";
 type StatusKey = "udfoert" | "i_gang" | "venter" | "ikke_startet";
@@ -89,7 +92,29 @@ const initialMachines: Machine[] = [
 
 function CaseDetailPage() {
   const { id } = Route.useParams();
-  const [machines, setMachines] = useState<Machine[]>(initialMachines);
+  const tsbs = useTsbs();
+  const tsb = tsbs.find((t) => t.id === id);
+  const link = tsb?.dealers.find((d) => d.dealerId === CURRENT_DEALER_ID);
+
+  // Derive machine list for this dealer from the shared store, with sensible
+  // defaults so newly-created admin TSBs immediately work in the dealer view.
+  const allMachines = getMachines();
+  const derivedInitial: Machine[] = useMemo(() => {
+    if (!link) return initialMachines;
+    return link.machineSerials.map((serial) => {
+      const m = allMachines.find((x) => x.serial === serial);
+      return {
+        serial,
+        model: m?.model ?? "—",
+        customer: m?.customer ?? "—",
+        status: "ikke_startet" as StatusKey,
+        checked: false,
+      };
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tsb?.id]);
+
+  const [machines, setMachines] = useState<Machine[]>(derivedInitial);
 
   const updateStatus = (serial: string, status: StatusKey) => {
     setMachines((prev) =>
@@ -106,6 +131,13 @@ function CaseDetailPage() {
   const percent = totalMachines === 0 ? 0 : Math.round((doneMachines / totalMachines) * 100);
   const isComplete = totalMachines > 0 && doneMachines === totalMachines;
 
+  const headerTitle = tsb?.title ?? "Softwareopdatering — styreenhed v3.2";
+  const headerSeverity = tsb ? `Severity ${tsb.severity}` : "Severity 3";
+  const acceptedLabel = link?.acceptedAt
+    ? `Accepteret ${formatDate(link.acceptedAt)} af Lars Jensen`
+    : "Afventer accept";
+  const deadlineLabel = tsb ? formatDate(tsb.deadline) : "14. maj";
+
   return (
     <ProtectedRoute>
     <AppLayout
@@ -119,26 +151,28 @@ function CaseDetailPage() {
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-3">
-              <StatusBadge variant="warning">Severity 3</StatusBadge>
+              <StatusBadge variant="warning">{headerSeverity}</StatusBadge>
               {isComplete ? (
                 <StatusBadge variant="success">
                   <span className="inline-flex items-center gap-1">
                     <CheckCircle2 className="h-3.5 w-3.5" /> Projekt fuldført
                   </span>
                 </StatusBadge>
+              ) : link?.status === "afventer" ? (
+                <StatusBadge variant="warning">Afventer accept</StatusBadge>
               ) : (
                 <StatusBadge variant="info">I gang</StatusBadge>
               )}
-              <span className="font-mono text-xs text-muted-foreground">{id} · v1.1</span>
+              <span className="font-mono text-xs text-muted-foreground">{id}</span>
             </div>
             <h1
               className="mt-3 text-[22px] font-semibold"
               style={{ color: "var(--timan-red)" }}
             >
-              Softwareopdatering — styreenhed v3.2
+              {headerTitle}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Accepteret 12. marts 2026 af Lars Jensen
+              {acceptedLabel}
             </p>
           </div>
           <Button
@@ -179,9 +213,7 @@ function CaseDetailPage() {
           <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Deadline
           </div>
-          <div className="mt-2 text-3xl font-semibold">
-            14. maj <span className="text-base font-normal text-muted-foreground">(27 dage)</span>
-          </div>
+          <div className="mt-2 text-2xl font-semibold">{deadlineLabel}</div>
         </div>
       </div>
 
