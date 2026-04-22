@@ -32,8 +32,11 @@ import {
   getDealers,
   getMachinesForDealer,
   nextTsbId,
+  PARTNER_TYPE_LABEL,
   type Severity,
 } from "@/lib/tsb-store";
+import { StatusBadge } from "@/components/StatusBadge";
+import { AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/admin/tsb/new")({
   head: () => ({ meta: [{ title: "Ny TSB — Timan Admin" }] }),
