@@ -56,9 +56,9 @@ const CasesIndexRoute = CasesIndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const CasesIdRoute = CasesIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => CasesRoute,
+  id: '/cases/$id',
+  path: '/cases/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/admin/users',
@@ -219,6 +219,7 @@ export interface RootRouteChildren {
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminTsbRoute: typeof AdminTsbRouteWithChildren
   AdminUsersRoute: typeof AdminUsersRoute
+  CasesIdRoute: typeof CasesIdRoute
   CasesIndexRoute: typeof CasesIndexRoute
 }
 
@@ -268,10 +269,10 @@ declare module '@tanstack/react-router' {
     }
     '/cases/$id': {
       id: '/cases/$id'
-      path: '/$id'
+      path: '/cases/$id'
       fullPath: '/cases/$id'
       preLoaderRoute: typeof CasesIdRouteImport
-      parentRoute: typeof CasesRoute
+      parentRoute: typeof rootRouteImport
     }
     '/admin/users': {
       id: '/admin/users'
@@ -358,6 +359,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminSettingsRoute: AdminSettingsRoute,
   AdminTsbRoute: AdminTsbRouteWithChildren,
   AdminUsersRoute: AdminUsersRoute,
+  CasesIdRoute: CasesIdRoute,
   CasesIndexRoute: CasesIndexRoute,
 }
 export const routeTree = rootRouteImport
