@@ -1,21 +1,24 @@
 
-## Fjern genveje øverst til højre på Admin Dashboard
+## Fjern "Hurtige handlinger"-sektionen fra Admin Dashboard
 
 **Hvad ændres:**
-På `/admin/dashboard` fjernes de to knapper øverst til højre:
-- "Se alle TSB'er"
-- "+ Ny TSB"
+På `/admin/dashboard` fjernes hele "Hurtige handlinger"-sektionen med de tre kort:
+- "Opret ny TSB"
+- "Administrer TSB'er"
+- "Forhandlere"
 
-Navigationen til disse findes allerede i venstre sidemenu og under de relevante faner, så genvejene er overflødige.
+Disse genveje er overflødige, da navigationen allerede findes i venstre sidemenu.
 
 **Hvad bevares:**
-- Titel "Admin Dashboard" og undertekst til venstre
+- Titel "Admin Dashboard" og undertekst
 - KPI-kort (Aktive TSB'er, Afventer accept, Nær deadline, Forsinket)
-- "Hurtige handlinger"-sektionen længere nede (Opret ny TSB, Administrer TSB'er, Forhandlere) — disse er kontekstuelle kort, ikke header-genveje
-- "Kræver opmærksomhed"-tabellen
+- "Kræver opmærksomhed"-tabellen med TSB'er der trænger til handling
 
 **Filer der ændres:**
-- `src/routes/admin.dashboard.tsx` — fjern `<div>` med de to `<Link>`/`<Button>` i header-rækken, samt nu ubrugte imports (`Plus`, `Button`, `Link` hvis ikke brugt andre steder i filen)
+- `src/routes/admin.dashboard.tsx`
+  - Fjern hele `<div className="mt-6 grid ... lg:grid-cols-3">` blokken med de tre `<QuickAction>`-kort
+  - Fjern `QuickAction`-hjælpekomponenten i bunden af filen (ikke længere brugt)
+  - Ryd ubrugte imports: `Plus`, `FileText`, `Users` fra `lucide-react` (behold `AlertTriangle`, `ArrowRight`, samt `Clock` der allerede er suppress'et)
 
 **Resultat:**
-Header-rækken viser kun titel + beskrivelse til venstre, og højre side er ren. Layoutet bliver mere roligt og undgår dobbelt-navigation.
+Dashboardet bliver mere fokuseret: KPI'er øverst, og direkte derunder tabellen med TSB'er der kræver opmærksomhed. Ingen dobbelt-navigation.
