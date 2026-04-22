@@ -326,20 +326,113 @@ function NewTsbPage() {
             <div className="space-y-4">
               <h2 className="text-lg font-semibold">Dokumenter</h2>
               <p className="text-sm text-muted-foreground">
-                Vedhæft den officielle TSB PDF (valgfrit i denne preview).
+                Vedhæft den officielle TSB PDF. Du kan trække filen ind eller
+                vælge den fra din computer.
               </p>
-              <div className="rounded-md border border-dashed border-border-soft p-6 text-center">
-                <Upload className="mx-auto h-6 w-6 text-muted-foreground" />
-                <div className="mt-2 text-sm text-muted-foreground">
-                  Træk og slip — eller indtast filnavn:
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="application/pdf,.pdf"
+                className="hidden"
+                onChange={(e) => {
+                  handleFile(e.target.files?.[0]);
+                  // reset so selecting same file again still triggers change
+                  e.target.value = "";
+                }}
+              />
+
+              {!documentName ? (
+                <div
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setIsDragging(true);
+                  }}
+                  onDragLeave={() => setIsDragging(false)}
+                  onDrop={onDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      fileInputRef.current?.click();
+                    }
+                  }}
+                  className={cn(
+                    "flex cursor-pointer flex-col items-center justify-center rounded-md border-2 border-dashed p-8 text-center transition-colors",
+                    isDragging
+                      ? "border-status-success-fg bg-status-success-bg"
+                      : "border-border-soft hover:bg-page-bg",
+                  )}
+                >
+                  <Upload className="h-8 w-8 text-muted-foreground" />
+                  <div className="mt-3 text-sm font-medium">
+                    Træk PDF hertil eller klik for at vælge fil
+                  </div>
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    Kun PDF · maks. én fil
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-4"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      fileInputRef.current?.click();
+                    }}
+                  >
+                    Vælg PDF…
+                  </Button>
                 </div>
-                <Input
-                  className="mx-auto mt-3 max-w-sm"
-                  placeholder="TSB-2026-XXX_DA.pdf"
-                  value={documentName}
-                  onChange={(e) => setDocumentName(e.target.value)}
-                />
-              </div>
+              ) : (
+                <div className="flex items-start gap-3 rounded-md border border-border-soft bg-status-success-bg/40 p-4">
+                  <div
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-white"
+                    style={{ backgroundColor: "var(--timan-red)" }}
+                  >
+                    <FileCheck2 className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-medium">
+                      {documentName}
+                    </div>
+                    <div className="mt-0.5 text-xs text-muted-foreground">
+                      PDF
+                      {documentSize !== null && <> · {formatBytes(documentSize)}</>}
+                      {" · "}vedhæftet
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        Erstat fil
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setDocumentName("");
+                          setDocumentSize(null);
+                          setDocumentError(null);
+                        }}
+                      >
+                        <X className="h-4 w-4" /> Fjern
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {documentError && (
+                <div className="rounded-md border border-status-danger-fg/30 bg-status-danger-bg px-3 py-2 text-sm text-status-danger-fg">
+                  {documentError}
+                </div>
+              )}
             </div>
           )}
 
