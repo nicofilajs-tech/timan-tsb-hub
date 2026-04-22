@@ -5,7 +5,6 @@ import { AppLayout } from "@/components/AppLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { StatCard } from "@/components/StatCard";
 import { StatusBadge } from "@/components/StatusBadge";
-import { Button } from "@/components/ui/button";
 import {
   daysUntil,
   deadlineLabel,
