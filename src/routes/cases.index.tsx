@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/cases")({
+export const Route = createFileRoute("/cases/")({
   head: () => ({
     meta: [{ title: "Mine sager — TSB Portal" }],
   }),
@@ -178,7 +178,7 @@ function CasesPage() {
                         params={{ id: r.id }}
                         className="font-mono text-sm font-medium hover:underline"
                         style={{ color: "var(--timan-green)" }}
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
                       >
                         {r.id}
                       </Link>

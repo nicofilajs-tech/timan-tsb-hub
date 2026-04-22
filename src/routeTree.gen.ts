@@ -13,8 +13,8 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as CasesRouteImport } from './routes/cases'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CasesIndexRouteImport } from './routes/cases.index'
 import { Route as CasesIdRouteImport } from './routes/cases.$id'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminTsbRouteImport } from './routes/admin.tsb'
@@ -45,14 +45,14 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CasesRoute = CasesRouteImport.update({
-  id: '/cases',
-  path: '/cases',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CasesIndexRoute = CasesIndexRouteImport.update({
+  id: '/cases/',
+  path: '/cases/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CasesIdRoute = CasesIdRouteImport.update({
@@ -103,7 +103,6 @@ const AdminTsbIdRoute = AdminTsbIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/cases': typeof CasesRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
@@ -115,12 +114,12 @@ export interface FileRoutesByFullPath {
   '/admin/tsb': typeof AdminTsbRouteWithChildren
   '/admin/users': typeof AdminUsersRoute
   '/cases/$id': typeof CasesIdRoute
+  '/cases/': typeof CasesIndexRoute
   '/admin/tsb/$id': typeof AdminTsbIdRoute
   '/admin/tsb/new': typeof AdminTsbNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/cases': typeof CasesRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
@@ -132,13 +131,13 @@ export interface FileRoutesByTo {
   '/admin/tsb': typeof AdminTsbRouteWithChildren
   '/admin/users': typeof AdminUsersRoute
   '/cases/$id': typeof CasesIdRoute
+  '/cases': typeof CasesIndexRoute
   '/admin/tsb/$id': typeof AdminTsbIdRoute
   '/admin/tsb/new': typeof AdminTsbNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/cases': typeof CasesRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
@@ -150,6 +149,7 @@ export interface FileRoutesById {
   '/admin/tsb': typeof AdminTsbRouteWithChildren
   '/admin/users': typeof AdminUsersRoute
   '/cases/$id': typeof CasesIdRoute
+  '/cases/': typeof CasesIndexRoute
   '/admin/tsb/$id': typeof AdminTsbIdRoute
   '/admin/tsb/new': typeof AdminTsbNewRoute
 }
@@ -157,7 +157,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/cases'
     | '/dashboard'
     | '/history'
     | '/login'
@@ -169,12 +168,12 @@ export interface FileRouteTypes {
     | '/admin/tsb'
     | '/admin/users'
     | '/cases/$id'
+    | '/cases/'
     | '/admin/tsb/$id'
     | '/admin/tsb/new'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/cases'
     | '/dashboard'
     | '/history'
     | '/login'
@@ -186,12 +185,12 @@ export interface FileRouteTypes {
     | '/admin/tsb'
     | '/admin/users'
     | '/cases/$id'
+    | '/cases'
     | '/admin/tsb/$id'
     | '/admin/tsb/new'
   id:
     | '__root__'
     | '/'
-    | '/cases'
     | '/dashboard'
     | '/history'
     | '/login'
@@ -203,13 +202,13 @@ export interface FileRouteTypes {
     | '/admin/tsb'
     | '/admin/users'
     | '/cases/$id'
+    | '/cases/'
     | '/admin/tsb/$id'
     | '/admin/tsb/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  CasesRoute: typeof CasesRouteWithChildren
   DashboardRoute: typeof DashboardRoute
   HistoryRoute: typeof HistoryRoute
   LoginRoute: typeof LoginRoute
@@ -220,6 +219,7 @@ export interface RootRouteChildren {
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminTsbRoute: typeof AdminTsbRouteWithChildren
   AdminUsersRoute: typeof AdminUsersRoute
+  CasesIndexRoute: typeof CasesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -252,18 +252,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/cases': {
-      id: '/cases'
-      path: '/cases'
-      fullPath: '/cases'
-      preLoaderRoute: typeof CasesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cases/': {
+      id: '/cases/'
+      path: '/cases'
+      fullPath: '/cases/'
+      preLoaderRoute: typeof CasesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cases/$id': {
@@ -332,16 +332,6 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface CasesRouteChildren {
-  CasesIdRoute: typeof CasesIdRoute
-}
-
-const CasesRouteChildren: CasesRouteChildren = {
-  CasesIdRoute: CasesIdRoute,
-}
-
-const CasesRouteWithChildren = CasesRoute._addFileChildren(CasesRouteChildren)
-
 interface AdminTsbRouteChildren {
   AdminTsbIdRoute: typeof AdminTsbIdRoute
   AdminTsbNewRoute: typeof AdminTsbNewRoute
@@ -358,7 +348,6 @@ const AdminTsbRouteWithChildren = AdminTsbRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  CasesRoute: CasesRouteWithChildren,
   DashboardRoute: DashboardRoute,
   HistoryRoute: HistoryRoute,
   LoginRoute: LoginRoute,
@@ -369,6 +358,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminSettingsRoute: AdminSettingsRoute,
   AdminTsbRoute: AdminTsbRouteWithChildren,
   AdminUsersRoute: AdminUsersRoute,
+  CasesIndexRoute: CasesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
