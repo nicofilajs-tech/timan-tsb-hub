@@ -215,7 +215,12 @@ function CaseDetailPage() {
                   className="border-b border-border-soft last:border-0 hover:bg-page-bg"
                 >
                   <td className="px-5 py-4">
-                    <Checkbox defaultChecked={m.checked} disabled={m.checked} />
+                    <Checkbox
+                      checked={m.status === "udfoert"}
+                      onCheckedChange={(checked) =>
+                        updateStatus(m.serial, checked ? "udfoert" : "i_gang")
+                      }
+                    />
                   </td>
                   <td className="px-5 py-4 font-mono text-sm">{m.serial}</td>
                   <td className="px-5 py-4">{m.model}</td>
