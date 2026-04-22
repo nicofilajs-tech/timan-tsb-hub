@@ -10,6 +10,9 @@ import {
   Wrench,
   ClipboardCheck,
   Upload,
+  Search,
+  X,
+  AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppLayout } from "@/components/AppLayout";
@@ -26,9 +29,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import {
   createTsb,
+  DEALER_DATA_SOURCE,
   getDealers,
   getMachinesForDealer,
   nextTsbId,
@@ -36,7 +45,7 @@ import {
   type Severity,
 } from "@/lib/tsb-store";
 import { StatusBadge } from "@/components/StatusBadge";
-import { AlertTriangle } from "lucide-react";
+import { MockDataBanner } from "@/components/MockDataBanner";
 
 export const Route = createFileRoute("/admin/tsb/new")({
   head: () => ({ meta: [{ title: "Ny TSB — Timan Admin" }] }),
@@ -70,6 +79,17 @@ function NewTsbPage() {
   const [documentName, setDocumentName] = useState("");
   const [selectedDealers, setSelectedDealers] = useState<string[]>([]);
   const [selectedMachines, setSelectedMachines] = useState<Record<string, string[]>>({});
+  const [dealerQuery, setDealerQuery] = useState("");
+  const [dealerPickerOpen, setDealerPickerOpen] = useState(false);
+
+  const dealerSearchResults = useMemo(() => {
+    const q = dealerQuery.trim().toLowerCase();
+    if (!q) return dealers;
+    return dealers.filter((d) => {
+      const hay = `${d.name} ${d.city} ${d.country} ${d.sharepointAccount ?? ""} ${PARTNER_TYPE_LABEL[d.partnerType]}`.toLowerCase();
+      return hay.includes(q);
+    });
+  }, [dealers, dealerQuery]);
 
   const stepIndex = STEPS.findIndex((s) => s.id === step);
   const isLast = stepIndex === STEPS.length - 1;
@@ -296,61 +316,188 @@ function NewTsbPage() {
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold">Vælg forhandlere</h2>
                 <div className="text-sm text-muted-foreground">
-                  {selectedDealers.length} valgt · {dealers.length} fra SharePoint
+                  {selectedDealers.length} valgt · {dealers.length}{" "}
+                  {DEALER_DATA_SOURCE === "sharepoint" ? "fra SharePoint" : "i preview"}
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Forhandlere er synkroniseret fra SharePoint-listen{" "}
-                <span className="font-mono">DebitorFiltered</span>. Forhandlere markeret med
-                gult er ikke længere i SharePoint men kan stadig tilføjes.
-              </p>
-              <div className="grid gap-2 sm:grid-cols-2">
-                {dealers.map((d) => {
-                  const checked = selectedDealers.includes(d.id);
-                  const inactive = d.inactiveFromSource;
-                  return (
-                    <label
-                      key={d.id}
-                      className={cn(
-                        "flex cursor-pointer items-start gap-3 rounded-md border p-4 transition-colors",
-                        checked && !inactive && "border-transparent bg-status-success-bg",
-                        checked && inactive && "border-status-warning-fg/40 bg-status-warning-bg",
-                        !checked && inactive && "border-status-warning-fg/30 bg-status-warning-bg/30 hover:bg-status-warning-bg/50",
-                        !checked && !inactive && "border-border-soft hover:bg-page-bg",
-                      )}
+
+              {DEALER_DATA_SOURCE === "mock" && (
+                <MockDataBanner
+                  title="Forhandlerne nedenfor er preview-data"
+                  description={
+                    <>
+                      Listen kommer i den endelige version fra SharePoint
+                      (<span className="font-mono">DebitorFiltered</span>). Du
+                      kan stadig vælge forhandlere her for at teste flowet —
+                      når den rigtige sync er aktiv, bruges de samme felter
+                      (Title, Account, A_B_KUNDE, COUNTRY).
+                    </>
+                  }
+                />
+              )}
+
+              {/* Searchable dealer picker */}
+              <div className="space-y-2">
+                <Label>Søg og tilføj forhandler</Label>
+                <Popover open={dealerPickerOpen} onOpenChange={setDealerPickerOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full justify-start font-normal text-muted-foreground"
                     >
-                      <Checkbox
-                        checked={checked}
-                        onCheckedChange={() => toggleDealer(d.id)}
+                      <Search className="mr-2 h-4 w-4" />
+                      Søg på navn, by, account eller type…
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-[--radix-popover-trigger-width] p-0"
+                    align="start"
+                  >
+                    <div className="border-b border-border-soft p-2">
+                      <Input
+                        autoFocus
+                        placeholder="Skriv for at filtrere…"
+                        value={dealerQuery}
+                        onChange={(e) => setDealerQuery(e.target.value)}
                       />
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="font-medium">{d.name}</div>
-                          <div className="text-xs text-muted-foreground">{d.machineCount} maskiner</div>
+                    </div>
+                    <div className="max-h-72 overflow-y-auto py-1">
+                      {dealerSearchResults.length === 0 && (
+                        <div className="px-3 py-6 text-center text-sm text-muted-foreground">
+                          Ingen forhandlere matcher "{dealerQuery}"
                         </div>
-                        <div className="mt-1 text-sm text-muted-foreground">
-                          {d.city} · {d.country} · {d.contact}
-                        </div>
-                        <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                          <StatusBadge variant="info">
-                            {PARTNER_TYPE_LABEL[d.partnerType]}
-                          </StatusBadge>
-                          {d.sharepointAccount && (
-                            <span className="font-mono text-[11px] text-muted-foreground">
-                              #{d.sharepointAccount}
-                            </span>
+                      )}
+                      {dealerSearchResults.map((d) => {
+                        const checked = selectedDealers.includes(d.id);
+                        return (
+                          <button
+                            key={d.id}
+                            type="button"
+                            onClick={() => toggleDealer(d.id)}
+                            className={cn(
+                              "flex w-full items-start gap-3 px-3 py-2 text-left hover:bg-page-bg",
+                              d.inactiveFromSource && "bg-status-warning-bg/30",
+                            )}
+                          >
+                            <Checkbox checked={checked} className="mt-1" />
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium">{d.name}</span>
+                                {d.inactiveFromSource && (
+                                  <AlertTriangle
+                                    className="h-3 w-3"
+                                    style={{ color: "var(--status-warning-fg)" }}
+                                  />
+                                )}
+                              </div>
+                              <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+                                <span>{PARTNER_TYPE_LABEL[d.partnerType]}</span>
+                                <span>·</span>
+                                <span className="font-mono">{d.country}</span>
+                                <span>·</span>
+                                <span>{d.city}</span>
+                                {d.sharepointAccount && (
+                                  <>
+                                    <span>·</span>
+                                    <span className="font-mono">#{d.sharepointAccount}</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+
+                {/* Selected dealer chips */}
+                {selectedDealers.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {selectedDealers.map((id) => {
+                      const d = dealers.find((x) => x.id === id);
+                      if (!d) return null;
+                      return (
+                        <span
+                          key={id}
+                          className={cn(
+                            "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium",
+                            d.inactiveFromSource
+                              ? "bg-status-warning-bg text-status-warning-fg"
+                              : "bg-status-success-bg text-status-success-fg",
                           )}
-                          {inactive && (
-                            <StatusBadge variant="warning">
-                              <AlertTriangle className="mr-1 h-3 w-3" />
-                              Ikke i SharePoint
+                        >
+                          {d.inactiveFromSource && <AlertTriangle className="h-3 w-3" />}
+                          {d.name}
+                          <button
+                            type="button"
+                            onClick={() => toggleDealer(id)}
+                            className="ml-0.5 rounded-full hover:bg-black/10"
+                            aria-label={`Fjern ${d.name}`}
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Full grid (still useful as overview) */}
+              <div className="pt-2">
+                <Label className="mb-2 block text-xs uppercase tracking-wide text-muted-foreground">
+                  Eller vælg fra hele listen
+                </Label>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {dealers.map((d) => {
+                    const checked = selectedDealers.includes(d.id);
+                    const inactive = d.inactiveFromSource;
+                    return (
+                      <label
+                        key={d.id}
+                        className={cn(
+                          "flex cursor-pointer items-start gap-3 rounded-md border p-4 transition-colors",
+                          checked && !inactive && "border-transparent bg-status-success-bg",
+                          checked && inactive && "border-status-warning-fg/40 bg-status-warning-bg",
+                          !checked && inactive && "border-status-warning-fg/30 bg-status-warning-bg/30 hover:bg-status-warning-bg/50",
+                          !checked && !inactive && "border-border-soft hover:bg-page-bg",
+                        )}
+                      >
+                        <Checkbox
+                          checked={checked}
+                          onCheckedChange={() => toggleDealer(d.id)}
+                        />
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="font-medium">{d.name}</div>
+                            <div className="text-xs text-muted-foreground">{d.machineCount} maskiner</div>
+                          </div>
+                          <div className="mt-1 text-sm text-muted-foreground">
+                            {d.city} · {d.country} · {d.contact}
+                          </div>
+                          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                            <StatusBadge variant="info">
+                              {PARTNER_TYPE_LABEL[d.partnerType]}
                             </StatusBadge>
-                          )}
+                            {d.sharepointAccount && (
+                              <span className="font-mono text-[11px] text-muted-foreground">
+                                #{d.sharepointAccount}
+                              </span>
+                            )}
+                            {inactive && (
+                              <StatusBadge variant="warning">
+                                <AlertTriangle className="mr-1 h-3 w-3" />
+                                Ikke i SharePoint
+                              </StatusBadge>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </label>
-                  );
-                })}
+                      </label>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           )}

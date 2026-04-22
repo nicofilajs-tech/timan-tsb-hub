@@ -81,6 +81,38 @@ export interface Tsb {
   dealers: TsbDealerLink[];
 }
 
+// ---------------- Data source flag ----------------
+
+/**
+ * Indicates the origin of the dealer list shown in the UI.
+ *
+ * - "mock": local seed data (current state — used for visual design only).
+ * - "sharepoint": real data synced from the SharePoint list `DebitorFiltered`.
+ *
+ * Until `syncDealersFromSharePoint()` is wired to a real edge function and
+ * persists results, this MUST stay "mock". The UI uses this flag to render an
+ * honest banner so mock data is never presented as real SharePoint data.
+ */
+export const DEALER_DATA_SOURCE: "mock" | "sharepoint" = "mock";
+
+/**
+ * Placeholder for the future SharePoint sync job.
+ *
+ * Real implementation will:
+ *  1. Authenticate against Microsoft Graph / SharePoint REST.
+ *  2. Read items from the `DebitorFiltered` list.
+ *  3. Map fields: Title → name, Account → sharepointAccount,
+ *     A_B_KUNDE → partnerType (via `mapPartnerType`), COUNTRY → country.
+ *  4. Upsert by `sharepointAccount`. Mark vanished rows as
+ *     `inactiveFromSource: true` — never hard-delete.
+ *  5. Flip `DEALER_DATA_SOURCE` to "sharepoint".
+ */
+export async function syncDealersFromSharePoint(): Promise<never> {
+  throw new Error(
+    "SharePoint dealer sync is not implemented yet. The current dealer list is mock/preview data.",
+  );
+}
+
 // ---------------- Seed data ----------------
 
 const SYNC_TS = "2026-04-22T08:00:00Z";

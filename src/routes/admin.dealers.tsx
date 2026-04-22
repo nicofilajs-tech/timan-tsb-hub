@@ -8,11 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
+  DEALER_DATA_SOURCE,
   getDealers,
   PARTNER_TYPE_LABEL,
   type PartnerType,
   type Dealer,
 } from "@/lib/tsb-store";
+import { MockDataBanner } from "@/components/MockDataBanner";
 
 export const Route = createFileRoute("/admin/dealers")({
   head: () => ({ meta: [{ title: "Forhandlere — Timan Admin" }] }),
@@ -116,8 +118,20 @@ function AdminDealersPage() {
               Forhandlere
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Synkroniseret fra SharePoint-listen{" "}
-              <span className="font-mono">DebitorFiltered</span> · Sidst synkroniseret: {lastSync}
+              {DEALER_DATA_SOURCE === "sharepoint" ? (
+                <>
+                  Synkroniseret fra SharePoint-listen{" "}
+                  <span className="font-mono">DebitorFiltered</span> · Sidst
+                  synkroniseret: {lastSync}
+                </>
+              ) : (
+                <>
+                  <strong className="text-status-warning-fg">Preview-data</strong>{" "}
+                  — reel SharePoint-sync er endnu ikke aktiv. Datamodellen er
+                  klar til listen{" "}
+                  <span className="font-mono">DebitorFiltered</span>.
+                </>
+              )}
             </p>
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -134,6 +148,22 @@ function AdminDealersPage() {
             )}
           </div>
         </div>
+
+        {DEALER_DATA_SOURCE === "mock" && (
+          <MockDataBanner
+            title="Forhandlerlisten er mock/preview-data"
+            description={
+              <>
+                De viste forhandlere er <strong>ikke</strong> hentet fra
+                SharePoint endnu. De er statiske eksempler, der bruges til at
+                designe og teste UI'et. Når den rigtige sync mod listen{" "}
+                <span className="font-mono">DebitorFiltered</span> er
+                aktiveret, erstattes denne liste automatisk med rigtige data —
+                historiske TSB-sager bevares.
+              </>
+            }
+          />
+        )}
 
         {/* Filters */}
         <div className="mt-5 rounded-[10px] border border-border-soft bg-white p-3 shadow-sm">
