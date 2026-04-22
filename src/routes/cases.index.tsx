@@ -12,88 +12,55 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
+import { deadlineLabel, getTsbsForDealer, useTsbs } from "@/lib/tsb-store";
 
 export const Route = createFileRoute("/cases/")({
-  head: () => ({
-    meta: [{ title: "Mine sager — TSB Portal" }],
-  }),
+  head: () => ({ meta: [{ title: "Mine sager — TSB Portal" }] }),
   component: CasesPage,
 });
 
-type StatusKey = "afventer" | "i_gang" | "klar" | "forsinket";
+// Preview/demo: hard-coded dealer identity for the dealer view.
+const CURRENT_DEALER_ID = "d-nordic";
 
-interface Row {
-  id: string;
-  title: string;
-  machines: number;
-  total: number;
-  deadline: string;
-  deadlineTone?: "warning" | "danger";
-  status: { key: StatusKey; variant: "warning" | "success" | "danger"; label: string };
-}
-
-const allRows: Row[] = [
-  {
-    id: "TSB-2026-112",
-    title: "Udskiftning af hydraulikventil",
-    machines: 0,
-    total: 8,
-    deadline: "3 dage",
-    deadlineTone: "warning",
-    status: { key: "afventer", variant: "warning", label: "Afventer accept" },
-  },
-  {
-    id: "TSB-2026-108",
-    title: "Softwareopdatering styreenhed",
-    machines: 7,
-    total: 12,
-    deadline: "27 dage",
-    status: { key: "i_gang", variant: "success", label: "I gang" },
-  },
-  {
-    id: "TSB-2026-103",
-    title: "Tjek af luftfilter — Z-serie",
-    machines: 5,
-    total: 5,
-    deadline: "—",
-    status: { key: "klar", variant: "success", label: "Klar til lukning" },
-  },
-  {
-    id: "TSB-2026-095",
-    title: "Kontrol af bremsekreds",
-    machines: 0,
-    total: 3,
-    deadline: "4 dage over",
-    deadlineTone: "danger",
-    status: { key: "forsinket", variant: "danger", label: "Forsinket" },
-  },
-];
+type StatusKey = "afventer" | "aktiv" | "forsinket";
 
 const STATUS_FILTERS: { value: "all" | StatusKey; label: string }[] = [
   { value: "all", label: "Alle statusser" },
   { value: "afventer", label: "Afventer accept" },
-  { value: "i_gang", label: "I gang" },
-  { value: "klar", label: "Klar til lukning" },
+  { value: "aktiv", label: "Aktiv" },
   { value: "forsinket", label: "Forsinket" },
 ];
 
 function CasesPage() {
   const navigate = useNavigate();
+  // Subscribe so that admin activations show up here immediately
+  useTsbs();
+  const items = getTsbsForDealer(CURRENT_DEALER_ID);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | StatusKey>("all");
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return allRows.filter((r) => {
-      if (statusFilter !== "all" && r.status.key !== statusFilter) return false;
-      if (!q) return true;
-      return (
-        r.id.toLowerCase().includes(q) ||
-        r.title.toLowerCase().includes(q)
-      );
-    });
-  }, [query, statusFilter]);
+    return items
+      .map(({ tsb, link }) => {
+        const dl = deadlineLabel(tsb.deadline);
+        const statusKey: StatusKey =
+          dl.tone === "danger"
+            ? "forsinket"
+            : link.status === "afventer"
+            ? "afventer"
+            : "aktiv";
+        return { tsb, link, dl, statusKey };
+      })
+      .filter((r) => {
+        if (statusFilter !== "all" && r.statusKey !== statusFilter) return false;
+        if (!q) return true;
+        return (
+          r.tsb.id.toLowerCase().includes(q) ||
+          r.tsb.title.toLowerCase().includes(q)
+        );
+      });
+  }, [items, query, statusFilter]);
 
   return (
     <ProtectedRoute>
@@ -113,7 +80,7 @@ function CasesPage() {
             </p>
           </div>
           <div className="text-sm text-muted-foreground">
-            <span className="font-semibold text-foreground">{rows.length}</span> af {allRows.length} sager
+            <span className="font-semibold text-foreground">{rows.length}</span> af {items.length} sager
           </div>
         </div>
 
@@ -166,46 +133,49 @@ function CasesPage() {
                     </td>
                   </tr>
                 )}
-                {rows.map((r) => (
+                {rows.map(({ tsb, link, dl, statusKey }) => (
                   <tr
-                    key={r.id}
-                    onClick={() => navigate({ to: "/cases/$id", params: { id: r.id } })}
+                    key={tsb.id}
+                    onClick={() => navigate({ to: "/cases/$id", params: { id: tsb.id } })}
                     className="cursor-pointer border-b border-border-soft last:border-0 hover:bg-page-bg"
                   >
                     <td className="px-5 py-4">
                       <Link
                         to="/cases/$id"
-                        params={{ id: r.id }}
+                        params={{ id: tsb.id }}
                         className="font-mono text-sm font-medium hover:underline"
                         style={{ color: "var(--timan-green)" }}
                         onClick={(e: React.MouseEvent) => e.stopPropagation()}
                       >
-                        {r.id}
+                        {tsb.id}
                       </Link>
                     </td>
-                    <td className="px-5 py-4">{r.title}</td>
+                    <td className="px-5 py-4">{tsb.title}</td>
                     <td className="px-5 py-4 text-muted-foreground">
-                      {r.machines} / {r.total}
+                      {link.machineSerials.length}
                     </td>
                     <td className="px-5 py-4">
                       <span
-                        className={cn(
-                          r.deadlineTone === "warning" && "font-medium",
-                          r.deadlineTone === "danger" && "font-medium",
-                        )}
+                        className={dl.tone ? "font-medium" : ""}
                         style={
-                          r.deadlineTone === "warning"
-                            ? { color: "#B45309" }
-                            : r.deadlineTone === "danger"
-                            ? { color: "#991B1B" }
+                          dl.tone === "danger"
+                            ? { color: "var(--status-danger-fg)" }
+                            : dl.tone === "warning"
+                            ? { color: "var(--status-warning-fg)" }
                             : undefined
                         }
                       >
-                        {r.deadline}
+                        {dl.label}
                       </span>
                     </td>
                     <td className="px-5 py-4">
-                      <StatusBadge variant={r.status.variant}>{r.status.label}</StatusBadge>
+                      {statusKey === "forsinket" ? (
+                        <StatusBadge variant="danger">Forsinket</StatusBadge>
+                      ) : statusKey === "afventer" ? (
+                        <StatusBadge variant="warning">Afventer accept</StatusBadge>
+                      ) : (
+                        <StatusBadge variant="success">Aktiv</StatusBadge>
+                      )}
                     </td>
                   </tr>
                 ))}
