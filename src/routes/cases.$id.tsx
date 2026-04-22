@@ -16,6 +16,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { formatDate, getMachines, useTsbs } from "@/lib/tsb-store";
+
+const CURRENT_DEALER_ID = "d-nordic";
 
 type StatusVariant = "success" | "info" | "warning" | "neutral";
 type StatusKey = "udfoert" | "i_gang" | "venter" | "ikke_startet";
