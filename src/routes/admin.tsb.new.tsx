@@ -78,10 +78,41 @@ function NewTsbPage() {
     new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString().slice(0, 10),
   );
   const [documentName, setDocumentName] = useState("");
+  const [documentSize, setDocumentSize] = useState<number | null>(null);
+  const [documentError, setDocumentError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedDealers, setSelectedDealers] = useState<string[]>([]);
   const [selectedMachines, setSelectedMachines] = useState<Record<string, string[]>>({});
   const [dealerQuery, setDealerQuery] = useState("");
   const [dealerPickerOpen, setDealerPickerOpen] = useState(false);
+
+  const handleFile = (file: File | null | undefined) => {
+    if (!file) return;
+    const isPdf =
+      file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+    if (!isPdf) {
+      setDocumentError("Kun PDF-filer er understøttet.");
+      return;
+    }
+    setDocumentError(null);
+    setDocumentName(file.name);
+    setDocumentSize(file.size);
+  };
+
+  const onDrop = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    handleFile(file);
+  };
+
+  const formatBytes = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+  };
+
 
   const dealerSearchResults = useMemo(() => {
     const q = dealerQuery.trim().toLowerCase();
