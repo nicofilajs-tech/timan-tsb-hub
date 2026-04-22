@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { ExternalLink, Search } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -7,6 +8,31 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+type StatusVariant = "success" | "info" | "warning" | "neutral";
+type StatusKey = "udfoert" | "i_gang" | "venter" | "ikke_startet";
+
+const STATUS_OPTIONS: { key: StatusKey; label: string; variant: StatusVariant }[] = [
+  { key: "udfoert", label: "Udført", variant: "success" },
+  { key: "i_gang", label: "I gang", variant: "info" },
+  { key: "venter", label: "Venter på dele", variant: "warning" },
+  { key: "ikke_startet", label: "Ikke startet", variant: "neutral" },
+];
+
+const statusDotClass: Record<StatusVariant, string> = {
+  success: "bg-status-success-fg",
+  info: "bg-status-info-fg",
+  warning: "bg-status-warning-fg",
+  neutral: "bg-status-neutral-fg",
+};
 
 export const Route = createFileRoute("/cases/$id")({
   head: ({ params }) => ({
@@ -19,50 +45,57 @@ interface Machine {
   serial: string;
   model: string;
   customer: string;
-  status: { variant: "success" | "info" | "warning" | "neutral"; label: string };
+  status: StatusKey;
   checked: boolean;
 }
 
-const machines: Machine[] = [
+const initialMachines: Machine[] = [
   {
     serial: "TM-X40-18291",
     model: "X40 Pro",
     customer: "Bygge A/S",
-    status: { variant: "success", label: "Udført" },
+    status: "udfoert",
     checked: true,
   },
   {
     serial: "TM-X40-18432",
     model: "X40 Pro",
     customer: "Entreprenør H. Olsen",
-    status: { variant: "success", label: "Udført" },
+    status: "udfoert",
     checked: true,
   },
   {
     serial: "TM-X40-18501",
     model: "X40 Pro",
     customer: "Kommune Syd",
-    status: { variant: "info", label: "I gang" },
+    status: "i_gang",
     checked: false,
   },
   {
     serial: "TM-X40-18622",
     model: "X40 Standard",
     customer: "Grus & Sand Aps",
-    status: { variant: "warning", label: "Venter på dele" },
+    status: "venter",
     checked: false,
   },
   {
     serial: "TM-X40-18733",
     model: "X40 Standard",
     customer: "Landbrug Nord",
-    status: { variant: "neutral", label: "Ikke startet" },
+    status: "ikke_startet",
     checked: false,
   },
 ];
 
 function CaseDetailPage() {
   const { id } = Route.useParams();
+  const [machines, setMachines] = useState<Machine[]>(initialMachines);
+
+  const updateStatus = (serial: string, status: StatusKey) => {
+    setMachines((prev) =>
+      prev.map((m) => (m.serial === serial ? { ...m, status } : m)),
+    );
+  };
 
   return (
     <ProtectedRoute>
@@ -160,7 +193,26 @@ function CaseDetailPage() {
                   <td className="px-5 py-4">{m.model}</td>
                   <td className="px-5 py-4 text-muted-foreground">{m.customer}</td>
                   <td className="px-5 py-4">
-                    <StatusBadge variant={m.status.variant}>{m.status.label}</StatusBadge>
+                    <Select
+                      value={m.status}
+                      onValueChange={(v) => updateStatus(m.serial, v as StatusKey)}
+                    >
+                      <SelectTrigger className="h-8 w-[180px] rounded-full border-border-soft bg-page-bg">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {STATUS_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.key} value={opt.key}>
+                            <span className="flex items-center gap-2">
+                              <span
+                                className={cn("h-2 w-2 rounded-full", statusDotClass[opt.variant])}
+                              />
+                              {opt.label}
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </td>
                 </tr>
               ))}
