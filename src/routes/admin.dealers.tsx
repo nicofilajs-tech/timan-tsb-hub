@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
-  useDealers,
+  getDealers,
   PARTNER_TYPE_LABEL,
   type PartnerType,
   type Dealer,
@@ -72,7 +72,7 @@ function applyFilter(d: Dealer, f: Filter, q: string): boolean {
 }
 
 function AdminDealersPage() {
-  const dealers = useDealers();
+  const dealers = getDealers();
   const [filter, setFilter] = useState<Filter>("alle");
   const [query, setQuery] = useState("");
 
