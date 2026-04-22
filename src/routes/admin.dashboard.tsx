@@ -81,27 +81,6 @@ function AdminDashboard() {
           />
         </div>
 
-        {/* Quick actions */}
-        <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
-          <QuickAction
-            to="/admin/tsb/new"
-            icon={Plus}
-            title="Opret ny TSB"
-            description="Definer detaljer, vælg forhandlere og maskiner, og aktivér."
-          />
-          <QuickAction
-            to="/admin/tsb"
-            icon={FileText}
-            title="Administrer TSB'er"
-            description="Se status, accept og fremdrift pr. forhandler."
-          />
-          <QuickAction
-            to="/admin/dealers"
-            icon={Users}
-            title="Forhandlere"
-            description="Hold styr på dine forhandlere og kontaktpersoner."
-          />
-        </div>
 
         {/* Requires attention */}
         <div className="mt-6 rounded-[10px] border border-border-soft bg-white shadow-sm">
