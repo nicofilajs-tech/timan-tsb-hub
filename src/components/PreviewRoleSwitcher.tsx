@@ -50,18 +50,10 @@ export function PreviewRoleSwitcher() {
 
   return (
     <>
-      {/* Top banner */}
-      <div className="fixed inset-x-0 top-0 z-[60] flex items-center justify-center gap-2 border-b border-amber-300 bg-amber-100/95 px-3 py-1.5 text-[11px] font-medium text-amber-900 shadow-sm backdrop-blur">
-        <Eye className="h-3.5 w-3.5" />
-        <span>
-          Preview-only auth bypass aktiv — rolle:{" "}
-          <strong>{PREVIEW_ROLES[role].label}</strong>. Skift rolle nederst til højre.
-        </span>
-      </div>
-
-      {/* Bottom-right switcher */}
+      {/* Bottom-right switcher with inline preview indicator */}
       <div className="fixed bottom-4 right-4 z-[60] rounded-xl border border-border-soft bg-white/95 p-2 shadow-lg backdrop-blur">
-        <div className="px-2 pb-1.5 pt-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+        <div className="flex items-center gap-1.5 px-2 pb-1.5 pt-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+          <Eye className="h-3 w-3" />
           Preview rolle
         </div>
         <div className="flex flex-col gap-1">
