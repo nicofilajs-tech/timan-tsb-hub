@@ -362,6 +362,13 @@ export function getDealers(): Dealer[] {
   return DEALERS;
 }
 
+/** Reactive hook for dealers — currently static seed data, but ready for sync updates */
+export function useDealers(): Dealer[] {
+  // DEALERS is currently static; using useSyncExternalStore-compatible no-op subscription
+  // would be overkill. Returning the array directly is fine until a real sync job mutates it.
+  return DEALERS;
+}
+
 export function getDealer(id: string): Dealer | undefined {
   return DEALERS.find((d) => d.id === id);
 }
