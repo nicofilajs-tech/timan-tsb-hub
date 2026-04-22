@@ -79,6 +79,17 @@ function NewTsbPage() {
   const [documentName, setDocumentName] = useState("");
   const [selectedDealers, setSelectedDealers] = useState<string[]>([]);
   const [selectedMachines, setSelectedMachines] = useState<Record<string, string[]>>({});
+  const [dealerQuery, setDealerQuery] = useState("");
+  const [dealerPickerOpen, setDealerPickerOpen] = useState(false);
+
+  const dealerSearchResults = useMemo(() => {
+    const q = dealerQuery.trim().toLowerCase();
+    if (!q) return dealers;
+    return dealers.filter((d) => {
+      const hay = `${d.name} ${d.city} ${d.country} ${d.sharepointAccount ?? ""} ${PARTNER_TYPE_LABEL[d.partnerType]}`.toLowerCase();
+      return hay.includes(q);
+    });
+  }, [dealers, dealerQuery]);
 
   const stepIndex = STEPS.findIndex((s) => s.id === step);
   const isLast = stepIndex === STEPS.length - 1;
