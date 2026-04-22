@@ -151,26 +151,28 @@ function CaseDetailPage() {
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-3">
-              <StatusBadge variant="warning">Severity 3</StatusBadge>
+              <StatusBadge variant="warning">{headerSeverity}</StatusBadge>
               {isComplete ? (
                 <StatusBadge variant="success">
                   <span className="inline-flex items-center gap-1">
                     <CheckCircle2 className="h-3.5 w-3.5" /> Projekt fuldført
                   </span>
                 </StatusBadge>
+              ) : link?.status === "afventer" ? (
+                <StatusBadge variant="warning">Afventer accept</StatusBadge>
               ) : (
                 <StatusBadge variant="info">I gang</StatusBadge>
               )}
-              <span className="font-mono text-xs text-muted-foreground">{id} · v1.1</span>
+              <span className="font-mono text-xs text-muted-foreground">{id}</span>
             </div>
             <h1
               className="mt-3 text-[22px] font-semibold"
               style={{ color: "var(--timan-red)" }}
             >
-              Softwareopdatering — styreenhed v3.2
+              {headerTitle}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Accepteret 12. marts 2026 af Lars Jensen
+              {acceptedLabel}
             </p>
           </div>
           <Button
@@ -211,9 +213,7 @@ function CaseDetailPage() {
           <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Deadline
           </div>
-          <div className="mt-2 text-3xl font-semibold">
-            14. maj <span className="text-base font-normal text-muted-foreground">(27 dage)</span>
-          </div>
+          <div className="mt-2 text-2xl font-semibold">{deadlineLabel}</div>
         </div>
       </div>
 
