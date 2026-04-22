@@ -687,25 +687,72 @@ function NewTsbPage() {
               <ReviewRow label="Severity" value={`Severity ${severity}`} />
               <ReviewRow label="Aktiv fra" value={activeFrom} />
               <ReviewRow label="Deadline" value={deadline} />
-              <ReviewRow label="Dokument" value={documentName || "Intet vedhæftet"} />
               <ReviewRow
-                label="Forhandlere"
+                label="Dokument"
                 value={
-                  <div className="space-y-1">
-                    {selectedDealers.length === 0 && <span className="text-muted-foreground">Ingen valgt</span>}
+                  documentName ? (
+                    <div className="flex items-center gap-2">
+                      <FileCheck2
+                        className="h-4 w-4 shrink-0"
+                        style={{ color: "var(--timan-red)" }}
+                      />
+                      <span className="font-medium">{documentName}</span>
+                      {documentSize !== null && (
+                        <span className="text-xs text-muted-foreground">
+                          ({formatBytes(documentSize)})
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <span className="text-muted-foreground">Intet vedhæftet</span>
+                  )
+                }
+              />
+              <ReviewRow
+                label="Forhandlere & maskiner"
+                value={
+                  <div className="space-y-3">
+                    {selectedDealers.length === 0 && (
+                      <span className="text-muted-foreground">Ingen valgt</span>
+                    )}
                     {selectedDealers.map((id) => {
                       const d = dealers.find((x) => x.id === id)!;
-                      const m = (selectedMachines[id] ?? []).length;
+                      const serials = selectedMachines[id] ?? [];
                       return (
-                        <div key={id} className="flex items-center justify-between gap-3">
-                          <span>{d.name}</span>
-                          <span className="text-xs text-muted-foreground">{m} maskiner</span>
+                        <div
+                          key={id}
+                          className="rounded-md border border-border-soft p-3"
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="font-medium">{d.name}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {serials.length}{" "}
+                              {serials.length === 1 ? "maskine" : "maskiner"}
+                            </span>
+                          </div>
+                          {serials.length > 0 ? (
+                            <div className="mt-2 flex flex-wrap gap-1.5">
+                              {serials.map((s) => (
+                                <span
+                                  key={s}
+                                  className="inline-flex items-center rounded-md border border-border-soft bg-page-bg px-2 py-0.5 font-mono text-xs"
+                                >
+                                  {s}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="mt-2 text-xs text-muted-foreground">
+                              Ingen maskiner valgt
+                            </div>
+                          )}
                         </div>
                       );
                     })}
                   </div>
                 }
               />
+
             </div>
           )}
         </div>
