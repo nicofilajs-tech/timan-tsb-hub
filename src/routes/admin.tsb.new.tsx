@@ -10,6 +10,9 @@ import {
   Wrench,
   ClipboardCheck,
   Upload,
+  Search,
+  X,
+  AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppLayout } from "@/components/AppLayout";
@@ -26,9 +29,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import {
   createTsb,
+  DEALER_DATA_SOURCE,
   getDealers,
   getMachinesForDealer,
   nextTsbId,
@@ -36,7 +45,7 @@ import {
   type Severity,
 } from "@/lib/tsb-store";
 import { StatusBadge } from "@/components/StatusBadge";
-import { AlertTriangle } from "lucide-react";
+import { MockDataBanner } from "@/components/MockDataBanner";
 
 export const Route = createFileRoute("/admin/tsb/new")({
   head: () => ({ meta: [{ title: "Ny TSB — Timan Admin" }] }),
