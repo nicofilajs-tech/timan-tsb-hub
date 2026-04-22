@@ -5,7 +5,6 @@ import { AppLayout } from "@/components/AppLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { StatCard } from "@/components/StatCard";
 import { StatusBadge } from "@/components/StatusBadge";
-import { Button } from "@/components/ui/button";
 import {
   daysUntil,
   deadlineLabel,
@@ -59,16 +58,6 @@ function AdminDashboard() {
             <p className="mt-1 text-sm text-muted-foreground">
               Overblik over alle TSB-sager på tværs af forhandlere.
             </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link to="/admin/tsb">
-              <Button variant="outline">Se alle TSB'er</Button>
-            </Link>
-            <Link to="/admin/tsb/new">
-              <Button style={{ backgroundColor: "var(--timan-green)", color: "white" }}>
-                <Plus className="h-4 w-4" /> Ny TSB
-              </Button>
-            </Link>
           </div>
         </div>
 
