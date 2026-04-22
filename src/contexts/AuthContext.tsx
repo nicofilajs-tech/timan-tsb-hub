@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import type { AppUser, RoleCode } from "@/lib/auth";
+// 🔴 TEMPORARY: preview-only auth bypass — remove before production launch
+import { isPreviewAuthBypassEnabled, PREVIEW_ADMIN_USER } from "@/lib/preview-auth";
 
 interface AuthContextValue {
   session: Session | null;
@@ -52,6 +54,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // 🔴 TEMPORARY PREVIEW-ONLY AUTH BYPASS — guarded so it never runs in production.
+    // Allows visual UI work in Lovable preview without a real Supabase login.
+    if (isPreviewAuthBypassEnabled()) {
+      // Fake a logged-in Timan Admin so ProtectedRoute / admin pages render normally
+      setSession({ user: { id: PREVIEW_ADMIN_USER.id } } as unknown as Session);
+      setCurrentUser(PREVIEW_ADMIN_USER);
+      setIsLoading(false);
+      return;
+    }
+
     supabase.auth.getSession().then(async ({ data: { session: initialSession } }) => {
       setSession(initialSession);
       if (initialSession) {
