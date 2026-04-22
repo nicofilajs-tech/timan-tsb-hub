@@ -34,7 +34,7 @@ interface AppLayoutProps {
 
 const dealerNav: NavItem[] = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/dashboard", label: "Mine sager", icon: FolderKanban },
+  { to: "/cases", label: "Mine sager", icon: FolderKanban },
   { to: "/history", label: "Historik", icon: Clock },
 ];
 
