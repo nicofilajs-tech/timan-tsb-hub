@@ -32,8 +32,11 @@ import {
   getDealers,
   getMachinesForDealer,
   nextTsbId,
+  PARTNER_TYPE_LABEL,
   type Severity,
 } from "@/lib/tsb-store";
+import { StatusBadge } from "@/components/StatusBadge";
+import { AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/admin/tsb/new")({
   head: () => ({ meta: [{ title: "Ny TSB — Timan Admin" }] }),
@@ -293,18 +296,27 @@ function NewTsbPage() {
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold">Vælg forhandlere</h2>
                 <div className="text-sm text-muted-foreground">
-                  {selectedDealers.length} valgt
+                  {selectedDealers.length} valgt · {dealers.length} fra SharePoint
                 </div>
               </div>
+              <p className="text-xs text-muted-foreground">
+                Forhandlere er synkroniseret fra SharePoint-listen{" "}
+                <span className="font-mono">DebitorFiltered</span>. Forhandlere markeret med
+                gult er ikke længere i SharePoint men kan stadig tilføjes.
+              </p>
               <div className="grid gap-2 sm:grid-cols-2">
                 {dealers.map((d) => {
                   const checked = selectedDealers.includes(d.id);
+                  const inactive = d.inactiveFromSource;
                   return (
                     <label
                       key={d.id}
                       className={cn(
                         "flex cursor-pointer items-start gap-3 rounded-md border p-4 transition-colors",
-                        checked ? "border-transparent bg-status-success-bg" : "border-border-soft hover:bg-page-bg",
+                        checked && !inactive && "border-transparent bg-status-success-bg",
+                        checked && inactive && "border-status-warning-fg/40 bg-status-warning-bg",
+                        !checked && inactive && "border-status-warning-fg/30 bg-status-warning-bg/30 hover:bg-status-warning-bg/50",
+                        !checked && !inactive && "border-border-soft hover:bg-page-bg",
                       )}
                     >
                       <Checkbox
@@ -317,7 +329,23 @@ function NewTsbPage() {
                           <div className="text-xs text-muted-foreground">{d.machineCount} maskiner</div>
                         </div>
                         <div className="mt-1 text-sm text-muted-foreground">
-                          {d.city} · {d.contact}
+                          {d.city} · {d.country} · {d.contact}
+                        </div>
+                        <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                          <StatusBadge variant="info">
+                            {PARTNER_TYPE_LABEL[d.partnerType]}
+                          </StatusBadge>
+                          {d.sharepointAccount && (
+                            <span className="font-mono text-[11px] text-muted-foreground">
+                              #{d.sharepointAccount}
+                            </span>
+                          )}
+                          {inactive && (
+                            <StatusBadge variant="warning">
+                              <AlertTriangle className="mr-1 h-3 w-3" />
+                              Ikke i SharePoint
+                            </StatusBadge>
+                          )}
                         </div>
                       </div>
                     </label>
@@ -326,6 +354,7 @@ function NewTsbPage() {
               </div>
             </div>
           )}
+
 
           {step === "machines" && (
             <div className="space-y-4">

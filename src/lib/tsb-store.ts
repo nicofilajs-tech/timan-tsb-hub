@@ -10,12 +10,47 @@ export type Severity = 1 | 2 | 3 | 4;
 export type TsbStatus = "kladde" | "aktiv" | "lukket";
 export type DealerActivation = "afventer" | "accepteret" | "afvist";
 
+/** Partner type from SharePoint A_B_KUNDE field */
+export type PartnerType = "forhandler" | "servicepartner" | "importor";
+
+/** Map raw SharePoint A_B_KUNDE numeric value to internal partner type */
+export function mapPartnerType(raw: number | string | null | undefined): PartnerType {
+  const n = typeof raw === "string" ? Number(raw) : raw;
+  if (n === 2) return "servicepartner";
+  if (n === 3) return "importor";
+  return "forhandler"; // 1 or default
+}
+
+export const PARTNER_TYPE_LABEL: Record<PartnerType, string> = {
+  forhandler: "Forhandler",
+  servicepartner: "Servicepartner",
+  importor: "Importør",
+};
+
+export type SourceSystem = "sharepoint" | "manual";
+
 export interface Dealer {
   id: string;
   name: string;
   city: string;
   contact: string;
   machineCount: number;
+  // ---- Source sync fields (SharePoint: DebitorFiltered) ----
+  /** External account number from SharePoint "Account" field — stable across syncs */
+  sharepointAccount?: string;
+  /** Where the dealer record originated */
+  sourceSystem: SourceSystem;
+  /** Mapped from A_B_KUNDE: 1=forhandler, 2=servicepartner, 3=importor */
+  partnerType: PartnerType;
+  /** ISO country code from COUNTRY field */
+  country: string;
+  /** True if the dealer is currently present and active in SharePoint */
+  sourceActive: boolean;
+  /** True if the dealer has been removed from / no longer present in SharePoint.
+   *  We never hard-delete — we keep history and mark with a yellow warning badge. */
+  inactiveFromSource: boolean;
+  /** Last successful sync timestamp (ISO) */
+  lastSyncedAt?: string;
 }
 
 export interface MachineRef {
@@ -48,12 +83,109 @@ export interface Tsb {
 
 // ---------------- Seed data ----------------
 
+const SYNC_TS = "2026-04-22T08:00:00Z";
+
 const DEALERS: Dealer[] = [
-  { id: "d-nordic", name: "Nordic Machinery Aps", city: "Aarhus", contact: "Lars Jensen", machineCount: 24 },
-  { id: "d-jysk", name: "Jysk Maskincenter", city: "Aalborg", contact: "Mette Sørensen", machineCount: 18 },
-  { id: "d-syd", name: "Syd Entreprenør Service", city: "Kolding", contact: "Henrik Bach", machineCount: 11 },
-  { id: "d-fyn", name: "Fyns Industri ApS", city: "Odense", contact: "Anne Holm", machineCount: 9 },
-  { id: "d-sjael", name: "Sjælland Maskiner A/S", city: "Roskilde", contact: "Peter Lund", machineCount: 15 },
+  {
+    id: "d-nordic",
+    name: "Nordic Machinery Aps",
+    city: "Aarhus",
+    contact: "Lars Jensen",
+    machineCount: 24,
+    sharepointAccount: "100214",
+    sourceSystem: "sharepoint",
+    partnerType: "forhandler",
+    country: "DK",
+    sourceActive: true,
+    inactiveFromSource: false,
+    lastSyncedAt: SYNC_TS,
+  },
+  {
+    id: "d-jysk",
+    name: "Jysk Maskincenter",
+    city: "Aalborg",
+    contact: "Mette Sørensen",
+    machineCount: 18,
+    sharepointAccount: "100318",
+    sourceSystem: "sharepoint",
+    partnerType: "servicepartner",
+    country: "DK",
+    sourceActive: true,
+    inactiveFromSource: false,
+    lastSyncedAt: SYNC_TS,
+  },
+  {
+    id: "d-syd",
+    name: "Syd Entreprenør Service",
+    city: "Kolding",
+    contact: "Henrik Bach",
+    machineCount: 11,
+    sharepointAccount: "100422",
+    sourceSystem: "sharepoint",
+    partnerType: "forhandler",
+    country: "DK",
+    sourceActive: true,
+    inactiveFromSource: false,
+    lastSyncedAt: SYNC_TS,
+  },
+  {
+    id: "d-fyn",
+    name: "Fyns Industri ApS",
+    city: "Odense",
+    contact: "Anne Holm",
+    machineCount: 9,
+    sharepointAccount: "100517",
+    sourceSystem: "sharepoint",
+    partnerType: "servicepartner",
+    country: "DK",
+    sourceActive: true,
+    inactiveFromSource: false,
+    lastSyncedAt: SYNC_TS,
+  },
+  {
+    id: "d-sjael",
+    name: "Sjælland Maskiner A/S",
+    city: "Roskilde",
+    contact: "Peter Lund",
+    machineCount: 15,
+    sharepointAccount: "100621",
+    sourceSystem: "sharepoint",
+    partnerType: "forhandler",
+    country: "DK",
+    sourceActive: true,
+    inactiveFromSource: false,
+    lastSyncedAt: SYNC_TS,
+  },
+  // Importør example — covers partner type 3
+  {
+    id: "d-import-se",
+    name: "Timan Import Sverige AB",
+    city: "Malmö",
+    contact: "Erik Lindqvist",
+    machineCount: 0,
+    sharepointAccount: "200118",
+    sourceSystem: "sharepoint",
+    partnerType: "importor",
+    country: "SE",
+    sourceActive: true,
+    inactiveFromSource: false,
+    lastSyncedAt: SYNC_TS,
+  },
+  // Historical / no longer in SharePoint — kept for history, yellow badge
+  {
+    id: "d-legacy-bornholm",
+    name: "Bornholm Maskinservice",
+    city: "Rønne",
+    contact: "(historisk kontakt)",
+    machineCount: 3,
+    sharepointAccount: "099887",
+    sourceSystem: "sharepoint",
+    partnerType: "servicepartner",
+    country: "DK",
+    sourceActive: false,
+    inactiveFromSource: true,
+    lastSyncedAt: "2025-11-04T08:00:00Z",
+  },
 ];
 
 const MACHINES: MachineRef[] = [
@@ -227,6 +359,13 @@ export function getTsb(id: string): Tsb | undefined {
 }
 
 export function getDealers(): Dealer[] {
+  return DEALERS;
+}
+
+/** Reactive hook for dealers — currently static seed data, but ready for sync updates */
+export function useDealers(): Dealer[] {
+  // DEALERS is currently static; using useSyncExternalStore-compatible no-op subscription
+  // would be overkill. Returning the array directly is fine until a real sync job mutates it.
   return DEALERS;
 }
 
