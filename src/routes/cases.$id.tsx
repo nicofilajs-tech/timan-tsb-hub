@@ -44,44 +44,44 @@ interface Machine {
   serial: string;
   model: string;
   customer: string;
-  status: { variant: "success" | "info" | "warning" | "neutral"; label: string };
+  status: StatusKey;
   checked: boolean;
 }
 
-const machines: Machine[] = [
+const initialMachines: Machine[] = [
   {
     serial: "TM-X40-18291",
     model: "X40 Pro",
     customer: "Bygge A/S",
-    status: { variant: "success", label: "Udført" },
+    status: "udfoert",
     checked: true,
   },
   {
     serial: "TM-X40-18432",
     model: "X40 Pro",
     customer: "Entreprenør H. Olsen",
-    status: { variant: "success", label: "Udført" },
+    status: "udfoert",
     checked: true,
   },
   {
     serial: "TM-X40-18501",
     model: "X40 Pro",
     customer: "Kommune Syd",
-    status: { variant: "info", label: "I gang" },
+    status: "i_gang",
     checked: false,
   },
   {
     serial: "TM-X40-18622",
     model: "X40 Standard",
     customer: "Grus & Sand Aps",
-    status: { variant: "warning", label: "Venter på dele" },
+    status: "venter",
     checked: false,
   },
   {
     serial: "TM-X40-18733",
     model: "X40 Standard",
     customer: "Landbrug Nord",
-    status: { variant: "neutral", label: "Ikke startet" },
+    status: "ikke_startet",
     checked: false,
   },
 ];
