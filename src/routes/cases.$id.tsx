@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { ExternalLink, Search } from "lucide-react";
+import { useMemo, useState } from "react";
+import { ExternalLink, Search, CheckCircle2 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { StatCard } from "@/components/StatCard";
