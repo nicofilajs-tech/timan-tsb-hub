@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, redirect } from "@tanstack/react-router";
 import { useState, useEffect, type FormEvent } from "react";
 import { toast } from "sonner";
 import { AuthLayout } from "@/components/AuthLayout";
@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { isAdminRole } from "@/lib/auth";
+// 🔴 TEMPORARY: preview-only auth bypass — remove before production launch
+import { isPreviewAuthBypassEnabled } from "@/lib/preview-auth";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -15,6 +17,13 @@ export const Route = createFileRoute("/login")({
       { name: "description", content: "Log ind på Timan TSB Portal" },
     ],
   }),
+  beforeLoad: () => {
+    // 🔴 TEMPORARY: in Lovable preview / dev, never show the login page —
+    // jump straight into the admin UI for visual review.
+    if (isPreviewAuthBypassEnabled()) {
+      throw redirect({ to: "/admin/dashboard" });
+    }
+  },
   component: LoginPage,
 });
 
