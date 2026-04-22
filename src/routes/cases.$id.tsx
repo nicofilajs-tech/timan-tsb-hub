@@ -97,13 +97,22 @@ function CaseDetailPage() {
     );
   };
 
+  // Auto-derived completion: project is "done" only when ALL machines are "udfoert"
+  const totalMachines = machines.length;
+  const doneMachines = useMemo(
+    () => machines.filter((m) => m.status === "udfoert").length,
+    [machines],
+  );
+  const percent = totalMachines === 0 ? 0 : Math.round((doneMachines / totalMachines) * 100);
+  const isComplete = totalMachines > 0 && doneMachines === totalMachines;
+
   return (
     <ProtectedRoute>
     <AppLayout
       variant="dealer"
       company="Nordic Machinery Aps"
       user={{ initials: "LJ", name: "Lars Jensen", role: "Dealer Admin" }}
-      breadcrumbs={[{ label: "Dashboard", to: "/dashboard" }, { label: id }]}
+      breadcrumbs={[{ label: "Mine sager", to: "/cases" }, { label: id }]}
     >
       {/* Header card */}
       <div className="rounded-[10px] border border-border-soft bg-white p-6 shadow-sm">
@@ -111,6 +120,15 @@ function CaseDetailPage() {
           <div>
             <div className="flex items-center gap-3">
               <StatusBadge variant="warning">Severity 3</StatusBadge>
+              {isComplete ? (
+                <StatusBadge variant="success">
+                  <span className="inline-flex items-center gap-1">
+                    <CheckCircle2 className="h-3.5 w-3.5" /> Projekt fuldført
+                  </span>
+                </StatusBadge>
+              ) : (
+                <StatusBadge variant="info">I gang</StatusBadge>
+              )}
               <span className="font-mono text-xs text-muted-foreground">{id} · v1.1</span>
             </div>
             <h1
@@ -133,9 +151,9 @@ function CaseDetailPage() {
         </div>
       </div>
 
-      {/* Summary cards */}
+      {/* Summary cards — auto-computed from machine rows */}
       <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <StatCard label="Maskiner" value="12" />
+        <StatCard label="Maskiner" value={String(totalMachines)} />
         <div className="rounded-[10px] border border-border-soft bg-white p-5 shadow-sm">
           <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Udført
@@ -144,7 +162,17 @@ function CaseDetailPage() {
             className="mt-2 text-3xl font-semibold"
             style={{ color: "var(--timan-green)" }}
           >
-            7 af 12 <span className="text-xl">(58%)</span>
+            {doneMachines} af {totalMachines}{" "}
+            <span className="text-xl">({percent}%)</span>
+          </div>
+          <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-page-bg">
+            <div
+              className="h-full rounded-full transition-all"
+              style={{
+                width: `${percent}%`,
+                backgroundColor: "var(--timan-green)",
+              }}
+            />
           </div>
         </div>
         <div className="rounded-[10px] border border-border-soft bg-white p-5 shadow-sm">
@@ -166,7 +194,7 @@ function CaseDetailPage() {
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input placeholder="Søg..." className="pl-9" />
             </div>
-            <Button>Marker som udført</Button>
+            {/* "Marker som udført" removed — completion auto-derived from rows */}
           </div>
         </div>
         <div className="overflow-x-auto">
