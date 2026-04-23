@@ -76,12 +76,6 @@ function AdminTsbDetail() {
   }
 
   const overdue = daysUntil(tsb.deadline) < 0;
-  const isActive = tsb.status === "aktiv";
-
-  const handleActivate = () => {
-    activateTsb(tsb.id);
-    toast.success(`${tsb.id} er nu aktiv og synlig for forhandlere`);
-  };
 
   const updateDealer = (dealerId: string, status: DealerActivation) => {
     setDealerActivation(tsb.id, dealerId, status);
