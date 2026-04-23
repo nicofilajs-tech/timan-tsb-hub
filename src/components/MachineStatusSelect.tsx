@@ -25,16 +25,16 @@ const TONE: Record<
   { trigger: string; dot: string }
 > = {
   afventer: {
-    trigger: "bg-status-danger-bg text-status-danger-fg",
-    dot: "bg-status-danger-fg",
-  },
-  i_gang: {
     trigger: "bg-status-warning-bg text-status-warning-fg",
     dot: "bg-status-warning-fg",
   },
-  udfoert: {
+  i_gang: {
     trigger: "bg-status-success-bg text-status-success-fg",
     dot: "bg-status-success-fg",
+  },
+  udfoert: {
+    trigger: "bg-status-neutral-bg text-status-neutral-fg",
+    dot: "bg-status-neutral-fg",
   },
 };
 
