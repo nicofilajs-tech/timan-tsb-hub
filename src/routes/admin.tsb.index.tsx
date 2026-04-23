@@ -135,8 +135,6 @@ function AdminTsbList() {
                 )}
                 {rows.map((t) => {
                   const dl = deadlineLabel(t.deadline);
-                  const awaiting = t.dealers.filter((d) => d.status === "afventer").length;
-                  const overdue = daysUntil(t.deadline) < 0;
                   return (
                     <tr
                       key={t.id}
@@ -156,13 +154,11 @@ function AdminTsbList() {
                       </td>
                       <td className="px-5 py-4">{t.title}</td>
                       <td className="px-5 py-4">
-                        {t.status === "aktiv" && (
-                          <StatusBadge variant={overdue ? "danger" : awaiting > 0 ? "warning" : "success"}>
-                            {overdue ? "Forsinket" : awaiting > 0 ? "Afventer accept" : "Aktiv"}
-                          </StatusBadge>
-                        )}
-                        {t.status === "kladde" && <StatusBadge variant="neutral">Kladde</StatusBadge>}
-                        {t.status === "lukket" && <StatusBadge variant="info">Lukket</StatusBadge>}
+                        <TsbStatusSelect
+                          value={getProcessStatus(t)}
+                          onChange={(next) => setTsbProcessStatus(t.id, next)}
+                          stopPropagation
+                        />
                       </td>
                       <td className="px-5 py-4 text-muted-foreground">{formatDate(t.activeFrom)}</td>
                       <td className="px-5 py-4 text-muted-foreground">{t.dealers.length}</td>
