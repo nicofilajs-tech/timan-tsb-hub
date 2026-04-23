@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { Plus, Search, SlidersHorizontal, ExternalLink } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { StatusBadge } from "@/components/StatusBadge";
+import { TsbStatusSelect } from "@/components/TsbStatusSelect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -17,9 +17,13 @@ import {
   daysUntil,
   deadlineLabel,
   formatDate,
+  getProcessStatus,
+  PROCESS_STATUS_LABEL,
+  PROCESS_STATUS_OPTIONS,
+  setTsbProcessStatus,
   totalMachineCount,
   useTsbs,
-  type TsbStatus,
+  type ProcessStatus,
 } from "@/lib/tsb-store";
 
 export const Route = createFileRoute("/admin/tsb/")({
@@ -27,23 +31,21 @@ export const Route = createFileRoute("/admin/tsb/")({
   component: AdminTsbList,
 });
 
-const STATUS_FILTERS: { value: "all" | TsbStatus; label: string }[] = [
+const STATUS_FILTERS: { value: "all" | ProcessStatus; label: string }[] = [
   { value: "all", label: "Alle statusser" },
-  { value: "aktiv", label: "Aktiv" },
-  { value: "kladde", label: "Kladde" },
-  { value: "lukket", label: "Lukket" },
+  ...PROCESS_STATUS_OPTIONS.map((s) => ({ value: s, label: PROCESS_STATUS_LABEL[s] })),
 ];
 
 function AdminTsbList() {
   const navigate = useNavigate();
   const tsbs = useTsbs();
   const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | TsbStatus>("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | ProcessStatus>("all");
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
     return tsbs.filter((t) => {
-      if (statusFilter !== "all" && t.status !== statusFilter) return false;
+      if (statusFilter !== "all" && getProcessStatus(t) !== statusFilter) return false;
       if (!q) return true;
       return t.id.toLowerCase().includes(q) || t.title.toLowerCase().includes(q);
     });
@@ -133,8 +135,6 @@ function AdminTsbList() {
                 )}
                 {rows.map((t) => {
                   const dl = deadlineLabel(t.deadline);
-                  const awaiting = t.dealers.filter((d) => d.status === "afventer").length;
-                  const overdue = daysUntil(t.deadline) < 0;
                   return (
                     <tr
                       key={t.id}
@@ -154,13 +154,11 @@ function AdminTsbList() {
                       </td>
                       <td className="px-5 py-4">{t.title}</td>
                       <td className="px-5 py-4">
-                        {t.status === "aktiv" && (
-                          <StatusBadge variant={overdue ? "danger" : awaiting > 0 ? "warning" : "success"}>
-                            {overdue ? "Forsinket" : awaiting > 0 ? "Afventer accept" : "Aktiv"}
-                          </StatusBadge>
-                        )}
-                        {t.status === "kladde" && <StatusBadge variant="neutral">Kladde</StatusBadge>}
-                        {t.status === "lukket" && <StatusBadge variant="info">Lukket</StatusBadge>}
+                        <TsbStatusSelect
+                          value={getProcessStatus(t)}
+                          onChange={(next) => setTsbProcessStatus(t.id, next)}
+                          stopPropagation
+                        />
                       </td>
                       <td className="px-5 py-4 text-muted-foreground">{formatDate(t.activeFrom)}</td>
                       <td className="px-5 py-4 text-muted-foreground">{t.dealers.length}</td>

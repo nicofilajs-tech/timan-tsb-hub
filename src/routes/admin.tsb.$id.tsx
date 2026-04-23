@@ -1,18 +1,20 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo } from "react";
-import { ExternalLink, Check, Send, Building2, Wrench } from "lucide-react";
+import { ExternalLink, Building2, Wrench } from "lucide-react";
 import { toast } from "sonner";
 import { AppLayout } from "@/components/AppLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { StatCard } from "@/components/StatCard";
 import { StatusBadge } from "@/components/StatusBadge";
+import { TsbStatusSelect } from "@/components/TsbStatusSelect";
 import { Button } from "@/components/ui/button";
 import {
-  activateTsb,
   daysUntil,
   formatDate,
   getDealer,
+  getProcessStatus,
   setDealerActivation,
+  setTsbProcessStatus,
   totalMachineCount,
   useTsbs,
   type DealerActivation,
@@ -74,12 +76,6 @@ function AdminTsbDetail() {
   }
 
   const overdue = daysUntil(tsb.deadline) < 0;
-  const isActive = tsb.status === "aktiv";
-
-  const handleActivate = () => {
-    activateTsb(tsb.id);
-    toast.success(`${tsb.id} er nu aktiv og synlig for forhandlere`);
-  };
 
   const updateDealer = (dealerId: string, status: DealerActivation) => {
     setDealerActivation(tsb.id, dealerId, status);
@@ -104,13 +100,14 @@ function AdminTsbDetail() {
             <div>
               <div className="flex flex-wrap items-center gap-3">
                 <StatusBadge variant="warning">Severity {tsb.severity}</StatusBadge>
-                {tsb.status === "kladde" && <StatusBadge variant="neutral">Kladde</StatusBadge>}
-                {tsb.status === "aktiv" && (
-                  <StatusBadge variant={overdue ? "danger" : "success"}>
-                    {overdue ? "Forsinket" : "Aktiv"}
-                  </StatusBadge>
-                )}
-                {tsb.status === "lukket" && <StatusBadge variant="info">Lukket</StatusBadge>}
+                <TsbStatusSelect
+                  value={getProcessStatus(tsb)}
+                  onChange={(next) => {
+                    setTsbProcessStatus(tsb.id, next);
+                    toast.success("Status opdateret");
+                  }}
+                  size="md"
+                />
                 <span className="font-mono text-xs text-muted-foreground">{tsb.id}</span>
               </div>
               <h1 className="mt-3 text-[22px] font-semibold" style={{ color: "var(--timan-red)" }}>
@@ -129,18 +126,6 @@ function AdminTsbDetail() {
                   Åbn PDF
                   <ExternalLink className="h-4 w-4" />
                 </Button>
-              )}
-              {!isActive ? (
-                <Button
-                  onClick={handleActivate}
-                  style={{ backgroundColor: "var(--timan-green)", color: "white" }}
-                >
-                  <Send className="h-4 w-4" /> Aktivér TSB
-                </Button>
-              ) : (
-                <div className="flex items-center gap-2 rounded-md bg-status-success-bg px-3 py-2 text-sm font-medium text-status-success-fg">
-                  <Check className="h-4 w-4" /> TSB er aktiv
-                </div>
               )}
             </div>
           </div>

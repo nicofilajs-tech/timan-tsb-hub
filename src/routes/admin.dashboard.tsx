@@ -4,11 +4,13 @@ import { AlertTriangle, Clock, ArrowRight } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { StatCard } from "@/components/StatCard";
-import { StatusBadge } from "@/components/StatusBadge";
+import { TsbStatusSelect } from "@/components/TsbStatusSelect";
 import {
   daysUntil,
   deadlineLabel,
   getDealer,
+  getProcessStatus,
+  setTsbProcessStatus,
   totalMachineCount,
   useTsbs,
 } from "@/lib/tsb-store";
@@ -145,13 +147,10 @@ function AdminDashboard() {
                         </span>
                       </td>
                       <td className="px-5 py-4">
-                        {dl.tone === "danger" ? (
-                          <StatusBadge variant="danger">Forsinket</StatusBadge>
-                        ) : awaiting > 0 ? (
-                          <StatusBadge variant="warning">Afventer accept</StatusBadge>
-                        ) : (
-                          <StatusBadge variant="success">På sporet</StatusBadge>
-                        )}
+                        <TsbStatusSelect
+                          value={getProcessStatus(t)}
+                          onChange={(next) => setTsbProcessStatus(t.id, next)}
+                        />
                       </td>
                     </tr>
                   );
