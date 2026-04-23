@@ -31,23 +31,21 @@ export const Route = createFileRoute("/admin/tsb/")({
   component: AdminTsbList,
 });
 
-const STATUS_FILTERS: { value: "all" | TsbStatus; label: string }[] = [
+const STATUS_FILTERS: { value: "all" | ProcessStatus; label: string }[] = [
   { value: "all", label: "Alle statusser" },
-  { value: "aktiv", label: "Aktiv" },
-  { value: "kladde", label: "Kladde" },
-  { value: "lukket", label: "Lukket" },
+  ...PROCESS_STATUS_OPTIONS.map((s) => ({ value: s, label: PROCESS_STATUS_LABEL[s] })),
 ];
 
 function AdminTsbList() {
   const navigate = useNavigate();
   const tsbs = useTsbs();
   const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | TsbStatus>("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | ProcessStatus>("all");
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
     return tsbs.filter((t) => {
-      if (statusFilter !== "all" && t.status !== statusFilter) return false;
+      if (statusFilter !== "all" && getProcessStatus(t) !== statusFilter) return false;
       if (!q) return true;
       return t.id.toLowerCase().includes(q) || t.title.toLowerCase().includes(q);
     });
