@@ -28,9 +28,9 @@ const TONE: Record<
   { bg: string; fg: string; ring: string }
 > = {
   ikke_paabegyndt: {
-    bg: "bg-status-neutral-bg",
-    fg: "text-status-neutral-fg",
-    ring: "focus:ring-status-neutral-fg/30",
+    bg: "bg-status-warning-bg",
+    fg: "text-status-warning-fg",
+    ring: "focus:ring-status-warning-fg/30",
   },
   aktiv: {
     bg: "bg-status-success-bg",
@@ -43,9 +43,9 @@ const TONE: Record<
     ring: "focus:ring-status-danger-fg/30",
   },
   afsluttet: {
-    bg: "bg-status-success-bg",
-    fg: "text-status-success-fg",
-    ring: "focus:ring-status-success-fg/30",
+    bg: "bg-status-neutral-bg",
+    fg: "text-status-neutral-fg",
+    ring: "focus:ring-status-neutral-fg/30",
   },
 };
 
