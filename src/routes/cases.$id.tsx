@@ -1,41 +1,27 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ExternalLink, Search, CheckCircle2 } from "lucide-react";
+import { ExternalLink, Search, CheckCircle2, BellRing } from "lucide-react";
+import { toast } from "sonner";
 import { AppLayout } from "@/components/AppLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { StatCard } from "@/components/StatCard";
 import { StatusBadge } from "@/components/StatusBadge";
+import { DealerCaseStatusBadge } from "@/components/DealerCaseStatusBadge";
+import { MachineStatusSelect } from "@/components/MachineStatusSelect";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { formatDate, getMachines, useTsbs } from "@/lib/tsb-store";
+  type DealerCaseStatus,
+  type MachineStatus,
+} from "@/lib/dealer-status";
+import {
+  formatDate,
+  getMachines,
+  setDealerActivation,
+  useTsbs,
+} from "@/lib/tsb-store";
 
 const CURRENT_DEALER_ID = "d-nordic";
-
-type StatusVariant = "success" | "info" | "warning" | "neutral";
-type StatusKey = "udfoert" | "i_gang" | "venter" | "ikke_startet";
-
-const STATUS_OPTIONS: { key: StatusKey; label: string; variant: StatusVariant }[] = [
-  { key: "udfoert", label: "Udført", variant: "success" },
-  { key: "i_gang", label: "I gang", variant: "info" },
-  { key: "venter", label: "Venter på dele", variant: "warning" },
-  { key: "ikke_startet", label: "Ikke startet", variant: "neutral" },
-];
-
-const statusDotClass: Record<StatusVariant, string> = {
-  success: "bg-status-success-fg",
-  info: "bg-status-info-fg",
-  warning: "bg-status-warning-fg",
-  neutral: "bg-status-neutral-fg",
-};
 
 export const Route = createFileRoute("/cases/$id")({
   head: ({ params }) => ({
@@ -44,50 +30,19 @@ export const Route = createFileRoute("/cases/$id")({
   component: CaseDetailPage,
 });
 
-interface Machine {
+interface MachineRow {
   serial: string;
   model: string;
   customer: string;
-  status: StatusKey;
-  checked: boolean;
+  status: MachineStatus;
 }
 
-const initialMachines: Machine[] = [
-  {
-    serial: "TM-X40-18291",
-    model: "X40 Pro",
-    customer: "Bygge A/S",
-    status: "udfoert",
-    checked: true,
-  },
-  {
-    serial: "TM-X40-18432",
-    model: "X40 Pro",
-    customer: "Entreprenør H. Olsen",
-    status: "udfoert",
-    checked: true,
-  },
-  {
-    serial: "TM-X40-18501",
-    model: "X40 Pro",
-    customer: "Kommune Syd",
-    status: "i_gang",
-    checked: false,
-  },
-  {
-    serial: "TM-X40-18622",
-    model: "X40 Standard",
-    customer: "Grus & Sand Aps",
-    status: "venter",
-    checked: false,
-  },
-  {
-    serial: "TM-X40-18733",
-    model: "X40 Standard",
-    customer: "Landbrug Nord",
-    status: "ikke_startet",
-    checked: false,
-  },
+const initialMachines: MachineRow[] = [
+  { serial: "TM-X40-18291", model: "X40 Pro", customer: "Bygge A/S", status: "udfoert" },
+  { serial: "TM-X40-18432", model: "X40 Pro", customer: "Entreprenør H. Olsen", status: "udfoert" },
+  { serial: "TM-X40-18501", model: "X40 Pro", customer: "Kommune Syd", status: "i_gang" },
+  { serial: "TM-X40-18622", model: "X40 Standard", customer: "Grus & Sand Aps", status: "afventer" },
+  { serial: "TM-X40-18733", model: "X40 Standard", customer: "Landbrug Nord", status: "afventer" },
 ];
 
 function CaseDetailPage() {
@@ -96,10 +51,9 @@ function CaseDetailPage() {
   const tsb = tsbs.find((t) => t.id === id);
   const link = tsb?.dealers.find((d) => d.dealerId === CURRENT_DEALER_ID);
 
-  // Derive machine list for this dealer from the shared store, with sensible
-  // defaults so newly-created admin TSBs immediately work in the dealer view.
+  // Derive machine list for this dealer from the shared store.
   const allMachines = getMachines();
-  const derivedInitial: Machine[] = useMemo(() => {
+  const derivedInitial: MachineRow[] = useMemo(() => {
     if (!link) return initialMachines;
     return link.machineSerials.map((serial) => {
       const m = allMachines.find((x) => x.serial === serial);
@@ -107,16 +61,15 @@ function CaseDetailPage() {
         serial,
         model: m?.model ?? "—",
         customer: m?.customer ?? "—",
-        status: "ikke_startet" as StatusKey,
-        checked: false,
+        status: "afventer" as MachineStatus,
       };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tsb?.id]);
 
-  const [machines, setMachines] = useState<Machine[]>(derivedInitial);
+  const [machines, setMachines] = useState<MachineRow[]>(derivedInitial);
 
-  const updateStatus = (serial: string, status: StatusKey) => {
+  const updateStatus = (serial: string, status: MachineStatus) => {
     setMachines((prev) =>
       prev.map((m) => (m.serial === serial ? { ...m, status } : m)),
     );
@@ -128,15 +81,36 @@ function CaseDetailPage() {
     () => machines.filter((m) => m.status === "udfoert").length,
     [machines],
   );
+  const anyWorkStarted = useMemo(
+    () => machines.some((m) => m.status !== "afventer"),
+    [machines],
+  );
   const percent = totalMachines === 0 ? 0 : Math.round((doneMachines / totalMachines) * 100);
   const isComplete = totalMachines > 0 && doneMachines === totalMachines;
+
+  // Overall dealer-case status — separate from machine-level status.
+  //   afventer (link.status)  → ny_frigivet
+  //   accepteret + no work    → accepteret_info
+  //   accepteret + work begun → aktiv
+  const caseStatus: DealerCaseStatus =
+    link?.status === "accepteret"
+      ? anyWorkStarted
+        ? "aktiv"
+        : "accepteret_info"
+      : "ny_frigivet";
+
+  const handleAcceptReceipt = () => {
+    if (!tsb) return;
+    setDealerActivation(tsb.id, CURRENT_DEALER_ID, "accepteret");
+    toast.success("Modtagelse af TSB accepteret");
+  };
 
   const headerTitle = tsb?.title ?? "Softwareopdatering — styreenhed v3.2";
   const headerSeverity = tsb ? `Severity ${tsb.severity}` : "Severity 3";
   const acceptedLabel = link?.acceptedAt
     ? `Accepteret ${formatDate(link.acceptedAt)} af Lars Jensen`
-    : "Afventer accept";
-  const deadlineLabel = tsb ? formatDate(tsb.deadline) : "14. maj";
+    : "Afventer accept af modtagelse";
+  const deadlineLabelText = tsb ? formatDate(tsb.deadline) : "14. maj";
 
   return (
     <ProtectedRoute>
@@ -146,23 +120,36 @@ function CaseDetailPage() {
       user={{ initials: "LJ", name: "Lars Jensen", role: "Dealer Admin" }}
       breadcrumbs={[{ label: "Mine sager", to: "/cases" }, { label: id }]}
     >
+      {/* Prominent dealer-case status banner — top of detail page */}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-[10px] border border-border-soft bg-white p-4 shadow-sm">
+        <div className="flex items-center gap-3">
+          {caseStatus === "ny_frigivet" && (
+            <BellRing className="h-5 w-5 text-status-warning-fg" />
+          )}
+          <DealerCaseStatusBadge status={caseStatus} size="md" />
+        </div>
+        {caseStatus === "ny_frigivet" && tsb && (
+          <Button
+            onClick={handleAcceptReceipt}
+            style={{ backgroundColor: "var(--timan-green)", color: "white" }}
+          >
+            Accepter modtagelse
+          </Button>
+        )}
+        {isComplete && (
+          <span className="inline-flex items-center gap-2 text-sm font-medium text-status-success-fg">
+            <CheckCircle2 className="h-4 w-4" />
+            Alle maskiner er udført — sagen er klar til lukning
+          </span>
+        )}
+      </div>
+
       {/* Header card */}
       <div className="rounded-[10px] border border-border-soft bg-white p-6 shadow-sm">
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-3">
               <StatusBadge variant="warning">{headerSeverity}</StatusBadge>
-              {isComplete ? (
-                <StatusBadge variant="success">
-                  <span className="inline-flex items-center gap-1">
-                    <CheckCircle2 className="h-3.5 w-3.5" /> Projekt fuldført
-                  </span>
-                </StatusBadge>
-              ) : link?.status === "afventer" ? (
-                <StatusBadge variant="warning">Afventer accept</StatusBadge>
-              ) : (
-                <StatusBadge variant="info">I gang</StatusBadge>
-              )}
               <span className="font-mono text-xs text-muted-foreground">{id}</span>
             </div>
             <h1
@@ -213,7 +200,7 @@ function CaseDetailPage() {
           <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Deadline
           </div>
-          <div className="mt-2 text-2xl font-semibold">{deadlineLabel}</div>
+          <div className="mt-2 text-2xl font-semibold">{deadlineLabelText}</div>
         </div>
       </div>
 
@@ -226,14 +213,12 @@ function CaseDetailPage() {
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input placeholder="Søg..." className="pl-9" />
             </div>
-            {/* "Marker som udført" removed — completion auto-derived from rows */}
           </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border-soft text-left text-xs uppercase tracking-wide text-muted-foreground">
-                <th className="px-5 py-3 font-medium w-10"></th>
                 <th className="px-5 py-3 font-medium">Serienummer</th>
                 <th className="px-5 py-3 font-medium">Model</th>
                 <th className="px-5 py-3 font-medium">Kunde</th>
@@ -246,38 +231,14 @@ function CaseDetailPage() {
                   key={m.serial}
                   className="border-b border-border-soft last:border-0 hover:bg-page-bg"
                 >
-                  <td className="px-5 py-4">
-                    <Checkbox
-                      checked={m.status === "udfoert"}
-                      onCheckedChange={(checked) =>
-                        updateStatus(m.serial, checked ? "udfoert" : "i_gang")
-                      }
-                    />
-                  </td>
                   <td className="px-5 py-4 font-mono text-sm">{m.serial}</td>
                   <td className="px-5 py-4">{m.model}</td>
                   <td className="px-5 py-4 text-muted-foreground">{m.customer}</td>
                   <td className="px-5 py-4">
-                    <Select
+                    <MachineStatusSelect
                       value={m.status}
-                      onValueChange={(v) => updateStatus(m.serial, v as StatusKey)}
-                    >
-                      <SelectTrigger className="h-8 w-[180px] rounded-full border-border-soft bg-page-bg">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {STATUS_OPTIONS.map((opt) => (
-                          <SelectItem key={opt.key} value={opt.key}>
-                            <span className="flex items-center gap-2">
-                              <span
-                                className={cn("h-2 w-2 rounded-full", statusDotClass[opt.variant])}
-                              />
-                              {opt.label}
-                            </span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      onChange={(next) => updateStatus(m.serial, next)}
+                    />
                   </td>
                 </tr>
               ))}
