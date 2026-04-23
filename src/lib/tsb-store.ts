@@ -448,6 +448,93 @@ export function activateTsb(id: string) {
   emit();
 }
 
+// ---------------- Admin process status ----------------
+
+/**
+ * High-level Timan-admin process status for a TSB.
+ *
+ * This is a UI-level status (4 states) derived from / settable on top of the
+ * underlying lifecycle (`kladde` | `aktiv` | `lukket`). It reflects the real
+ * project flow visible to Timan Admin and is intentionally separate from
+ * dealer-side machine statuses.
+ *
+ *  - "ikke_paabegyndt": created, not yet activated (= kladde)
+ *  - "aktiv":           activated and within deadline
+ *  - "dato_overskredet": activated, deadline passed, not all completed
+ *  - "afsluttet":       closed (= lukket)
+ */
+export type ProcessStatus =
+  | "ikke_paabegyndt"
+  | "aktiv"
+  | "dato_overskredet"
+  | "afsluttet";
+
+export const PROCESS_STATUS_LABEL: Record<ProcessStatus, string> = {
+  ikke_paabegyndt: "Ikke påbegyndt",
+  aktiv: "Aktiv",
+  dato_overskredet: "Dato overskredet",
+  afsluttet: "Afsluttet / lukket",
+};
+
+export const PROCESS_STATUS_OPTIONS: ProcessStatus[] = [
+  "ikke_paabegyndt",
+  "aktiv",
+  "dato_overskredet",
+  "afsluttet",
+];
+
+/** Derive the admin process status from the TSB's lifecycle + deadline. */
+export function getProcessStatus(t: Tsb): ProcessStatus {
+  if (t.status === "kladde") return "ikke_paabegyndt";
+  if (t.status === "lukket") return "afsluttet";
+  // status === "aktiv"
+  return daysUntil(t.deadline) < 0 ? "dato_overskredet" : "aktiv";
+}
+
+/**
+ * Set the process status from the admin UI dropdown.
+ *
+ * Maps the 4-state UI value back to the underlying lifecycle:
+ *  - ikke_paabegyndt  → kladde
+ *  - aktiv            → aktiv (sets activeFrom if missing)
+ *  - dato_overskredet → aktiv (kept active; "overskredet" is derived from
+ *                        deadline, but admin may force it by also pulling
+ *                        the deadline back to today - 1 if currently in future)
+ *  - afsluttet        → lukket
+ */
+export function setTsbProcessStatus(id: string, next: ProcessStatus) {
+  const today = new Date().toISOString().slice(0, 10);
+  tsbs = tsbs.map((t) => {
+    if (t.id !== id) return t;
+    switch (next) {
+      case "ikke_paabegyndt":
+        return { ...t, status: "kladde" };
+      case "aktiv":
+        return {
+          ...t,
+          status: "aktiv",
+          activeFrom: t.activeFrom ?? today,
+        };
+      case "dato_overskredet": {
+        // Force overdue: keep aktiv, pull deadline into the past if needed.
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yIso = yesterday.toISOString().slice(0, 10);
+        const deadline = daysUntil(t.deadline) < 0 ? t.deadline : yIso;
+        return {
+          ...t,
+          status: "aktiv",
+          activeFrom: t.activeFrom ?? today,
+          deadline,
+        };
+      }
+      case "afsluttet":
+        return { ...t, status: "lukket" };
+    }
+  });
+  emit();
+}
+
 export function setDealerActivation(tsbId: string, dealerId: string, status: DealerActivation) {
   tsbs = tsbs.map((t) =>
     t.id === tsbId
