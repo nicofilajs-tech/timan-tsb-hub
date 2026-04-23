@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { StatusBadge } from "@/components/StatusBadge";
+import { DealerCaseStatusBadge } from "@/components/DealerCaseStatusBadge";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -12,6 +12,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DEALER_CASE_STATUS_LABEL,
+  type DealerCaseStatus,
+} from "@/lib/dealer-status";
 import { deadlineLabel, getTsbsForDealer, useTsbs } from "@/lib/tsb-store";
 
 export const Route = createFileRoute("/cases/")({
@@ -22,13 +26,11 @@ export const Route = createFileRoute("/cases/")({
 // Preview/demo: hard-coded dealer identity for the dealer view.
 const CURRENT_DEALER_ID = "d-nordic";
 
-type StatusKey = "afventer" | "aktiv" | "forsinket";
-
-const STATUS_FILTERS: { value: "all" | StatusKey; label: string }[] = [
+const STATUS_FILTERS: { value: "all" | DealerCaseStatus; label: string }[] = [
   { value: "all", label: "Alle statusser" },
-  { value: "afventer", label: "Afventer accept" },
-  { value: "aktiv", label: "Aktiv" },
-  { value: "forsinket", label: "Forsinket" },
+  { value: "ny_frigivet", label: DEALER_CASE_STATUS_LABEL.ny_frigivet },
+  { value: "accepteret_info", label: DEALER_CASE_STATUS_LABEL.accepteret_info },
+  { value: "aktiv", label: DEALER_CASE_STATUS_LABEL.aktiv },
 ];
 
 function CasesPage() {
@@ -37,23 +39,26 @@ function CasesPage() {
   useTsbs();
   const items = getTsbsForDealer(CURRENT_DEALER_ID);
   const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | StatusKey>("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | DealerCaseStatus>("all");
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
     return items
       .map(({ tsb, link }) => {
         const dl = deadlineLabel(tsb.deadline);
-        const statusKey: StatusKey =
-          dl.tone === "danger"
-            ? "forsinket"
-            : link.status === "afventer"
-            ? "afventer"
-            : "aktiv";
-        return { tsb, link, dl, statusKey };
+        // List-level mapping: we only know acceptance state here, not per-machine
+        // work state. So:
+        //   afventer   → ny_frigivet
+        //   accepteret → aktiv (work assumed running once accepted)
+        //   afvist     → ny_frigivet (still needs action)
+        // The "accepteret_info" intermediate is shown on the detail page once
+        // we can see machine state.
+        const caseStatus: DealerCaseStatus =
+          link.status === "accepteret" ? "aktiv" : "ny_frigivet";
+        return { tsb, link, dl, caseStatus };
       })
       .filter((r) => {
-        if (statusFilter !== "all" && r.statusKey !== statusFilter) return false;
+        if (statusFilter !== "all" && r.caseStatus !== statusFilter) return false;
         if (!q) return true;
         return (
           r.tsb.id.toLowerCase().includes(q) ||
@@ -98,12 +103,12 @@ function CasesPage() {
           <div className="flex items-center gap-2">
             <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
             <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as typeof statusFilter)}>
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="w-[260px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {STATUS_FILTERS.map((s) => (
-                  <SelectItem key={s.value} value={s.value}>
+                  <SelectItem key={s.value} value={s.value} className="whitespace-nowrap">
                     {s.label}
                   </SelectItem>
                 ))}
@@ -133,7 +138,7 @@ function CasesPage() {
                     </td>
                   </tr>
                 )}
-                {rows.map(({ tsb, link, dl, statusKey }) => (
+                {rows.map(({ tsb, link, dl, caseStatus }) => (
                   <tr
                     key={tsb.id}
                     onClick={() => navigate({ to: "/cases/$id", params: { id: tsb.id } })}
@@ -169,13 +174,7 @@ function CasesPage() {
                       </span>
                     </td>
                     <td className="px-5 py-4">
-                      {statusKey === "forsinket" ? (
-                        <StatusBadge variant="danger">Forsinket</StatusBadge>
-                      ) : statusKey === "afventer" ? (
-                        <StatusBadge variant="warning">Afventer accept</StatusBadge>
-                      ) : (
-                        <StatusBadge variant="success">Aktiv</StatusBadge>
-                      )}
+                      <DealerCaseStatusBadge status={caseStatus} variant="short" size="sm" />
                     </td>
                   </tr>
                 ))}
