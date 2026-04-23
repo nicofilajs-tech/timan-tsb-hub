@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { Plus, Search, SlidersHorizontal, ExternalLink } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { StatusBadge } from "@/components/StatusBadge";
+import { TsbStatusSelect } from "@/components/TsbStatusSelect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -17,9 +17,13 @@ import {
   daysUntil,
   deadlineLabel,
   formatDate,
+  getProcessStatus,
+  PROCESS_STATUS_LABEL,
+  PROCESS_STATUS_OPTIONS,
+  setTsbProcessStatus,
   totalMachineCount,
   useTsbs,
-  type TsbStatus,
+  type ProcessStatus,
 } from "@/lib/tsb-store";
 
 export const Route = createFileRoute("/admin/tsb/")({
