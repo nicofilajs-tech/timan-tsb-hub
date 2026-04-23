@@ -1,18 +1,20 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo } from "react";
-import { ExternalLink, Check, Send, Building2, Wrench } from "lucide-react";
+import { ExternalLink, Building2, Wrench } from "lucide-react";
 import { toast } from "sonner";
 import { AppLayout } from "@/components/AppLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { StatCard } from "@/components/StatCard";
 import { StatusBadge } from "@/components/StatusBadge";
+import { TsbStatusSelect } from "@/components/TsbStatusSelect";
 import { Button } from "@/components/ui/button";
 import {
-  activateTsb,
   daysUntil,
   formatDate,
   getDealer,
+  getProcessStatus,
   setDealerActivation,
+  setTsbProcessStatus,
   totalMachineCount,
   useTsbs,
   type DealerActivation,
