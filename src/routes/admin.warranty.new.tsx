@@ -97,7 +97,7 @@ const EMPTY: FormState = {
   machineSerial: "",
   machineType: "",
   replacementBrand: "Nej",
-  toolSerials: ["", "", "", "", ""],
+  toolSerials: [""],
   deliveryDate: "",
   customer: "",
   customerAddress: "",
