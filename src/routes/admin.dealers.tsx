@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Search, AlertTriangle, Building2 } from "lucide-react";
-import { AppLayout } from "@/components/AppLayout";
+import { TsbAdminSidebarLayout } from "@/components/TsbAdminSidebarLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Input } from "@/components/ui/input";
@@ -103,15 +103,7 @@ function AdminDealersPage() {
 
   return (
     <ProtectedRoute adminOnly>
-      <AppLayout
-        variant="admin"
-        company="Timan Intern"
-        user={{ initials: "TA", name: "Timan Admin", role: "Intern" }}
-        breadcrumbs={[
-          { label: "Dashboard", to: "/admin/dashboard" },
-          { label: "Forhandlere" },
-        ]}
-      >
+      <TsbAdminSidebarLayout>
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="text-[22px] font-semibold" style={{ color: "var(--timan-red)" }}>
@@ -275,7 +267,7 @@ function AdminDealersPage() {
           Forhandlere slettes aldrig — hvis en forhandler forsvinder fra SharePoint markeres
           den med en gul advarsel og bevares for historiske TSB-sager.
         </p>
-      </AppLayout>
+      </TsbAdminSidebarLayout>
     </ProtectedRoute>
   );
 }
