@@ -28,7 +28,11 @@ function DealerRegistrationsRoute() {
           />
         }
       >
-        <WarrantyRegistrationsTable scope="dealer" dealerName={dealerName} />
+        <WarrantyRegistrationsTable
+          scope="dealer"
+          dealerName={dealerName}
+          title="Mine registreringer"
+        />
       </WarrantyAdminSidebarLayout>
     </ProtectedRoute>
   );
