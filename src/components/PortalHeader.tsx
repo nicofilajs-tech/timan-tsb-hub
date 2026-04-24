@@ -80,6 +80,10 @@ interface PortalHeaderProps {
   backTo?: string;
   /** Override label for the back link */
   backLabel?: string;
+  /** Optional module title shown after the back link */
+  moduleTitle?: string;
+  /** Optional module subtitle shown under the title */
+  moduleSubtitle?: string;
 }
 
 export function PortalHeader({
@@ -88,6 +92,8 @@ export function PortalHeader({
   user,
   backTo,
   backLabel = "Tilbage til dashboard",
+  moduleTitle,
+  moduleSubtitle,
 }: PortalHeaderProps) {
   const navigate = useNavigate();
   const { logout } = useAuth();
@@ -112,6 +118,19 @@ export function PortalHeader({
               <ArrowLeft className="h-4 w-4" />
               {backLabel}
             </Link>
+          )}
+          {moduleTitle && (
+            <>
+              <div className="h-10 border-l border-slate-200" />
+              <div>
+                <p className="text-lg font-black leading-tight text-slate-950">
+                  {moduleTitle}
+                </p>
+                {moduleSubtitle && (
+                  <p className="text-xs text-slate-500">{moduleSubtitle}</p>
+                )}
+              </div>
+            </>
           )}
         </div>
 
