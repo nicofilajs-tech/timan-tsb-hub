@@ -9,7 +9,6 @@ import { useMemo, useState, type ReactNode } from "react";
 import {
   AlertTriangle,
   Check,
-  Globe,
   Loader2,
   Phone,
   Plus,
@@ -18,6 +17,7 @@ import {
   User,
   Wrench,
 } from "lucide-react";
+import { usePortalLanguage, type PortalLang } from "@/components/PortalHeader";
 
 const LANGUAGES = [
   { code: "dk", name: "Dansk", flag: "DK" },
@@ -167,8 +167,14 @@ type PartLine = {
   unitPrice: string;
 };
 
+/** Map shared portal language → claim translation key (only DK/GB exist). */
+function mapPortalLang(p: PortalLang): LanguageCode {
+  return p === "DK" ? "dk" : "gb";
+}
+
 export function ClaimTool() {
-  const [lang, setLang] = useState<LanguageCode>("dk");
+  const [portalLang] = usePortalLanguage();
+  const lang = mapPortalLang(portalLang);
   const [showErrors, setShowErrors] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
@@ -306,17 +312,6 @@ export function ClaimTool() {
               <h2 className="text-sm font-bold uppercase tracking-widest text-slate-800">
                 {t("intro.title")}
               </h2>
-              <select
-                className="rounded border px-2 py-1 text-xs"
-                value={lang}
-                onChange={(event) => setLang(event.target.value as LanguageCode)}
-              >
-                {LANGUAGES.map((language) => (
-                  <option key={language.code} value={language.code}>
-                    {language.flag} {language.name}
-                  </option>
-                ))}
-              </select>
             </div>
             <div className="p-8">
               <p className="mb-8 whitespace-pre-line leading-relaxed text-slate-600">
@@ -334,25 +329,7 @@ export function ClaimTool() {
         </div>
       )}
 
-      {/* Local language switcher */}
-      <div className="border-b bg-white no-print">
-        <div className="mx-auto flex max-w-6xl items-center justify-end px-4 py-3">
-          <div className="flex items-center gap-2 rounded-lg border bg-slate-100 px-3 py-1.5 text-sm font-bold">
-            <Globe className="h-4 w-4 text-green-700" />
-            <select
-              className="bg-transparent outline-none"
-              value={lang}
-              onChange={(event) => setLang(event.target.value as LanguageCode)}
-            >
-              {LANGUAGES.map((language) => (
-                <option key={language.code} value={language.code}>
-                  {language.flag}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </div>
+      {/* Language is controlled from the shared portal header */}
 
       {/* Stepper */}
       <div className="border-b bg-slate-900 py-4 shadow-inner no-print">

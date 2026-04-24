@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { ExternalLink, Building2, Wrench } from "lucide-react";
 import { toast } from "sonner";
-import { AppLayout } from "@/components/AppLayout";
+import { TsbAdminLayout } from "@/components/TsbAdminLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { StatCard } from "@/components/StatCard";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -51,16 +51,7 @@ function AdminTsbDetail() {
   if (!tsb) {
     return (
       <ProtectedRoute adminOnly>
-        <AppLayout
-          variant="admin"
-          company="Timan Intern"
-          user={{ initials: "TA", name: "Timan Admin", role: "Intern" }}
-          breadcrumbs={[
-            { label: "Dashboard", to: "/admin/dashboard" },
-            { label: "TSB'er", to: "/admin/tsb" },
-            { label: id },
-          ]}
-        >
+        <TsbAdminLayout>
           <div className="rounded-[10px] border border-border-soft bg-white p-10 text-center shadow-sm">
             <div className="text-lg font-medium">TSB ikke fundet</div>
             <p className="mt-2 text-sm text-muted-foreground">
@@ -70,7 +61,7 @@ function AdminTsbDetail() {
               <Button variant="outline">Tilbage til TSB-listen</Button>
             </Link>
           </div>
-        </AppLayout>
+        </TsbAdminLayout>
       </ProtectedRoute>
     );
   }
@@ -84,16 +75,7 @@ function AdminTsbDetail() {
 
   return (
     <ProtectedRoute adminOnly>
-      <AppLayout
-        variant="admin"
-        company="Timan Intern"
-        user={{ initials: "TA", name: "Timan Admin", role: "Intern" }}
-        breadcrumbs={[
-          { label: "Dashboard", to: "/admin/dashboard" },
-          { label: "TSB'er", to: "/admin/tsb" },
-          { label: tsb.id },
-        ]}
-      >
+      <TsbAdminLayout>
         {/* Header */}
         <div className="rounded-[10px] border border-border-soft bg-white p-6 shadow-sm">
           <div className="flex flex-wrap items-start justify-between gap-4">
@@ -268,7 +250,7 @@ function AdminTsbDetail() {
             </table>
           </div>
         </div>
-      </AppLayout>
+      </TsbAdminLayout>
     </ProtectedRoute>
   );
 }

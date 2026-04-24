@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Plus, Search, SlidersHorizontal, ExternalLink } from "lucide-react";
-import { AppLayout } from "@/components/AppLayout";
+import { TsbAdminLayout } from "@/components/TsbAdminLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { TsbStatusSelect } from "@/components/TsbStatusSelect";
 import { Button } from "@/components/ui/button";
@@ -53,32 +53,30 @@ function AdminTsbList() {
 
   return (
     <ProtectedRoute adminOnly>
-      <AppLayout
-        variant="admin"
-        company="Timan Intern"
-        user={{ initials: "TA", name: "Timan Admin", role: "Intern" }}
-        breadcrumbs={[{ label: "Dashboard", to: "/admin/dashboard" }, { label: "TSB'er" }]}
-      >
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h1 className="text-[22px] font-semibold" style={{ color: "var(--timan-red)" }}>
-              TSB'er
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Alle Technical Service Bulletins — kladder, aktive og lukkede.
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="text-sm text-muted-foreground">
-              <span className="font-semibold text-foreground">{rows.length}</span> af {tsbs.length}
+      <TsbAdminLayout
+        intro={
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h1 className="text-[22px] font-semibold" style={{ color: "var(--timan-red)" }}>
+                TSB'er
+              </h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Alle Technical Service Bulletins — kladder, aktive og lukkede.
+              </p>
             </div>
-            <Link to="/admin/tsb/new">
-              <Button style={{ backgroundColor: "var(--timan-green)", color: "white" }}>
-                <Plus className="h-4 w-4" /> Ny TSB
-              </Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              <div className="text-sm text-muted-foreground">
+                <span className="font-semibold text-foreground">{rows.length}</span> af {tsbs.length}
+              </div>
+              <Link to="/admin/tsb/new">
+                <Button style={{ backgroundColor: "var(--timan-green)", color: "white" }}>
+                  <Plus className="h-4 w-4" /> Ny TSB
+                </Button>
+              </Link>
+            </div>
           </div>
-        </div>
+        }
+      >
 
         <div className="mt-5 flex flex-wrap items-center gap-3 rounded-[10px] border border-border-soft bg-white p-3 shadow-sm">
           <div className="relative min-w-[260px] flex-1">
@@ -195,7 +193,7 @@ function AdminTsbList() {
             </table>
           </div>
         </div>
-      </AppLayout>
+      </TsbAdminLayout>
     </ProtectedRoute>
   );
 }

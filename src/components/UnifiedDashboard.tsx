@@ -10,25 +10,21 @@
  */
 
 import { useMemo } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
-import { toast } from "sonner";
+import { Link } from "@tanstack/react-router";
 import {
   AlertCircle,
   BarChart3,
-  Bell,
   BookOpen,
   ChevronRight,
   Clock,
   ExternalLink,
   FileText,
   Info,
-  LogOut,
   Wrench,
   type LucideIcon,
 } from "lucide-react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { useAuth } from "@/contexts/AuthContext";
-import timanLogo from "@/assets/timan-logo.png";
+import { PortalHeader } from "@/components/PortalHeader";
 import {
   daysUntil,
   totalMachineCount,
@@ -96,14 +92,6 @@ export function UnifiedDashboard({
 }: UnifiedDashboardProps) {
   const isAdmin = scope === "timan_admin";
   const tsbs = useTsbs();
-  const navigate = useNavigate();
-  const { logout } = useAuth();
-
-  const handleLogout = async () => {
-    await logout();
-    toast.success("Du er nu logget ud");
-    navigate({ to: "/login" });
-  };
 
   // Filter TSBs by scope
   const visibleTsbs = useMemo<Tsb[]>(() => {
@@ -323,56 +311,7 @@ export function UnifiedDashboard({
   return (
     <ProtectedRoute adminOnly={isAdmin}>
       <div className="min-h-screen bg-slate-50 text-slate-950">
-        {/* Top header */}
-        <header className="sticky top-0 z-40 border-b border-slate-200 bg-white">
-          <div className="flex h-[72px] items-center justify-between px-6">
-            <img src={timanLogo} alt="Timan Logo" className="h-9 w-auto" />
-
-            <div className="flex items-center gap-6">
-              <div className="hidden rounded-full bg-slate-100 p-1 text-sm font-bold text-slate-500 md:flex">
-                {["DK", "GB", "DE", "IT", "HU"].map((lang) => (
-                  <button
-                    key={lang}
-                    type="button"
-                    className={`rounded-full px-4 py-2 ${
-                      lang === "DK" ? "bg-white text-slate-950 shadow-sm" : ""
-                    }`}
-                  >
-                    {lang}
-                  </button>
-                ))}
-              </div>
-
-              <button
-                type="button"
-                className="relative rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100"
-              >
-                <Bell className="h-5 w-5" />
-                <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500" />
-              </button>
-
-              <div className="h-10 border-l border-slate-200" />
-
-              <div className="hidden text-right sm:block">
-                <p className="text-sm font-black">{displayName}</p>
-                <p className="text-xs text-slate-500">{company}</p>
-              </div>
-
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-green-700 text-lg font-black text-white">
-                {user.initials}
-              </div>
-
-              <button
-                type="button"
-                onClick={handleLogout}
-                title="Log ud"
-                className="rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100"
-              >
-                <LogOut className="h-5 w-5" />
-              </button>
-            </div>
-          </div>
-        </header>
+        <PortalHeader displayName={displayName} company={company} user={user} />
 
         <main>
           {/* Hero */}

@@ -16,7 +16,7 @@ import {
   FileCheck2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { AppLayout } from "@/components/AppLayout";
+import { TsbAdminLayout } from "@/components/TsbAdminLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -194,16 +194,7 @@ function NewTsbPage() {
 
   return (
     <ProtectedRoute adminOnly>
-      <AppLayout
-        variant="admin"
-        company="Timan Intern"
-        user={{ initials: "TA", name: "Timan Admin", role: "Intern" }}
-        breadcrumbs={[
-          { label: "Dashboard", to: "/admin/dashboard" },
-          { label: "TSB'er", to: "/admin/tsb" },
-          { label: "Ny" },
-        ]}
-      >
+      <TsbAdminLayout>
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="text-[22px] font-semibold" style={{ color: "var(--timan-red)" }}>
@@ -787,7 +778,7 @@ function NewTsbPage() {
             )}
           </div>
         </div>
-      </AppLayout>
+      </TsbAdminLayout>
     </ProtectedRoute>
   );
 }
