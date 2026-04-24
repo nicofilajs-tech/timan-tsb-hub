@@ -265,7 +265,8 @@ function CasesPage() {
             </table>
           </div>
         </div>
-      </AppLayout>
+        </main>
+      </div>
     </ProtectedRoute>
   );
 }
