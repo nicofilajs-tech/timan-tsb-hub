@@ -2,15 +2,15 @@ import type { ReactNode } from "react";
 import { PortalHeader } from "@/components/PortalHeader";
 
 interface TsbAdminLayoutProps {
-  /** Optional intro section (h1, description, primary actions) */
+  /** Optional intro section (description, primary actions). Title now lives in the header. */
   intro?: ReactNode;
   children: ReactNode;
 }
 
 /**
- * Consistent shell for /admin/tsb/* pages: shared portal header (with
- * back-to-dashboard link rendered inline next to the logo), optional
- * page intro, and the page body.
+ * Consistent shell for /admin/tsb/* pages: shared portal header with the
+ * module title rendered inline next to the back link, optional intro
+ * (e.g. action row), and the page body.
  */
 export function TsbAdminLayout({ intro, children }: TsbAdminLayoutProps) {
   return (
@@ -20,6 +20,8 @@ export function TsbAdminLayout({ intro, children }: TsbAdminLayoutProps) {
         company="Timan Intern"
         user={{ initials: "TA", name: "Timan Admin", role: "Intern" }}
         backTo="/admin/dashboard"
+        moduleTitle="TSB Portal"
+        moduleSubtitle="Technical Service Bulletins"
       />
 
       {intro && (

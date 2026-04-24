@@ -34,23 +34,12 @@ function ServiceModule() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-slate-50 text-slate-950">
-        <PortalHeader {...headerProps} backTo={dashboardTo} />
-
-        {/* Page intro */}
-        <div className="border-b border-slate-200 bg-white">
-          <div className="mx-auto max-w-6xl px-6 py-6">
-            <h1 className="text-3xl font-black text-slate-950">
-              Service / Claims
-            </h1>
-            <p className="mt-2 max-w-3xl text-sm text-slate-600">
-              Opret og håndter reklamationssager. Kontakt altid Timan og indhent
-              et reklamationsnummer før reparationsarbejdet påbegyndes. Brug
-              værktøjet nedenfor til at registrere dealer-, ejer- og
-              maskininformation, beskrive fejl og reparation samt generere en
-              komplet rapport (PDF).
-            </p>
-          </div>
-        </div>
+        <PortalHeader
+          {...headerProps}
+          backTo={dashboardTo}
+          moduleTitle="Service / Claims"
+          moduleSubtitle="Officiel portal for forhandlere"
+        />
 
         <ClaimTool />
       </div>
