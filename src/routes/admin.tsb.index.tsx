@@ -72,17 +72,38 @@ const STATUS_FILTERS: { value: "all" | ProcessStatus; label: string }[] = [
 function AdminTsbList() {
   const navigate = useNavigate();
   const tsbs = useTsbs();
+  const [tab, setTab] = useState<AdminTab>("all");
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | ProcessStatus>("all");
+
+  const tabCounts = useMemo(() => {
+    const counts: Record<AdminTab, number> = {
+      all: tsbs.length,
+      aktive: 0,
+      near: 0,
+      overdue: 0,
+      kladder: 0,
+      lukkede: 0,
+    };
+    for (const t of tsbs) {
+      if (matchesAdminTab(t, "aktive")) counts.aktive++;
+      if (matchesAdminTab(t, "near")) counts.near++;
+      if (matchesAdminTab(t, "overdue")) counts.overdue++;
+      if (matchesAdminTab(t, "kladder")) counts.kladder++;
+      if (matchesAdminTab(t, "lukkede")) counts.lukkede++;
+    }
+    return counts;
+  }, [tsbs]);
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
     return tsbs.filter((t) => {
+      if (!matchesAdminTab(t, tab)) return false;
       if (statusFilter !== "all" && getProcessStatus(t) !== statusFilter) return false;
       if (!q) return true;
       return t.id.toLowerCase().includes(q) || t.title.toLowerCase().includes(q);
     });
-  }, [tsbs, query, statusFilter]);
+  }, [tsbs, tab, query, statusFilter]);
 
   return (
     <ProtectedRoute adminOnly>
@@ -105,6 +126,36 @@ function AdminTsbList() {
           </div>
         }
       >
+
+        {/* Compact role-based tab navigation */}
+        <div className="mt-1 flex flex-wrap gap-1 rounded-[10px] border border-border-soft bg-white p-1 shadow-sm">
+          {ADMIN_TABS.map((t) => {
+            const active = tab === t.value;
+            const count = tabCounts[t.value];
+            return (
+              <button
+                key={t.value}
+                type="button"
+                onClick={() => setTab(t.value)}
+                aria-pressed={active}
+                className={`inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                  active
+                    ? "bg-slate-900 text-white"
+                    : "text-muted-foreground hover:bg-slate-100 hover:text-foreground"
+                }`}
+              >
+                {t.label}
+                <span
+                  className={`rounded-full px-1.5 py-0.5 text-[11px] font-semibold ${
+                    active ? "bg-white/20 text-white" : "bg-slate-100 text-muted-foreground"
+                  }`}
+                >
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
 
         <div className="mt-5 flex flex-wrap items-center gap-3 rounded-[10px] border border-border-soft bg-white p-3 shadow-sm">
           <div className="relative min-w-[260px] flex-1">
