@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PortalHeader } from "@/components/PortalHeader";
-import { PageBackLink } from "@/components/PageBackLink";
+
 import { ClaimTool } from "@/components/claims/ClaimTool";
 import { isPreviewAuthBypassEnabled, getPreviewUser } from "@/lib/preview-auth";
 import { isAdminRole } from "@/lib/auth";
