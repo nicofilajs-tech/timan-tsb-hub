@@ -281,7 +281,7 @@ function AdminTsbList() {
             </table>
           </div>
         </div>
-      </TsbAdminLayout>
+      </TsbAdminSidebarLayout>
     </ProtectedRoute>
   );
 }
