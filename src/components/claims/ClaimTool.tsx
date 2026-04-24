@@ -312,17 +312,6 @@ export function ClaimTool() {
               <h2 className="text-sm font-bold uppercase tracking-widest text-slate-800">
                 {t("intro.title")}
               </h2>
-              <select
-                className="rounded border px-2 py-1 text-xs"
-                value={lang}
-                onChange={(event) => setLang(event.target.value as LanguageCode)}
-              >
-                {LANGUAGES.map((language) => (
-                  <option key={language.code} value={language.code}>
-                    {language.flag} {language.name}
-                  </option>
-                ))}
-              </select>
             </div>
             <div className="p-8">
               <p className="mb-8 whitespace-pre-line leading-relaxed text-slate-600">
