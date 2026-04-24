@@ -16,7 +16,7 @@ import {
   FileCheck2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { AppLayout } from "@/components/AppLayout";
+import { TsbAdminLayout } from "@/components/TsbAdminLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
