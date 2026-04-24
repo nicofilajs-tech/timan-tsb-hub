@@ -329,25 +329,7 @@ export function ClaimTool() {
         </div>
       )}
 
-      {/* Local language switcher */}
-      <div className="border-b bg-white no-print">
-        <div className="mx-auto flex max-w-6xl items-center justify-end px-4 py-3">
-          <div className="flex items-center gap-2 rounded-lg border bg-slate-100 px-3 py-1.5 text-sm font-bold">
-            <Globe className="h-4 w-4 text-green-700" />
-            <select
-              className="bg-transparent outline-none"
-              value={lang}
-              onChange={(event) => setLang(event.target.value as LanguageCode)}
-            >
-              {LANGUAGES.map((language) => (
-                <option key={language.code} value={language.code}>
-                  {language.flag}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </div>
+      {/* Language is controlled from the shared portal header */}
 
       {/* Stepper */}
       <div className="border-b bg-slate-900 py-4 shadow-inner no-print">
