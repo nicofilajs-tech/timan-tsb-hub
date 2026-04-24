@@ -9,7 +9,10 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ServiceInfoRouteImport } from './routes/service-info'
+import { Route as ServiceRouteImport } from './routes/service'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as ManualsRouteImport } from './routes/manuals'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -26,9 +29,24 @@ import { Route as AdminTsbIndexRouteImport } from './routes/admin.tsb.index'
 import { Route as AdminTsbNewRouteImport } from './routes/admin.tsb.new'
 import { Route as AdminTsbIdRouteImport } from './routes/admin.tsb.$id'
 
+const ServiceInfoRoute = ServiceInfoRouteImport.update({
+  id: '/service-info',
+  path: '/service-info',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServiceRoute = ServiceRouteImport.update({
+  id: '/service',
+  path: '/service',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ManualsRoute = ManualsRouteImport.update({
+  id: '/manuals',
+  path: '/manuals',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -112,7 +130,10 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
+  '/manuals': typeof ManualsRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/service': typeof ServiceRoute
+  '/service-info': typeof ServiceInfoRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/dealers': typeof AdminDealersRoute
   '/admin/machines': typeof AdminMachinesRoute
@@ -130,7 +151,10 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
+  '/manuals': typeof ManualsRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/service': typeof ServiceRoute
+  '/service-info': typeof ServiceInfoRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/dealers': typeof AdminDealersRoute
   '/admin/machines': typeof AdminMachinesRoute
@@ -148,7 +172,10 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
+  '/manuals': typeof ManualsRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/service': typeof ServiceRoute
+  '/service-info': typeof ServiceInfoRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/dealers': typeof AdminDealersRoute
   '/admin/machines': typeof AdminMachinesRoute
@@ -168,7 +195,10 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/history'
     | '/login'
+    | '/manuals'
     | '/reset-password'
+    | '/service'
+    | '/service-info'
     | '/admin/dashboard'
     | '/admin/dealers'
     | '/admin/machines'
@@ -186,7 +216,10 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/history'
     | '/login'
+    | '/manuals'
     | '/reset-password'
+    | '/service'
+    | '/service-info'
     | '/admin/dashboard'
     | '/admin/dealers'
     | '/admin/machines'
@@ -203,7 +236,10 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/history'
     | '/login'
+    | '/manuals'
     | '/reset-password'
+    | '/service'
+    | '/service-info'
     | '/admin/dashboard'
     | '/admin/dealers'
     | '/admin/machines'
@@ -222,7 +258,10 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   HistoryRoute: typeof HistoryRoute
   LoginRoute: typeof LoginRoute
+  ManualsRoute: typeof ManualsRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ServiceRoute: typeof ServiceRoute
+  ServiceInfoRoute: typeof ServiceInfoRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminDealersRoute: typeof AdminDealersRoute
   AdminMachinesRoute: typeof AdminMachinesRoute
@@ -235,11 +274,32 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/service-info': {
+      id: '/service-info'
+      path: '/service-info'
+      fullPath: '/service-info'
+      preLoaderRoute: typeof ServiceInfoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/service': {
+      id: '/service'
+      path: '/service'
+      fullPath: '/service'
+      preLoaderRoute: typeof ServiceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reset-password': {
       id: '/reset-password'
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/manuals': {
+      id: '/manuals'
+      path: '/manuals'
+      fullPath: '/manuals'
+      preLoaderRoute: typeof ManualsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -371,7 +431,10 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   HistoryRoute: HistoryRoute,
   LoginRoute: LoginRoute,
+  ManualsRoute: ManualsRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ServiceRoute: ServiceRoute,
+  ServiceInfoRoute: ServiceInfoRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminDealersRoute: AdminDealersRoute,
   AdminMachinesRoute: AdminMachinesRoute,
