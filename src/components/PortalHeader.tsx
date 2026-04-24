@@ -13,8 +13,8 @@
  */
 
 import { useEffect, useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
-import { Bell, LogOut } from "lucide-react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { ArrowLeft, Bell, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import timanLogo from "@/assets/timan-logo.png";
@@ -76,9 +76,19 @@ interface PortalHeaderProps {
   company: string;
   /** Avatar initials block */
   user: PortalHeaderUser;
+  /** Optional back link rendered next to the logo */
+  backTo?: string;
+  /** Override label for the back link */
+  backLabel?: string;
 }
 
-export function PortalHeader({ displayName, company, user }: PortalHeaderProps) {
+export function PortalHeader({
+  displayName,
+  company,
+  user,
+  backTo,
+  backLabel = "Tilbage til dashboard",
+}: PortalHeaderProps) {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const [lang, setLang] = usePortalLanguage();
@@ -92,7 +102,18 @@ export function PortalHeader({ displayName, company, user }: PortalHeaderProps) 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white">
       <div className="flex h-[72px] items-center justify-between px-6">
-        <img src={timanLogo} alt="Timan Logo" className="h-9 w-auto" />
+        <div className="flex items-center gap-6">
+          <img src={timanLogo} alt="Timan Logo" className="h-9 w-auto" />
+          {backTo && (
+            <Link
+              to={backTo as "/dashboard"}
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-xs font-bold uppercase tracking-widest text-slate-500 transition-colors hover:border-slate-300 hover:text-slate-900"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              {backLabel}
+            </Link>
+          )}
+        </div>
 
         <div className="flex items-center gap-6">
           <div className="hidden rounded-full bg-slate-100 p-1 text-sm font-bold text-slate-500 md:flex">
