@@ -164,9 +164,9 @@ export function UnifiedDashboard({
       icon: FileText,
     },
     {
-      title: "Brugermanualer",
-      desc: "Komplet bibliotek med brugervejledninger, reservedelskataloger og tekniske tegninger.",
-      action: "Åbn bibliotek",
+      title: "Garantiregisteringer",
+      desc: "Registrer nye maskiner ved levering til kunden. Garantiregistrering skal oprettes ved overlevering. Der kan ikke behandles garanti eller reklamation på maskiner, som ikke er registreret.",
+      action: "Åbn registrering",
       href: "/manuals",
       color: "amber",
       icon: BookOpen,
