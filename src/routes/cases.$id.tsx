@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { ExternalLink, Search, CheckCircle2, BellRing } from "lucide-react";
 import { toast } from "sonner";
-import { AppLayout } from "@/components/AppLayout";
+import { PortalHeader } from "@/components/PortalHeader";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { StatCard } from "@/components/StatCard";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -114,12 +114,17 @@ function CaseDetailPage() {
 
   return (
     <ProtectedRoute>
-    <AppLayout
-      variant="dealer"
-      company="Nordic Machinery Aps"
-      user={{ initials: "LJ", name: "Lars Jensen", role: "Dealer Admin" }}
-      breadcrumbs={[{ label: "Mine sager", to: "/cases" }, { label: id }]}
-    >
+      <div className="min-h-screen bg-slate-50 text-slate-950">
+        <PortalHeader
+          displayName="Lars Jensen"
+          company="Nordic Machinery Aps"
+          user={{ initials: "LJ", name: "Lars Jensen", role: "Dealer Admin" }}
+          backTo="/cases"
+          backLabel="Tilbage til Mine sager"
+          moduleTitle={id}
+          moduleSubtitle="TSB-detaljer"
+        />
+        <main className="mx-auto max-w-7xl px-6 py-6">
       {/* Prominent dealer-case status banner — top of detail page */}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-[10px] border border-border-soft bg-white p-4 shadow-sm">
         <div className="flex items-center gap-3">
@@ -246,7 +251,8 @@ function CaseDetailPage() {
           </table>
         </div>
       </div>
-    </AppLayout>
+        </main>
+      </div>
     </ProtectedRoute>
   );
 }
