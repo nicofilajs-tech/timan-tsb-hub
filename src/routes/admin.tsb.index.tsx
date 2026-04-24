@@ -24,7 +24,40 @@ import {
   totalMachineCount,
   useTsbs,
   type ProcessStatus,
+  type Tsb,
 } from "@/lib/tsb-store";
+
+type AdminTab =
+  | "all"
+  | "aktive"
+  | "near"
+  | "overdue"
+  | "kladder"
+  | "lukkede";
+
+const ADMIN_TABS: { value: AdminTab; label: string }[] = [
+  { value: "all", label: "Alle TSB'er" },
+  { value: "aktive", label: "Aktive" },
+  { value: "near", label: "Nær deadline" },
+  { value: "overdue", label: "Overskredet" },
+  { value: "kladder", label: "Kladder" },
+  { value: "lukkede", label: "Lukkede" },
+];
+
+function matchesAdminTab(t: Tsb, tab: AdminTab): boolean {
+  if (tab === "all") return true;
+  const ps = getProcessStatus(t);
+  if (tab === "aktive") return ps === "aktiv";
+  if (tab === "overdue") return ps === "dato_overskredet";
+  if (tab === "kladder") return ps === "ikke_paabegyndt";
+  if (tab === "lukkede") return ps === "afsluttet";
+  if (tab === "near") {
+    if (ps !== "aktiv") return false;
+    const d = daysUntil(t.deadline);
+    return d >= 0 && d <= 14;
+  }
+  return true;
+}
 
 export const Route = createFileRoute("/admin/tsb/")({
   head: () => ({ meta: [{ title: "TSB'er — Timan Admin" }] }),
