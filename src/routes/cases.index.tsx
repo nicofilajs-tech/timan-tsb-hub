@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Search, SlidersHorizontal } from "lucide-react";
-import { AppLayout } from "@/components/AppLayout";
+import { PortalHeader } from "@/components/PortalHeader";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { DealerCaseStatusBadge } from "@/components/DealerCaseStatusBadge";
 import { Input } from "@/components/ui/input";
