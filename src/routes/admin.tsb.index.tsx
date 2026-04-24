@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Plus, Search, SlidersHorizontal, ExternalLink } from "lucide-react";
-import { TsbAdminLayout } from "@/components/TsbAdminLayout";
+import { TsbAdminSidebarLayout } from "@/components/TsbAdminSidebarLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { TsbStatusSelect } from "@/components/TsbStatusSelect";
 import { Button } from "@/components/ui/button";
