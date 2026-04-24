@@ -1,6 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { PortalHeader } from "@/components/PortalHeader";
+import { PageBackLink } from "@/components/PageBackLink";
 import { ClaimTool } from "@/components/claims/ClaimTool";
 import { isPreviewAuthBypassEnabled, getPreviewUser } from "@/lib/preview-auth";
 import { isAdminRole } from "@/lib/auth";
@@ -17,19 +18,28 @@ function ServiceModule() {
     isPreviewAuthBypassEnabled() && isAdminRole(getPreviewUser().role);
   const dashboardTo = isAdmin ? "/admin/dashboard" : "/dashboard";
 
+  // Header context — mirrors what the dashboard passes in.
+  const headerProps = isAdmin
+    ? {
+        displayName: "Timan Admin",
+        company: "Timan Intern",
+        user: { initials: "TA", name: "Timan Admin", role: "Intern" },
+      }
+    : {
+        displayName: "Forhandler",
+        company: "Dealer",
+        user: { initials: "FH", name: "Forhandler", role: "Dealer" },
+      };
+
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-slate-50">
-        {/* Page header */}
+      <div className="min-h-screen bg-slate-50 text-slate-950">
+        <PortalHeader {...headerProps} />
+
+        {/* Page intro */}
         <div className="border-b border-slate-200 bg-white">
           <div className="mx-auto max-w-6xl px-6 py-6">
-            <Link
-              to={dashboardTo}
-              className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500 transition-colors hover:text-slate-900"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Tilbage til dashboard
-            </Link>
+            <PageBackLink to={dashboardTo} />
             <h1 className="mt-3 text-3xl font-black text-slate-950">
               Service / Claims
             </h1>
