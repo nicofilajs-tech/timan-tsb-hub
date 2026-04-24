@@ -93,13 +93,6 @@ export function UnifiedDashboard({
   const isAdmin = scope === "timan_admin";
   const tsbs = useTsbs();
   const navigate = useNavigate();
-  const { logout } = useAuth();
-
-  const handleLogout = async () => {
-    await logout();
-    toast.success("Du er nu logget ud");
-    navigate({ to: "/login" });
-  };
 
   // Filter TSBs by scope
   const visibleTsbs = useMemo<Tsb[]>(() => {
