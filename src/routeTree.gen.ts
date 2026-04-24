@@ -27,6 +27,7 @@ import { Route as AdminDealersRouteImport } from './routes/admin.dealers'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminTsbIndexRouteImport } from './routes/admin.tsb.index'
 import { Route as AdminTsbNewRouteImport } from './routes/admin.tsb.new'
+import { Route as AdminTsbDashboardRouteImport } from './routes/admin.tsb.dashboard'
 import { Route as AdminTsbIdRouteImport } from './routes/admin.tsb.$id'
 
 const ServiceInfoRoute = ServiceInfoRouteImport.update({
@@ -119,6 +120,11 @@ const AdminTsbNewRoute = AdminTsbNewRouteImport.update({
   path: '/new',
   getParentRoute: () => AdminTsbRoute,
 } as any)
+const AdminTsbDashboardRoute = AdminTsbDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AdminTsbRoute,
+} as any)
 const AdminTsbIdRoute = AdminTsbIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -143,6 +149,7 @@ export interface FileRoutesByFullPath {
   '/cases/$id': typeof CasesIdRoute
   '/cases/': typeof CasesIndexRoute
   '/admin/tsb/$id': typeof AdminTsbIdRoute
+  '/admin/tsb/dashboard': typeof AdminTsbDashboardRoute
   '/admin/tsb/new': typeof AdminTsbNewRoute
   '/admin/tsb/': typeof AdminTsbIndexRoute
 }
@@ -163,6 +170,7 @@ export interface FileRoutesByTo {
   '/cases/$id': typeof CasesIdRoute
   '/cases': typeof CasesIndexRoute
   '/admin/tsb/$id': typeof AdminTsbIdRoute
+  '/admin/tsb/dashboard': typeof AdminTsbDashboardRoute
   '/admin/tsb/new': typeof AdminTsbNewRoute
   '/admin/tsb': typeof AdminTsbIndexRoute
 }
@@ -185,6 +193,7 @@ export interface FileRoutesById {
   '/cases/$id': typeof CasesIdRoute
   '/cases/': typeof CasesIndexRoute
   '/admin/tsb/$id': typeof AdminTsbIdRoute
+  '/admin/tsb/dashboard': typeof AdminTsbDashboardRoute
   '/admin/tsb/new': typeof AdminTsbNewRoute
   '/admin/tsb/': typeof AdminTsbIndexRoute
 }
@@ -208,6 +217,7 @@ export interface FileRouteTypes {
     | '/cases/$id'
     | '/cases/'
     | '/admin/tsb/$id'
+    | '/admin/tsb/dashboard'
     | '/admin/tsb/new'
     | '/admin/tsb/'
   fileRoutesByTo: FileRoutesByTo
@@ -228,6 +238,7 @@ export interface FileRouteTypes {
     | '/cases/$id'
     | '/cases'
     | '/admin/tsb/$id'
+    | '/admin/tsb/dashboard'
     | '/admin/tsb/new'
     | '/admin/tsb'
   id:
@@ -249,6 +260,7 @@ export interface FileRouteTypes {
     | '/cases/$id'
     | '/cases/'
     | '/admin/tsb/$id'
+    | '/admin/tsb/dashboard'
     | '/admin/tsb/new'
     | '/admin/tsb/'
   fileRoutesById: FileRoutesById
@@ -400,6 +412,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminTsbNewRouteImport
       parentRoute: typeof AdminTsbRoute
     }
+    '/admin/tsb/dashboard': {
+      id: '/admin/tsb/dashboard'
+      path: '/dashboard'
+      fullPath: '/admin/tsb/dashboard'
+      preLoaderRoute: typeof AdminTsbDashboardRouteImport
+      parentRoute: typeof AdminTsbRoute
+    }
     '/admin/tsb/$id': {
       id: '/admin/tsb/$id'
       path: '/$id'
@@ -412,12 +431,14 @@ declare module '@tanstack/react-router' {
 
 interface AdminTsbRouteChildren {
   AdminTsbIdRoute: typeof AdminTsbIdRoute
+  AdminTsbDashboardRoute: typeof AdminTsbDashboardRoute
   AdminTsbNewRoute: typeof AdminTsbNewRoute
   AdminTsbIndexRoute: typeof AdminTsbIndexRoute
 }
 
 const AdminTsbRouteChildren: AdminTsbRouteChildren = {
   AdminTsbIdRoute: AdminTsbIdRoute,
+  AdminTsbDashboardRoute: AdminTsbDashboardRoute,
   AdminTsbNewRoute: AdminTsbNewRoute,
   AdminTsbIndexRoute: AdminTsbIndexRoute,
 }
