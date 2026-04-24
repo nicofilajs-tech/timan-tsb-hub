@@ -16,7 +16,7 @@ import {
   DEALER_CASE_STATUS_LABEL,
   type DealerCaseStatus,
 } from "@/lib/dealer-status";
-import { deadlineLabel, getTsbsForDealer, useTsbs } from "@/lib/tsb-store";
+import { daysUntil, deadlineLabel, getTsbsForDealer, useTsbs } from "@/lib/tsb-store";
 
 export const Route = createFileRoute("/cases/")({
   head: () => ({ meta: [{ title: "Mine sager — TSB Portal" }] }),
@@ -33,13 +33,66 @@ const STATUS_FILTERS: { value: "all" | DealerCaseStatus; label: string }[] = [
   { value: "aktiv", label: DEALER_CASE_STATUS_LABEL.aktiv },
 ];
 
+type DealerTab =
+  | "all"
+  | "afventer"
+  | "accepterede"
+  | "near"
+  | "overdue"
+  | "lukkede";
+
+const DEALER_TABS: { value: DealerTab; label: string }[] = [
+  { value: "all", label: "Mine TSB'er" },
+  { value: "afventer", label: "Afventer accept" },
+  { value: "accepterede", label: "Accepterede" },
+  { value: "near", label: "Nær deadline" },
+  { value: "overdue", label: "Overskredet" },
+  { value: "lukkede", label: "Lukkede" },
+];
+
 function CasesPage() {
   const navigate = useNavigate();
   // Subscribe so that admin activations show up here immediately
   useTsbs();
   const items = getTsbsForDealer(CURRENT_DEALER_ID);
+  const [tab, setTab] = useState<DealerTab>("all");
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | DealerCaseStatus>("all");
+
+  const matchesDealerTab = (
+    tsb: { status: string; deadline: string },
+    link: { status: string },
+    target: DealerTab,
+  ): boolean => {
+    if (target === "all") return true;
+    if (target === "lukkede") return tsb.status === "lukket";
+    if (tsb.status === "lukket") return false; // closed only counted in lukkede
+    if (target === "afventer") return link.status !== "accepteret";
+    if (target === "accepterede") return link.status === "accepteret";
+    const d = daysUntil(tsb.deadline);
+    if (target === "overdue") return d < 0;
+    if (target === "near") return d >= 0 && d <= 14;
+    return true;
+  };
+
+  const tabCounts = useMemo(() => {
+    const counts: Record<DealerTab, number> = {
+      all: items.length,
+      afventer: 0,
+      accepterede: 0,
+      near: 0,
+      overdue: 0,
+      lukkede: 0,
+    };
+    for (const { tsb, link } of items) {
+      if (matchesDealerTab(tsb, link, "afventer")) counts.afventer++;
+      if (matchesDealerTab(tsb, link, "accepterede")) counts.accepterede++;
+      if (matchesDealerTab(tsb, link, "near")) counts.near++;
+      if (matchesDealerTab(tsb, link, "overdue")) counts.overdue++;
+      if (matchesDealerTab(tsb, link, "lukkede")) counts.lukkede++;
+    }
+    return counts;
+  }, [items]);
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
