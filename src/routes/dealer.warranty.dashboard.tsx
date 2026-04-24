@@ -5,22 +5,24 @@ import {
   WarrantyDashboardBody,
   WarrantyDashboardIntro,
 } from "@/components/warranty/WarrantyDashboardBody";
+import { useDealerName } from "@/components/warranty/useDealerName";
 
-export const Route = createFileRoute("/admin/warranty/dashboard")({
+export const Route = createFileRoute("/dealer/warranty/dashboard")({
   head: () => ({
     meta: [{ title: "Garantiregistrering — Dashboard — Timan Service Portal" }],
   }),
-  component: WarrantyDashboardRoute,
+  component: DealerWarrantyDashboardRoute,
 });
 
-function WarrantyDashboardRoute() {
+function DealerWarrantyDashboardRoute() {
+  const dealerName = useDealerName();
   return (
-    <ProtectedRoute adminOnly>
+    <ProtectedRoute>
       <WarrantyAdminSidebarLayout
-        scope="admin"
-        intro={<WarrantyDashboardIntro scope="admin" />}
+        scope="dealer"
+        intro={<WarrantyDashboardIntro scope="dealer" />}
       >
-        <WarrantyDashboardBody scope="admin" />
+        <WarrantyDashboardBody scope="dealer" dealerName={dealerName} />
       </WarrantyAdminSidebarLayout>
     </ProtectedRoute>
   );

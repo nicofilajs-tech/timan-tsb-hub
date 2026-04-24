@@ -1,79 +1,17 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState, type FormEvent } from "react";
+/**
+ * Shared "New warranty registration" form. Used only by Dealer Admin at
+ * /dealer/warranty/new. The "Redskabs identifikationsnummer" field is dynamic
+ * — starts with one row, dealers can add/remove additional tools.
+ */
+import { useState, type FormEvent } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { CheckCircle2, AlertTriangle, Plus, X } from "lucide-react";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { WarrantyAdminSidebarLayout } from "@/components/WarrantyAdminSidebarLayout";
-import { useAuth } from "@/contexts/AuthContext";
-import { getPreviewUser, isPreviewAuthBypassEnabled } from "@/lib/preview-auth";
-import { isAdminRole } from "@/lib/auth";
 import {
   MACHINE_TYPES,
   REPLACEMENT_BRANDS,
   addRegistration,
   type NewRegistrationInput,
 } from "@/lib/warranty-store";
-
-export const Route = createFileRoute("/admin/warranty/new")({
-  head: () => ({
-    meta: [
-      { title: "Ny registrering — Garantiregistrering — Timan Service Portal" },
-    ],
-  }),
-  component: NewRegistrationRoute,
-});
-
-function NewRegistrationRoute() {
-  return (
-    <ProtectedRoute>
-      <WarrantyAdminSidebarLayout intro={<Intro />}>
-        <DealerOnlyGate>
-          <Form />
-        </DealerOnlyGate>
-      </WarrantyAdminSidebarLayout>
-    </ProtectedRoute>
-  );
-}
-
-function DealerOnlyGate({ children }: { children: React.ReactNode }) {
-  const { currentUser } = useAuth();
-  const navigate = useNavigate();
-  const [hydrated, setHydrated] = useState(false);
-  useEffect(() => setHydrated(true), []);
-
-  const role =
-    currentUser?.role ??
-    (hydrated && isPreviewAuthBypassEnabled() ? getPreviewUser().role : null);
-  const isTimanAdmin = isAdminRole(role);
-
-  useEffect(() => {
-    if (hydrated && isTimanAdmin) {
-      navigate({ to: "/admin/warranty/dashboard" });
-    }
-  }, [hydrated, isTimanAdmin, navigate]);
-
-  if (!hydrated) return null;
-  if (isTimanAdmin) {
-    return (
-      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-sm text-amber-900">
-        Ny registrering kan kun oprettes af forhandlere. Omdirigerer …
-      </div>
-    );
-  }
-  return <>{children}</>;
-}
-
-function Intro() {
-  return (
-    <div>
-      <h1 className="text-3xl font-black tracking-tight">Ny registrering</h1>
-      <p className="mt-1 max-w-3xl text-sm text-slate-500">
-        Registrér en ny maskine ved levering til kunden. Garantiregistrering
-        skal oprettes ved overlevering — der kan ikke behandles garanti eller
-        reklamation på maskiner, som ikke er registreret.
-      </p>
-    </div>
-  );
-}
 
 interface FormState {
   dealerName: string;
@@ -107,9 +45,22 @@ const EMPTY: FormState = {
   comment: "",
 };
 
-function Form() {
+export function WarrantyNewFormIntro() {
+  return (
+    <div>
+      <h1 className="text-3xl font-black tracking-tight">Ny registrering</h1>
+      <p className="mt-1 max-w-3xl text-sm text-slate-500">
+        Registrér en ny maskine ved levering til kunden. Garantiregistrering
+        skal oprettes ved overlevering — der kan ikke behandles garanti eller
+        reklamation på maskiner, som ikke er registreret.
+      </p>
+    </div>
+  );
+}
+
+export function WarrantyNewForm({ defaultDealerName = "" }: { defaultDealerName?: string }) {
   const navigate = useNavigate();
-  const [state, setState] = useState<FormState>(EMPTY);
+  const [state, setState] = useState<FormState>({ ...EMPTY, dealerName: defaultDealerName });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<{
     certificate: string;
@@ -125,7 +76,6 @@ function Form() {
     e.preventDefault();
     setError(null);
 
-    // Validate required fields
     const required: [keyof FormState, string][] = [
       ["dealerName", "Forhandlernavn"],
       ["isDemo", "Demo maskine"],
@@ -166,7 +116,7 @@ function Form() {
       };
       const record = addRegistration(input);
       setSuccess({ certificate: record.certificateNumber, customer: record.customer });
-      setState(EMPTY);
+      setState({ ...EMPTY, dealerName: defaultDealerName });
     } catch (err) {
       setError(
         err instanceof Error
@@ -202,10 +152,10 @@ function Form() {
               </button>
               <button
                 type="button"
-                onClick={() => navigate({ to: "/admin/warranty/certificates" })}
+                onClick={() => navigate({ to: "/dealer/warranty/registrations" })}
                 className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50"
               >
-                Se alle garantibeviser
+                Se mine registreringer
               </button>
             </div>
           </div>
@@ -372,10 +322,7 @@ function Form() {
             className={inputCls}
           />
         </Field>
-        <Field
-          label="E-mail til bekræftelse af garantiregistrering"
-          required
-        >
+        <Field label="E-mail til bekræftelse af garantiregistrering" required>
           <input
             type="email"
             value={state.confirmationEmail}
@@ -399,7 +346,7 @@ function Form() {
       <div className="flex flex-wrap items-center justify-end gap-3 border-t border-slate-100 pt-5">
         <button
           type="button"
-          onClick={() => setState(EMPTY)}
+          onClick={() => setState({ ...EMPTY, dealerName: defaultDealerName })}
           className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50"
         >
           Nulstil

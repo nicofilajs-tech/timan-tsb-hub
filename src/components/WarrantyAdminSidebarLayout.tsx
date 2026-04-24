@@ -1,16 +1,14 @@
 /**
- * Layout for the Timan Admin Warranty Registration module.
+ * Layout for the Warranty Registration module — used by BOTH:
+ *  - Timan Admin (scope="admin"):  /admin/warranty/{dashboard,certificates}
+ *  - Dealer Admin (scope="dealer"): /dealer/warranty/{dashboard,registrations,new}
  *
- * Mirrors `TsbAdminSidebarLayout` so the visual structure of every admin
- * module is consistent: shared PortalHeader on top + sticky white card
- * sidebar on the left + scrollable content area on the right.
- *
- * Sidebar items: Dashboard, Mine registreringer, Ny registrering,
- * Registrerede garantibeviser.
+ * One shared shell: PortalHeader + sticky white card sidebar + content area.
+ * The sidebar items, labels, header titles and link targets switch by `scope`.
  */
 
 import type { ReactNode } from "react";
-import { Component, useEffect, useState, type ErrorInfo } from "react";
+import { Component, type ErrorInfo } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import {
   ClipboardList,
@@ -20,39 +18,22 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { PortalHeader } from "@/components/PortalHeader";
-import { useAuth } from "@/contexts/AuthContext";
-import { getPreviewUser, isPreviewAuthBypassEnabled } from "@/lib/preview-auth";
-import { isAdminRole, type RoleCode } from "@/lib/auth";
+
+export type WarrantyLayoutScope = "admin" | "dealer";
 
 interface NavItem {
   to: string;
   label: string;
   icon: LucideIcon;
   match: string;
-  exact?: boolean;
-  /** If true, only dealer roles (non-Timan-admin) can see this item. */
-  dealerOnly?: boolean;
 }
 
-const NAV: NavItem[] = [
+const ADMIN_NAV: NavItem[] = [
   {
     to: "/admin/warranty/dashboard",
     label: "Dashboard",
     icon: LayoutDashboard,
     match: "/admin/warranty/dashboard",
-  },
-  {
-    to: "/admin/warranty/mine",
-    label: "Mine registreringer",
-    icon: ClipboardList,
-    match: "/admin/warranty/mine",
-  },
-  {
-    to: "/admin/warranty/new",
-    label: "Ny registrering",
-    icon: PlusCircle,
-    match: "/admin/warranty/new",
-    dealerOnly: true,
   },
   {
     to: "/admin/warranty/certificates",
@@ -62,15 +43,26 @@ const NAV: NavItem[] = [
   },
 ];
 
-function useEffectiveRole(): RoleCode | null {
-  const { currentUser } = useAuth();
-  const [hydrated, setHydrated] = useState(false);
-  useEffect(() => setHydrated(true), []);
-  if (currentUser?.role) return currentUser.role;
-  if (!hydrated) return null;
-  if (isPreviewAuthBypassEnabled()) return getPreviewUser().role;
-  return null;
-}
+const DEALER_NAV: NavItem[] = [
+  {
+    to: "/dealer/warranty/dashboard",
+    label: "Dashboard",
+    icon: LayoutDashboard,
+    match: "/dealer/warranty/dashboard",
+  },
+  {
+    to: "/dealer/warranty/registrations",
+    label: "Mine registreringer",
+    icon: ClipboardList,
+    match: "/dealer/warranty/registrations",
+  },
+  {
+    to: "/dealer/warranty/new",
+    label: "Ny registrering",
+    icon: PlusCircle,
+    match: "/dealer/warranty/new",
+  },
+];
 
 interface WarrantyErrorBoundaryState {
   error: Error | null;
@@ -119,26 +111,39 @@ class WarrantyErrorBoundary extends Component<
 }
 
 interface WarrantyAdminSidebarLayoutProps {
+  /** Defaults to "admin" so existing Timan Admin routes keep working. */
+  scope?: WarrantyLayoutScope;
   intro?: ReactNode;
   children: ReactNode;
 }
 
 export function WarrantyAdminSidebarLayout({
+  scope = "admin",
   intro,
   children,
 }: WarrantyAdminSidebarLayoutProps) {
   const location = useLocation();
-  const role = useEffectiveRole();
-  const isTimanAdmin = isAdminRole(role);
-  const visibleNav = NAV.filter((n) => !n.dealerOnly || !isTimanAdmin);
+  const nav = scope === "admin" ? ADMIN_NAV : DEALER_NAV;
+
+  const headerProps =
+    scope === "admin"
+      ? {
+          displayName: "Timan Admin",
+          company: "Timan Intern",
+          user: { initials: "TA", name: "Timan Admin", role: "Intern" },
+          backTo: "/admin/dashboard",
+        }
+      : {
+          displayName: "Forhandler",
+          company: "Garantiregistrering",
+          user: { initials: "FH", name: "Forhandler", role: "Dealer" },
+          backTo: "/dashboard",
+        };
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-950">
       <PortalHeader
-        displayName="Timan Admin"
-        company="Timan Intern"
-        user={{ initials: "TA", name: "Timan Admin", role: "Intern" }}
-        backTo="/admin/dashboard"
+        {...headerProps}
         moduleTitle="Garantiregistrering"
         moduleSubtitle="Warranty Registration"
       />
@@ -146,12 +151,11 @@ export function WarrantyAdminSidebarLayout({
       <div className="mx-auto flex max-w-[1400px] gap-6 px-6 py-6">
         <aside className="hidden w-64 shrink-0 lg:block">
           <nav className="sticky top-[88px] space-y-1 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
-            {visibleNav.map((item) => {
+            {nav.map((item) => {
               const Icon = item.icon;
-              const active = item.exact
-                ? location.pathname === item.match
-                : location.pathname === item.match ||
-                  location.pathname.startsWith(item.match + "/");
+              const active =
+                location.pathname === item.match ||
+                location.pathname.startsWith(item.match + "/");
               return (
                 <Link
                   key={item.to}

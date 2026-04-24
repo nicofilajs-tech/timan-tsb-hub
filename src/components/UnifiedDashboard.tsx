@@ -167,7 +167,7 @@ export function UnifiedDashboard({
       title: "Garantiregisteringer",
       desc: "Registrer nye maskiner ved levering til kunden. Garantiregistrering skal oprettes ved overlevering. Der kan ikke behandles garanti eller reklamation på maskiner, som ikke er registreret.",
       action: "Åbn registrering",
-      href: isAdmin ? "/admin/warranty/dashboard" : "/manuals",
+      href: isAdmin ? "/admin/warranty/dashboard" : "/dealer/warranty/dashboard",
       color: "amber",
       icon: BookOpen,
     },
