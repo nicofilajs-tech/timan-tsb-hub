@@ -87,16 +87,18 @@ function AdminTsbList() {
     const counts: Record<AdminTab, number> = {
       all: tsbs.length,
       aktive: 0,
+      kladder: 0,
+      afventer: 0,
       near: 0,
       overdue: 0,
-      kladder: 0,
       lukkede: 0,
     };
     for (const t of tsbs) {
       if (matchesAdminTab(t, "aktive")) counts.aktive++;
+      if (matchesAdminTab(t, "kladder")) counts.kladder++;
+      if (matchesAdminTab(t, "afventer")) counts.afventer++;
       if (matchesAdminTab(t, "near")) counts.near++;
       if (matchesAdminTab(t, "overdue")) counts.overdue++;
-      if (matchesAdminTab(t, "kladder")) counts.kladder++;
       if (matchesAdminTab(t, "lukkede")) counts.lukkede++;
     }
     return counts;
