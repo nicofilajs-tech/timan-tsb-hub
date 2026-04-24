@@ -137,33 +137,42 @@ function AdminTsbList() {
       >
 
         {/* Compact role-based tab navigation */}
-        <div className="mt-1 flex flex-wrap gap-1 rounded-[10px] border border-border-soft bg-white p-1 shadow-sm">
-          {ADMIN_TABS.map((t) => {
-            const active = tab === t.value;
-            const count = tabCounts[t.value];
-            return (
-              <button
-                key={t.value}
-                type="button"
-                onClick={() => setTab(t.value)}
-                aria-pressed={active}
-                className={`inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                  active
-                    ? "bg-slate-900 text-white"
-                    : "text-muted-foreground hover:bg-slate-100 hover:text-foreground"
-                }`}
-              >
-                {t.label}
-                <span
-                  className={`rounded-full px-1.5 py-0.5 text-[11px] font-semibold ${
-                    active ? "bg-white/20 text-white" : "bg-slate-100 text-muted-foreground"
+        <div className="mt-1 flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap gap-1 rounded-[10px] border border-border-soft bg-white p-1 shadow-sm">
+            {ADMIN_TABS.map((t) => {
+              const active = tab === t.value;
+              const count = tabCounts[t.value];
+              return (
+                <button
+                  key={t.value}
+                  type="button"
+                  onClick={() => setTab(t.value)}
+                  aria-pressed={active}
+                  className={`inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                    active
+                      ? "bg-slate-900 text-white"
+                      : "text-muted-foreground hover:bg-slate-100 hover:text-foreground"
                   }`}
                 >
-                  {count}
-                </span>
-              </button>
-            );
-          })}
+                  {t.label}
+                  <span
+                    className={`rounded-full px-1.5 py-0.5 text-[11px] font-semibold ${
+                      active ? "bg-white/20 text-white" : "bg-slate-100 text-muted-foreground"
+                    }`}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          <Link
+            to="/admin/dealers"
+            className="inline-flex items-center gap-2 rounded-[10px] border border-border-soft bg-white px-3 py-2 text-sm font-medium text-muted-foreground shadow-sm transition-colors hover:bg-slate-100 hover:text-foreground"
+          >
+            Forhandlere
+            <ExternalLink className="h-3.5 w-3.5" />
+          </Link>
         </div>
 
         <div className="mt-5 flex flex-wrap items-center gap-3 rounded-[10px] border border-border-soft bg-white p-3 shadow-sm">
