@@ -1,24 +1,39 @@
+/**
+ * Timan Service Portal — unified dashboard.
+ *
+ * Visual layout matches the supplied design reference 1:1:
+ *  - Top sticky white header (logo • title • company • bell • user • avatar • logout)
+ *  - Welcome hero (red headline, green CTA)
+ *  - 4 module cards
+ *  - Two KPI panels (TSB / Claim) side-by-side
+ *  - "Kræver opmærksomhed" (2/3) + "Seneste aktivitet" (1/3)
+ *
+ * No sidebar — this is the platform landing page.
+ */
+
 import { useMemo } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
 import {
-  AlertTriangle,
+  AlertCircle,
   ArrowRight,
-  ClipboardList,
-  Wrench,
+  BarChart3,
+  Bell,
   BookOpen,
-  Info,
   CheckCircle2,
-  Clock3,
+  ChevronRight,
+  Clock,
+  ExternalLink,
   FileText,
-  FolderKanban,
+  Info,
+  LogOut,
+  Settings,
+  Wrench,
 } from "lucide-react";
-import { AppLayout } from "@/components/AppLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { StatCard } from "@/components/StatCard";
-import { StatusBadge } from "@/components/StatusBadge";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   daysUntil,
-  deadlineLabel,
   totalMachineCount,
   useTsbs,
   type Tsb,
@@ -32,21 +47,12 @@ interface UnifiedDashboardProps {
   dealerId?: string;
   /** Display name shown in welcome heading */
   displayName: string;
-  /** Company shown in sidebar header */
+  /** Company shown in header */
   company: string;
-  /** Sidebar user chip */
+  /** Header user chip */
   user: { initials: string; name: string; role: string };
 }
 
-/**
- * Single shared dashboard used as the post-login landing page for ALL roles.
- *
- * - Timan Admin: global data across all dealers / machines.
- * - Dealer Admin / Dealer User: data scoped to their own company (dealerId).
- *
- * Layout, visual hierarchy and module structure are identical across roles —
- * only the numbers and "scope label" differ.
- */
 export function UnifiedDashboard({
   scope,
   dealerId,
@@ -56,6 +62,14 @@ export function UnifiedDashboard({
 }: UnifiedDashboardProps) {
   const isAdmin = scope === "timan_admin";
   const tsbs = useTsbs();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    toast.success("Du er nu logget ud");
+    navigate({ to: "/login" });
+  };
 
   // Filter TSBs by scope
   const visibleTsbs = useMemo<Tsb[]>(() => {
@@ -95,474 +109,463 @@ export function UnifiedDashboard({
           return n + (link?.machineSerials.length ?? 0);
         }, 0);
 
-    return {
-      active: active.length,
-      awaiting,
-      nearDeadline,
-      overdue,
-      affectedDealers,
-      affectedMachines,
-    };
+    return { active: active.length, awaiting, nearDeadline, overdue, affectedDealers, affectedMachines };
   }, [visibleTsbs, isAdmin, dealerId]);
 
   // ---- Claims KPIs (mock — Claim module not yet implemented) ----
-  const claimStats: {
-    open: number;
-    awaiting: number;
-    inProgress: number;
-    readyToClose: number;
-    completed: number;
-    rejected?: number;
-    avgHandlingDays?: number;
-  } = isAdmin
-    ? {
-        open: 12,
-        awaiting: 3,
-        inProgress: 5,
-        readyToClose: 2,
-        completed: 41,
-        rejected: 4,
-        avgHandlingDays: 6.2,
-      }
-    : {
-        open: 2,
-        awaiting: 1,
-        inProgress: 1,
-        readyToClose: 0,
-        completed: 7,
-      };
+  const claimStats = isAdmin
+    ? { open: 28, awaiting: 10, inProgress: 12, readyToClose: 4, completed: 156, rejected: 14, avgTime: "4.2 dage" }
+    : { open: 4, awaiting: 1, inProgress: 2, readyToClose: 1, completed: 45 };
 
   // ---- Requires attention ----
   const attention = useMemo(() => {
     const items: Array<{
-      kind: "tsb" | "claim";
+      kind: "TSB" | "Claim";
       id: string;
       title: string;
-      tone: "danger" | "warning" | "info";
-      badge: string;
+      status: string;
       meta: string;
-      href: { to: string; params?: Record<string, string> };
+      tone: "danger" | "warning" | "info";
+      to: string;
+      params?: Record<string, string>;
     }> = [];
 
     visibleTsbs
       .filter((t) => t.status === "aktiv")
       .forEach((t) => {
-        const days = daysUntil(t.deadline);
-        const dealerLink = !isAdmin
-          ? t.dealers.find((d) => d.dealerId === dealerId)
-          : undefined;
-        if (days < 0) {
+        const d = daysUntil(t.deadline);
+        const link = !isAdmin ? t.dealers.find((x) => x.dealerId === dealerId) : undefined;
+        const to = isAdmin ? "/admin/tsb/$id" : "/cases/$id";
+        if (d < 0) {
           items.push({
-            kind: "tsb",
+            kind: "TSB",
             id: t.id,
             title: t.title,
+            status: "Forsinket",
+            meta: `${Math.abs(d)} dage over deadline`,
             tone: "danger",
-            badge: "Forsinket",
-            meta: `${Math.abs(days)} dage over deadline`,
-            href: isAdmin
-              ? { to: "/admin/tsb/$id", params: { id: t.id } }
-              : { to: "/cases/$id", params: { id: t.id } },
+            to,
+            params: { id: t.id },
           });
-        } else if (days <= 7) {
+        } else if (d <= 7) {
           items.push({
-            kind: "tsb",
+            kind: "TSB",
             id: t.id,
             title: t.title,
-            tone: "warning",
-            badge: "Nær deadline",
-            meta: `Deadline om ${days} dage`,
-            href: isAdmin
-              ? { to: "/admin/tsb/$id", params: { id: t.id } }
-              : { to: "/cases/$id", params: { id: t.id } },
+            status: "Nær deadline",
+            meta: `Deadline om ${d} dage`,
+            tone: "info",
+            to,
+            params: { id: t.id },
           });
-        } else if (!isAdmin && dealerLink?.status === "afventer") {
+        } else if (!isAdmin && link?.status === "afventer") {
           items.push({
-            kind: "tsb",
+            kind: "TSB",
             id: t.id,
             title: t.title,
-            tone: "warning",
-            badge: "Afventer accept",
+            status: "Afventer accept",
             meta: "Modtagelse skal bekræftes",
-            href: { to: "/cases/$id", params: { id: t.id } },
+            tone: "warning",
+            to,
+            params: { id: t.id },
           });
         }
       });
 
-    // Mock claim attention items so the section is realistic.
+    // Mock claim attention items
     if (isAdmin) {
       items.push({
-        kind: "claim",
-        id: "CLM-2026-0042",
-        title: "Garanticlaim — hydraulikpumpe",
+        kind: "Claim",
+        id: "CL-2026-8821",
+        title: "Defekt gearkasse - Serie 3400",
+        status: "Afventer accept",
+        meta: "Svar ønskes i dag",
         tone: "warning",
-        badge: "Afventer accept",
-        meta: "Modtaget for 2 dage siden",
-        href: { to: "/service" },
+        to: "/service",
       });
       items.push({
-        kind: "claim",
-        id: "CLM-2026-0039",
-        title: "Manglende dokumentation",
+        kind: "Claim",
+        id: "CL-2026-8790",
+        title: "Manglende dokumentation på reklamation",
+        status: "Kræver handling",
+        meta: "Senest opdateret for 6 dage siden",
         tone: "danger",
-        badge: "Mangler bilag",
-        meta: "Ingen aktivitet i 7 dage",
-        href: { to: "/service" },
+        to: "/service",
       });
     } else {
       items.push({
-        kind: "claim",
-        id: "CLM-2026-0051",
+        kind: "Claim",
+        id: "CL-2026-0051",
         title: "Reklamation — startmotor",
-        tone: "warning",
-        badge: "Afventer accept",
+        status: "Afventer accept",
         meta: "Modtaget i går",
-        href: { to: "/service" },
+        tone: "warning",
+        to: "/service",
       });
     }
 
-    // Sort: danger first, then warning, then info
-    const order = { danger: 0, warning: 1, info: 2 };
-    return items.sort((a, b) => order[a.tone] - order[b.tone]).slice(0, 6);
+    const order = { danger: 0, warning: 1, info: 2 } as const;
+    return items.sort((a, b) => order[a.tone] - order[b.tone]).slice(0, 4);
   }, [visibleTsbs, isAdmin, dealerId]);
 
   // ---- Recent activity (mock) ----
   const recentActivity = isAdmin
     ? [
-        { icon: FileText, text: "Ny claim oprettet — CLM-2026-0052", time: "5 min siden" },
-        { icon: CheckCircle2, text: "TSB-2026-103 accepteret af Jysk Maskincenter", time: "27 min siden" },
-        { icon: Wrench, text: "Claim CLM-2026-0048 sat til 'Klar til lukning'", time: "1 t siden" },
-        { icon: ClipboardList, text: "Serviceinformation 'Smøreplan Z-serie' publiceret", time: "3 t siden" },
-        { icon: CheckCircle2, text: "TSB-2026-095 lukket", time: "I går" },
+        { text: "Ny reklamation oprettet: CL-2026-8901", time: "10 min siden" },
+        { text: "TSB-2026-103 blev accepteret", time: "2 timer siden" },
+        { text: "Ny serviceinformation publiceret", time: "5 timer siden" },
+        { text: "Claim CL-2026-8750 ændret til under behandling", time: "I går" },
       ]
     : [
-        { icon: FileText, text: "Ny claim oprettet — CLM-2026-0051", time: "12 min siden" },
-        { icon: CheckCircle2, text: "TSB-2026-108 accepteret", time: "I går" },
-        { icon: Wrench, text: "Claim CLM-2026-0044 opdateret til 'I gang'", time: "2 dage siden" },
-        { icon: Info, text: "Serviceinformation 'Bremseinspektion' publiceret", time: "3 dage siden" },
+        { text: "Ny reklamation oprettet: CL-2026-0051", time: "12 min siden" },
+        { text: "TSB-2026-108 blev accepteret", time: "I går" },
+        { text: "Claim CL-2026-0044 opdateret til 'I gang'", time: "2 dage siden" },
+        { text: "Ny serviceinformation publiceret", time: "3 dage siden" },
       ];
+
+  const firstName = displayName.split(" ")[0];
 
   return (
     <ProtectedRoute adminOnly={isAdmin}>
-      <AppLayout
-        variant={isAdmin ? "admin" : "dealer"}
-        company={company}
-        user={user}
-        breadcrumbs={[{ label: "Dashboard" }]}
-      >
-        {/* Welcome */}
-        <section
-          className="rounded-[14px] border border-border-soft p-6 shadow-sm"
-          style={{
-            background:
-              "linear-gradient(135deg, color-mix(in oklab, var(--timan-green) 8%, white) 0%, white 60%)",
-          }}
-        >
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Timan Service Portal
+      <div className="min-h-screen bg-slate-50 text-slate-900">
+        {/* Top header */}
+        <header className="sticky top-0 z-40 border-b border-slate-200 bg-white">
+          <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
+            <div className="flex items-center gap-4">
+              <img
+                src="https://timan.dk/wp-content/uploads/2021/04/timan-logo.png"
+                alt="Timan"
+                className="h-8"
+              />
+              <div className="border-l border-slate-200 pl-4">
+                <p className="text-lg font-bold leading-none">Service Portal</p>
+                <p className="text-xs text-slate-500">{company}</p>
               </div>
-              <h1
-                className="mt-1 text-[26px] font-semibold leading-tight"
-                style={{ color: "var(--timan-red)" }}
+            </div>
+
+            <div className="flex items-center gap-4">
+              <button className="relative rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100">
+                <Bell size={20} />
+                <span className="absolute right-1 top-1 h-2 w-2 rounded-full border-2 border-white bg-red-500" />
+              </button>
+
+              <div className="hidden text-right sm:block">
+                <p className="text-sm font-bold">{user.name}</p>
+                <p className="text-xs text-slate-500">{user.role}</p>
+              </div>
+
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-700 font-bold text-white">
+                {user.initials}
+              </div>
+
+              <button
+                onClick={handleLogout}
+                title="Log ud"
+                className="rounded-full p-2 text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600"
               >
-                Velkommen tilbage, {displayName}
+                <LogOut size={20} />
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <main className="mx-auto max-w-7xl space-y-8 px-4 py-8">
+          {/* Welcome hero */}
+          <section className="flex flex-col gap-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="mb-2 text-xs font-bold uppercase tracking-widest text-green-700">
+                Oversigt
+              </p>
+              <h1 className="text-3xl font-black text-red-600">
+                Velkommen til Timan Service Portal, {firstName}
               </h1>
-              <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-                {isAdmin
-                  ? "Overblik over alle TSB-sager, claims og serviceaktivitet på tværs af forhandlere."
-                  : "Her er status på dine åbne TSB'er, claims og maskiner i dag."}
+              <p className="mt-2 text-slate-500">
+                Her er samlet status på TSB'er, reklamationer og serviceopgaver.
               </p>
             </div>
-            <Link
-              to={isAdmin ? "/admin/tsb" : "/cases"}
-              className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90"
-              style={{ backgroundColor: "var(--timan-green)" }}
-            >
-              <FolderKanban className="h-4 w-4" />
-              Gå til mine sager
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        </section>
 
-        {/* Module cards */}
-        <section className="mt-6">
-          <h2 className="text-[16px] font-semibold">Moduler</h2>
-          <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="flex flex-wrap gap-3">
+              <Link
+                to={isAdmin ? "/admin/tsb" : "/cases"}
+                className="flex items-center gap-2 rounded-xl bg-green-700 px-5 py-3 font-bold text-white transition-colors hover:bg-green-800"
+              >
+                Gå til mine sager <ChevronRight size={18} />
+              </Link>
+
+              {isAdmin && (
+                <Link
+                  to="/admin/settings"
+                  className="flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-3 font-bold text-white transition-colors hover:bg-slate-800"
+                >
+                  System Administration <Settings size={18} />
+                </Link>
+              )}
+            </div>
+          </section>
+
+          {/* Module cards */}
+          <section className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
             <ModuleCard
-              to="/service"
-              icon={<Wrench className="h-5 w-5" />}
               title="Service / Claims"
-              description="Opret og håndter garanticlaims og servicesager."
-              accent="var(--timan-red)"
-            />
-            <ModuleCard
-              to={isAdmin ? "/admin/tsb" : "/cases"}
-              icon={<ClipboardList className="h-5 w-5" />}
-              title="TSB Portal"
-              description={
-                isAdmin
-                  ? "Opret og følg tekniske servicebulletiner på tværs af forhandlere."
-                  : "Se og bekræft TSB'er for dine maskiner."
-              }
-              accent="var(--timan-green)"
-            />
-            <ModuleCard
-              to="/manuals"
-              icon={<BookOpen className="h-5 w-5" />}
-              title="Brugermanualer"
-              description="Find manualer, reservedelskataloger og tekniske dokumenter."
-              accent="var(--timan-green)"
-            />
-            <ModuleCard
-              to="/service-info"
-              icon={<Info className="h-5 w-5" />}
-              title="Serviceinformation"
-              description="Læs publicerede service- og produktnyheder fra Timan."
-              accent="var(--timan-red)"
-            />
-          </div>
-        </section>
-
-        {/* TSB KPIs */}
-        <section className="mt-8">
-          <div className="flex items-end justify-between gap-3">
-            <div>
-              <h2 className="text-[16px] font-semibold">TSB Portal</h2>
-              <p className="text-xs text-muted-foreground">
-                {isAdmin ? "Globalt overblik" : "Status for din virksomhed"}
-              </p>
-            </div>
-            <Link
-              to={isAdmin ? "/admin/tsb" : "/cases"}
-              className="text-xs font-medium hover:underline"
-              style={{ color: "var(--timan-green)" }}
-            >
-              Åbn TSB Portal <ArrowRight className="inline h-3 w-3" />
-            </Link>
-          </div>
-          <div
-            className={`mt-3 grid grid-cols-2 gap-4 sm:grid-cols-3 ${
-              isAdmin ? "lg:grid-cols-6" : "lg:grid-cols-5"
-            }`}
-          >
-            <StatCard label="Aktive TSB'er" value={String(tsbStats.active)} />
-            <StatCard
-              label="Afventer accept"
-              value={String(tsbStats.awaiting)}
-              tone={tsbStats.awaiting > 0 ? "warning" : "default"}
-            />
-            <StatCard
-              label="Nær deadline"
-              value={String(tsbStats.nearDeadline)}
-              tone={tsbStats.nearDeadline > 0 ? "warning" : "default"}
-            />
-            <StatCard
-              label="Forsinket"
-              value={String(tsbStats.overdue)}
-              tone={tsbStats.overdue > 0 ? "danger" : "default"}
-            />
-            {isAdmin && (
-              <StatCard label="Forhandlere berørt" value={String(tsbStats.affectedDealers)} />
-            )}
-            <StatCard label="Maskiner berørt" value={String(tsbStats.affectedMachines)} />
-          </div>
-        </section>
-
-        {/* Claims KPIs */}
-        <section className="mt-8">
-          <div className="flex items-end justify-between gap-3">
-            <div>
-              <h2 className="text-[16px] font-semibold">Service / Claims</h2>
-              <p className="text-xs text-muted-foreground">
-                {isAdmin ? "Globalt overblik" : "Status for din virksomhed"}
-              </p>
-            </div>
-            <Link
+              desc="Opret og følg reklamationer, garantisager og servicehistorik."
+              icon={<Wrench />}
               to="/service"
-              className="text-xs font-medium hover:underline"
-              style={{ color: "var(--timan-green)" }}
-            >
-              Åbn Service / Claims <ArrowRight className="inline h-3 w-3" />
-            </Link>
-          </div>
-          <div
-            className={`mt-3 grid grid-cols-2 gap-4 sm:grid-cols-3 ${
-              isAdmin ? "lg:grid-cols-7" : "lg:grid-cols-5"
-            }`}
-          >
-            <StatCard label="Åbne claims" value={String(claimStats.open)} />
-            <StatCard
-              label="Afventer accept"
-              value={String(claimStats.awaiting)}
-              tone={claimStats.awaiting > 0 ? "warning" : "default"}
+              color="green"
             />
-            <StatCard label="I gang" value={String(claimStats.inProgress)} />
-            <StatCard
-              label="Klar til lukning"
-              value={String(claimStats.readyToClose)}
-              tone={claimStats.readyToClose > 0 ? "warning" : "default"}
+            <ModuleCard
+              title="TSB Portal"
+              desc="Se Technical Service Bulletins, deadlines, accept og status."
+              icon={<FileText />}
+              to={isAdmin ? "/admin/tsb" : "/cases"}
+              color="blue"
             />
-            <StatCard label="Afsluttede" value={String(claimStats.completed)} />
-            {isAdmin && claimStats.rejected !== undefined && (
-              <>
-                <StatCard
-                  label="Afviste"
-                  value={String(claimStats.rejected)}
-                  tone={claimStats.rejected > 0 ? "danger" : "default"}
-                />
-                <StatCard
-                  label="Gns. behandlingstid"
-                  value={`${claimStats.avgHandlingDays ?? 0} d`}
-                />
-              </>
-            )}
-          </div>
-        </section>
+            <ModuleCard
+              title="Brugermanualer"
+              desc="Find manualer, dokumentation og tekniske filer."
+              icon={<BookOpen />}
+              to="/manuals"
+              color="amber"
+            />
+            <ModuleCard
+              title="Serviceinformation"
+              desc="Læs vigtige servicemeddelelser, kendte fejl og løsninger."
+              icon={<Info />}
+              to="/service-info"
+              color="purple"
+            />
+          </section>
 
-        {/* Two-col: Requires attention + Recent activity */}
-        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
-          {/* Requires attention */}
-          <div className="rounded-[10px] border border-border-soft bg-white shadow-sm lg:col-span-2">
-            <div className="flex items-center justify-between border-b border-border-soft p-5">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4" style={{ color: "var(--timan-red)" }} />
-                <h2 className="text-[18px] font-semibold">Kræver opmærksomhed</h2>
-              </div>
-            </div>
-            {attention.length === 0 ? (
-              <div className="p-6 text-sm text-muted-foreground">
-                Intet kræver opmærksomhed lige nu.
-              </div>
-            ) : (
-              <ul className="divide-y divide-border-soft">
-                {attention.map((row) => (
-                  <li key={`${row.kind}-${row.id}`}>
-                    <Link
-                      to={row.href.to as "/admin/tsb/$id"}
-                      params={(row.href.params ?? {}) as { id: string }}
-                      className="flex items-start justify-between gap-3 p-4 transition-colors hover:bg-page-bg"
-                    >
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 text-xs">
-                          <span
-                            className="inline-flex items-center rounded-full px-2 py-0.5 font-semibold uppercase tracking-wide"
-                            style={{
-                              backgroundColor:
-                                row.kind === "tsb"
-                                  ? "color-mix(in oklab, var(--timan-green) 12%, white)"
-                                  : "color-mix(in oklab, var(--timan-red) 12%, white)",
-                              color:
-                                row.kind === "tsb"
-                                  ? "var(--timan-green)"
-                                  : "var(--timan-red)",
-                            }}
-                          >
-                            {row.kind === "tsb" ? "TSB" : "Claim"}
-                          </span>
-                          <span className="font-mono font-semibold text-muted-foreground">
-                            {row.id}
-                          </span>
-                        </div>
-                        <div className="mt-1 truncate text-sm font-medium">{row.title}</div>
-                        <div className="mt-0.5 text-xs text-muted-foreground">{row.meta}</div>
-                      </div>
-                      <StatusBadge
-                        variant={
-                          row.tone === "danger"
-                            ? "danger"
-                            : row.tone === "warning"
-                              ? "warning"
-                              : "info"
-                        }
+          {/* KPI panels */}
+          <section className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+            <KPIPanel
+              title="TSB KPI Oversigt"
+              icon={<BarChart3 size={20} />}
+              accent="text-blue-600"
+              items={[
+                ["Aktive TSB'er", tsbStats.active, "text-slate-900"],
+                ["Afventer accept", tsbStats.awaiting, "text-amber-600"],
+                ["Nær deadline", tsbStats.nearDeadline, "text-blue-600"],
+                ["Forsinkede", tsbStats.overdue, "text-red-600"],
+                ...(isAdmin
+                  ? ([["Berørte forhandlere", tsbStats.affectedDealers, "text-slate-900"]] as KPIItem[])
+                  : []),
+                ["Berørte maskiner", tsbStats.affectedMachines, "text-slate-900"],
+              ]}
+            />
+
+            <KPIPanel
+              title="Reklamations KPI"
+              icon={<Wrench size={20} />}
+              accent="text-green-600"
+              items={[
+                ["Åbne claims", claimStats.open, "text-slate-900"],
+                ["Afventer accept", claimStats.awaiting, "text-amber-600"],
+                ["Under behandling", claimStats.inProgress, "text-blue-600"],
+                ["Klar til lukning", claimStats.readyToClose, "text-green-600"],
+                ...(isAdmin && "rejected" in claimStats
+                  ? ([
+                      ["Afviste", claimStats.rejected, "text-red-600"],
+                      ["Gns. behandlingstid", claimStats.avgTime, "text-slate-900"],
+                    ] as KPIItem[])
+                  : ([["Afsluttede", claimStats.completed, "text-slate-500"]] as KPIItem[])),
+              ]}
+            />
+          </section>
+
+          {/* Attention + Activity */}
+          <section className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+            {/* Kræver opmærksomhed */}
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm xl:col-span-2">
+              <SectionHeader
+                title="Kræver opmærksomhed"
+                icon={<AlertCircle className="text-red-500" />}
+                action="Se alle"
+              />
+
+              {attention.length === 0 ? (
+                <div className="p-6 text-sm text-slate-500">
+                  Intet kræver opmærksomhed lige nu.
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-100">
+                  {attention.map((item) => {
+                    const tone = TONE[item.tone];
+                    return (
+                      <Link
+                        key={`${item.kind}-${item.id}`}
+                        to={item.to as "/admin/tsb/$id"}
+                        params={(item.params ?? {}) as { id: string }}
+                        className="flex items-center justify-between gap-4 p-4 transition-colors hover:bg-slate-50"
                       >
-                        {row.badge}
-                      </StatusBadge>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+                        <div className="flex items-start gap-4">
+                          <div className={`rounded-xl p-2 ${tone.bg} ${tone.text}`}>
+                            {item.kind === "TSB" ? <FileText size={18} /> : <Wrench size={18} />}
+                          </div>
+                          <div>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="rounded bg-slate-100 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                {item.id}
+                              </span>
+                              <p className="font-bold text-slate-800">{item.title}</p>
+                            </div>
+                            <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                              <span className={`rounded-full px-2 py-1 font-bold ${tone.bg} ${tone.text}`}>
+                                {item.status}
+                              </span>
+                              <span className="flex items-center gap-1 text-slate-500">
+                                <Clock size={12} /> {item.meta}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <ChevronRight className="text-slate-400" size={20} />
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
-          {/* Recent activity */}
-          <div className="rounded-[10px] border border-border-soft bg-white shadow-sm">
-            <div className="flex items-center justify-between border-b border-border-soft p-5">
-              <div className="flex items-center gap-2">
-                <Clock3 className="h-4 w-4 text-muted-foreground" />
-                <h2 className="text-[18px] font-semibold">Seneste aktivitet</h2>
+            {/* Seneste aktivitet */}
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <SectionHeader
+                title="Seneste aktivitet"
+                icon={<Clock className="text-slate-400" />}
+                action="Historik"
+              />
+
+              <div className="space-y-5 p-5">
+                {recentActivity.map((a, i) => (
+                  <div key={i} className="flex gap-3">
+                    <div className="mt-1 flex h-8 w-8 items-center justify-center rounded-full bg-green-50 text-green-700">
+                      <CheckCircle2 size={16} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-slate-800">{a.text}</p>
+                      <p className="mt-1 text-xs text-slate-400">{a.time}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="border-t border-slate-100 bg-slate-50 p-4 text-center">
+                <button className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-800">
+                  Vis fuld historik <ExternalLink size={14} />
+                </button>
               </div>
             </div>
-            <ul className="divide-y divide-border-soft">
-              {recentActivity.map((a, i) => {
-                const Icon = a.icon;
-                return (
-                  <li key={i} className="flex items-start gap-3 p-4">
-                    <div
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md"
-                      style={{
-                        backgroundColor: "color-mix(in oklab, var(--timan-green) 10%, white)",
-                        color: "var(--timan-green)",
-                      }}
-                    >
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-sm">{a.text}</div>
-                      <div className="text-xs text-muted-foreground">{a.time}</div>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        </div>
-
-        {/* Suppress unused import warnings for helpers we may use as the data evolves */}
-        <span hidden>{deadlineLabel(visibleTsbs[0]?.deadline ?? "2030-01-01").label}</span>
-      </AppLayout>
+          </section>
+        </main>
+      </div>
     </ProtectedRoute>
   );
 }
 
+// ---------------- Helpers ----------------
+
+type KPIItem = [string, string | number, string];
+
+const TONE = {
+  danger: { bg: "bg-red-50", text: "text-red-700" },
+  warning: { bg: "bg-amber-50", text: "text-amber-700" },
+  info: { bg: "bg-blue-50", text: "text-blue-700" },
+} as const;
+
 function ModuleCard({
-  to,
-  icon,
   title,
-  description,
-  accent,
+  desc,
+  icon,
+  to,
+  color,
 }: {
-  to: string;
-  icon: React.ReactNode;
   title: string;
-  description: string;
-  accent: string;
+  desc: string;
+  icon: React.ReactElement<{ size?: number }>;
+  to: string;
+  color: "green" | "blue" | "amber" | "purple";
 }) {
+  const colors = {
+    green: "bg-green-50 text-green-700 border-green-100",
+    blue: "bg-blue-50 text-blue-700 border-blue-100",
+    amber: "bg-amber-50 text-amber-700 border-amber-100",
+    purple: "bg-purple-50 text-purple-700 border-purple-100",
+  };
+
   return (
     <Link
       to={to as "/service"}
-      className="group flex h-full flex-col rounded-[12px] border border-border-soft bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+      className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg"
     >
-      <div className="flex items-center gap-3">
-        <div
-          className="flex h-10 w-10 items-center justify-center rounded-md"
-          style={{
-            backgroundColor: `color-mix(in oklab, ${accent} 12%, white)`,
-            color: accent,
-          }}
-        >
-          {icon}
-        </div>
-        <h3 className="text-[15px] font-semibold">{title}</h3>
-      </div>
-      <p className="mt-3 text-sm text-muted-foreground">{description}</p>
       <div
-        className="mt-4 inline-flex items-center gap-1 text-xs font-medium opacity-0 transition-opacity group-hover:opacity-100"
-        style={{ color: accent }}
+        className={`mb-5 flex h-12 w-12 items-center justify-center rounded-xl border ${colors[color]}`}
       >
-        Åbn modul <ArrowRight className="h-3 w-3" />
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+        {(icon as any).type({ ...(icon.props ?? {}), size: 24 })}
+      </div>
+
+      <h2 className="mb-2 text-xl font-black text-slate-900">{title}</h2>
+      <p className="mb-5 text-sm leading-relaxed text-slate-500">{desc}</p>
+
+      <div className="flex items-center gap-1 text-sm font-bold text-green-700">
+        Åbn modul{" "}
+        <ChevronRight size={17} className="transition-transform group-hover:translate-x-1" />
       </div>
     </Link>
+  );
+}
+
+function KPIPanel({
+  title,
+  icon,
+  accent,
+  items,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  accent: string;
+  items: KPIItem[];
+}) {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 p-5">
+        <h2 className="flex items-center gap-2 font-black uppercase tracking-wide text-slate-700">
+          <span className={accent}>{icon}</span>
+          {title}
+        </h2>
+        <span className="text-xs text-slate-400">Live oversigt</span>
+      </div>
+
+      <div className="grid grid-cols-2 gap-5 p-5 md:grid-cols-3">
+        {items.map(([label, value, color]) => (
+          <div key={label}>
+            <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-slate-400">
+              {label}
+            </p>
+            <p className={`text-3xl font-black ${color} whitespace-nowrap`}>{value}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SectionHeader({
+  title,
+  icon,
+  action,
+}: {
+  title: string;
+  icon: React.ReactElement<{ size?: number }>;
+  action: string;
+}) {
+  return (
+    <div className="flex items-center justify-between border-b border-slate-100 p-5">
+      <h2 className="flex items-center gap-2 text-lg font-black">
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+        {(icon as any).type({ ...(icon.props ?? {}), size: 22 })}
+        {title}
+      </h2>
+      <button className="text-sm font-bold text-green-700 hover:underline">{action}</button>
+    </div>
   );
 }
