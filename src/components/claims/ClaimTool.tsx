@@ -9,7 +9,6 @@ import { useMemo, useState, type ReactNode } from "react";
 import {
   AlertTriangle,
   Check,
-  Globe,
   Loader2,
   Phone,
   Plus,
@@ -18,6 +17,7 @@ import {
   User,
   Wrench,
 } from "lucide-react";
+import { usePortalLanguage, type PortalLang } from "@/components/PortalHeader";
 
 const LANGUAGES = [
   { code: "dk", name: "Dansk", flag: "DK" },
@@ -167,8 +167,14 @@ type PartLine = {
   unitPrice: string;
 };
 
+/** Map shared portal language → claim translation key (only DK/GB exist). */
+function mapPortalLang(p: PortalLang): LanguageCode {
+  return p === "DK" ? "dk" : "gb";
+}
+
 export function ClaimTool() {
-  const [lang, setLang] = useState<LanguageCode>("dk");
+  const [portalLang] = usePortalLanguage();
+  const lang = mapPortalLang(portalLang);
   const [showErrors, setShowErrors] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
