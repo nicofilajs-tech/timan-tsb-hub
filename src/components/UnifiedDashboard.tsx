@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
+import timanLogo from "@/assets/timan-logo.png";
 import {
   daysUntil,
   totalMachineCount,
@@ -325,11 +326,7 @@ export function UnifiedDashboard({
         {/* Top header */}
         <header className="sticky top-0 z-40 border-b border-slate-200 bg-white">
           <div className="flex h-[72px] items-center justify-between px-6">
-            <img
-              src="https://timan.dk/wp-content/uploads/2021/04/timan-logo.png"
-              alt="Timan Logo"
-              className="h-8"
-            />
+            <img src={timanLogo} alt="Timan Logo" className="h-9 w-auto" />
 
             <div className="flex items-center gap-6">
               <div className="hidden rounded-full bg-slate-100 p-1 text-sm font-bold text-slate-500 md:flex">
