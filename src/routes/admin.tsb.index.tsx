@@ -193,7 +193,7 @@ function AdminTsbList() {
             </table>
           </div>
         </div>
-      </AppLayout>
+      </TsbAdminLayout>
     </ProtectedRoute>
   );
 }
