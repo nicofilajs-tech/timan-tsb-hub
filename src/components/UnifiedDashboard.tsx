@@ -327,15 +327,6 @@ export function UnifiedDashboard({
                 Din centrale adgang til servicehåndtering, TSB-oversigt og teknisk dokumentation.
                 Her kan du nemt administrere sager, se KPI'er og få adgang til de nyeste ressourcer.
               </p>
-
-              <div className="mt-10 flex flex-wrap gap-4">
-                <Link
-                  to={isAdmin ? "/admin/tsb" : "/cases"}
-                  className="inline-flex items-center gap-3 rounded-lg bg-green-600 px-7 py-4 font-black text-white transition-colors hover:bg-green-700"
-                >
-                  Gå til mine sager <ChevronRight className="h-5 w-5" />
-                </Link>
-              </div>
             </div>
           </section>
 
