@@ -251,7 +251,8 @@ function CaseDetailPage() {
           </table>
         </div>
       </div>
-    </AppLayout>
+        </main>
+      </div>
     </ProtectedRoute>
   );
 }
