@@ -123,25 +123,24 @@ function CasesPage() {
 
   return (
     <ProtectedRoute>
-      <AppLayout
-        variant="dealer"
-        company="Nordic Machinery Aps"
-        user={{ initials: "LJ", name: "Lars Jensen", role: "Dealer Admin" }}
-        breadcrumbs={[{ label: "Mine sager" }]}
-      >
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h1 className="text-[22px] font-semibold" style={{ color: "var(--timan-red)" }}>
-              Mine sager
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
+      <div className="min-h-screen bg-slate-50 text-slate-950">
+        <PortalHeader
+          displayName="Lars Jensen"
+          company="Nordic Machinery Aps"
+          user={{ initials: "LJ", name: "Lars Jensen", role: "Dealer Admin" }}
+          backTo="/dashboard"
+          moduleTitle="Mine TSB-sager"
+          moduleSubtitle="Technical Service Bulletins"
+        />
+        <main className="mx-auto max-w-7xl px-6 py-6">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <p className="text-sm text-muted-foreground">
               Den fulde liste over dine TSB-sager. Søg, filtrér og åbn for detaljer.
             </p>
+            <div className="text-sm text-muted-foreground">
+              <span className="font-semibold text-foreground">{rows.length}</span> af {items.length} sager
+            </div>
           </div>
-          <div className="text-sm text-muted-foreground">
-            <span className="font-semibold text-foreground">{rows.length}</span> af {items.length} sager
-          </div>
-        </div>
 
         {/* Compact role-based tab navigation */}
         <div className="mt-5 flex flex-wrap gap-1 rounded-[10px] border border-border-soft bg-white p-1 shadow-sm">
