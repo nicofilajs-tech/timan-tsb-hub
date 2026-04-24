@@ -1,8 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
-import { CheckCircle2, AlertTriangle } from "lucide-react";
+import { useEffect, useState, type FormEvent } from "react";
+import { CheckCircle2, AlertTriangle, Plus, X } from "lucide-react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { WarrantyAdminSidebarLayout } from "@/components/WarrantyAdminSidebarLayout";
+import { useAuth } from "@/contexts/AuthContext";
+import { getPreviewUser, isPreviewAuthBypassEnabled } from "@/lib/preview-auth";
+import { isAdminRole } from "@/lib/auth";
 import {
   MACHINE_TYPES,
   REPLACEMENT_BRANDS,
@@ -21,12 +24,42 @@ export const Route = createFileRoute("/admin/warranty/new")({
 
 function NewRegistrationRoute() {
   return (
-    <ProtectedRoute adminOnly>
+    <ProtectedRoute>
       <WarrantyAdminSidebarLayout intro={<Intro />}>
-        <Form />
+        <DealerOnlyGate>
+          <Form />
+        </DealerOnlyGate>
       </WarrantyAdminSidebarLayout>
     </ProtectedRoute>
   );
+}
+
+function DealerOnlyGate({ children }: { children: React.ReactNode }) {
+  const { currentUser } = useAuth();
+  const navigate = useNavigate();
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
+
+  const role =
+    currentUser?.role ??
+    (hydrated && isPreviewAuthBypassEnabled() ? getPreviewUser().role : null);
+  const isTimanAdmin = isAdminRole(role);
+
+  useEffect(() => {
+    if (hydrated && isTimanAdmin) {
+      navigate({ to: "/admin/warranty/dashboard" });
+    }
+  }, [hydrated, isTimanAdmin, navigate]);
+
+  if (!hydrated) return null;
+  if (isTimanAdmin) {
+    return (
+      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-sm text-amber-900">
+        Ny registrering kan kun oprettes af forhandlere. Omdirigerer …
+      </div>
+    );
+  }
+  return <>{children}</>;
 }
 
 function Intro() {
