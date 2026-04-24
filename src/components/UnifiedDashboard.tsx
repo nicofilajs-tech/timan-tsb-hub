@@ -106,7 +106,15 @@ export function UnifiedDashboard({
   }, [visibleTsbs, isAdmin, dealerId]);
 
   // ---- Claims KPIs (mock — Claim module not yet implemented) ----
-  const claimStats = isAdmin
+  const claimStats: {
+    open: number;
+    awaiting: number;
+    inProgress: number;
+    readyToClose: number;
+    completed: number;
+    rejected?: number;
+    avgHandlingDays?: number;
+  } = isAdmin
     ? {
         open: 12,
         awaiting: 3,
@@ -397,7 +405,7 @@ export function UnifiedDashboard({
               tone={claimStats.readyToClose > 0 ? "warning" : "default"}
             />
             <StatCard label="Afsluttede" value={String(claimStats.completed)} />
-            {isAdmin && "rejected" in claimStats && (
+            {isAdmin && claimStats.rejected !== undefined && (
               <>
                 <StatCard
                   label="Afviste"
@@ -406,7 +414,7 @@ export function UnifiedDashboard({
                 />
                 <StatCard
                   label="Gns. behandlingstid"
-                  value={`${claimStats.avgHandlingDays} d`}
+                  value={`${claimStats.avgHandlingDays ?? 0} d`}
                 />
               </>
             )}
@@ -432,8 +440,7 @@ export function UnifiedDashboard({
                 {attention.map((row) => (
                   <li key={`${row.kind}-${row.id}`}>
                     <Link
-                      // @ts-expect-error — dynamic route paths from string
-                      to={row.href.to}
+                      to={row.href.to as "/admin/tsb/$id"}
                       params={row.href.params}
                       className="flex items-start justify-between gap-3 p-4 transition-colors hover:bg-page-bg"
                     >
@@ -534,8 +541,7 @@ function ModuleCard({
 }) {
   return (
     <Link
-      // @ts-expect-error — module routes are typed via routeTree but we accept string here for flexibility
-      to={to}
+      to={to as "/service"}
       className="group flex h-full flex-col rounded-[12px] border border-border-soft bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
     >
       <div className="flex items-center gap-3">
