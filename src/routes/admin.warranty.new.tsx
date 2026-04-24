@@ -290,20 +290,48 @@ function Form() {
       </Section>
 
       <Section title="Redskabs identifikationsnumre">
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:col-span-2">
+        <div className="space-y-3 lg:col-span-2">
           {state.toolSerials.map((t, i) => (
-            <Field key={i} label={`Redskab ${i + 1}`}>
-              <input
-                value={t}
-                onChange={(e) => {
-                  const next = [...state.toolSerials];
-                  next[i] = e.target.value;
-                  set("toolSerials", next);
-                }}
-                className={inputCls}
-              />
-            </Field>
+            <div key={i} className="flex items-end gap-2">
+              <div className="flex-1">
+                <Field
+                  label={`Redskab ${i + 1} — identifikationsnummer / serienummer`}
+                >
+                  <input
+                    value={t}
+                    onChange={(e) => {
+                      const next = [...state.toolSerials];
+                      next[i] = e.target.value;
+                      set("toolSerials", next);
+                    }}
+                    placeholder="fx 712000-00-1111"
+                    className={inputCls}
+                  />
+                </Field>
+              </div>
+              {state.toolSerials.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next = state.toolSerials.filter((_, idx) => idx !== i);
+                    set("toolSerials", next.length ? next : [""]);
+                  }}
+                  aria-label={`Fjern redskab ${i + 1}`}
+                  className="mb-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-red-600"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
           ))}
+          <button
+            type="button"
+            onClick={() => set("toolSerials", [...state.toolSerials, ""])}
+            className="inline-flex items-center gap-2 rounded-xl border border-dashed border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:border-slate-400 hover:bg-slate-50"
+          >
+            <Plus className="h-4 w-4" />
+            Tilføj endnu et redskab
+          </button>
         </div>
       </Section>
 
