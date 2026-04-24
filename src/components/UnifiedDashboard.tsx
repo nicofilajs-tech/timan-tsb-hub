@@ -335,15 +335,6 @@ export function UnifiedDashboard({
                 >
                   Gå til mine sager <ChevronRight className="h-5 w-5" />
                 </Link>
-
-                {isAdmin && (
-                  <Link
-                    to="/admin/tsb"
-                    className="inline-flex items-center gap-3 rounded-lg border border-white/30 bg-white/10 px-7 py-4 font-black text-white transition-colors hover:bg-white/15"
-                  >
-                    Administrer TSB'er
-                  </Link>
-                )}
               </div>
             </div>
           </section>
