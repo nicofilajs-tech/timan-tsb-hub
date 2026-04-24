@@ -11,24 +11,20 @@
 
 import { useMemo } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { toast } from "sonner";
 import {
   AlertCircle,
   BarChart3,
-  Bell,
   BookOpen,
   ChevronRight,
   Clock,
   ExternalLink,
   FileText,
   Info,
-  LogOut,
   Wrench,
   type LucideIcon,
 } from "lucide-react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { useAuth } from "@/contexts/AuthContext";
-import timanLogo from "@/assets/timan-logo.png";
+import { PortalHeader } from "@/components/PortalHeader";
 import {
   daysUntil,
   totalMachineCount,
