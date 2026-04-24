@@ -70,9 +70,10 @@ export function TsbAdminSidebarLayout({ intro, children }: TsbAdminSidebarLayout
           <nav className="sticky top-[88px] space-y-1 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
             {ADMIN_NAV.map((item) => {
               const Icon = item.icon;
-              const active =
-                location.pathname === item.match ||
-                location.pathname.startsWith(item.match + "/");
+              const active = item.exact
+                ? location.pathname === item.match
+                : location.pathname === item.match ||
+                  location.pathname.startsWith(item.match + "/");
               return (
                 <Link
                   key={item.to}
