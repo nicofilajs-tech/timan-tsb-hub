@@ -10,7 +10,7 @@
  */
 
 import type { ReactNode } from "react";
-import { Component, type ErrorInfo } from "react";
+import { Component, useEffect, useState, type ErrorInfo } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import {
   ClipboardList,
@@ -20,6 +20,9 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { PortalHeader } from "@/components/PortalHeader";
+import { useAuth } from "@/contexts/AuthContext";
+import { getPreviewUser, isPreviewAuthBypassEnabled } from "@/lib/preview-auth";
+import { isAdminRole, type RoleCode } from "@/lib/auth";
 
 interface NavItem {
   to: string;
@@ -27,6 +30,8 @@ interface NavItem {
   icon: LucideIcon;
   match: string;
   exact?: boolean;
+  /** If true, only dealer roles (non-Timan-admin) can see this item. */
+  dealerOnly?: boolean;
 }
 
 const NAV: NavItem[] = [
@@ -47,6 +52,7 @@ const NAV: NavItem[] = [
     label: "Ny registrering",
     icon: PlusCircle,
     match: "/admin/warranty/new",
+    dealerOnly: true,
   },
   {
     to: "/admin/warranty/certificates",
@@ -55,6 +61,16 @@ const NAV: NavItem[] = [
     match: "/admin/warranty/certificates",
   },
 ];
+
+function useEffectiveRole(): RoleCode | null {
+  const { currentUser } = useAuth();
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
+  if (currentUser?.role) return currentUser.role;
+  if (!hydrated) return null;
+  if (isPreviewAuthBypassEnabled()) return getPreviewUser().role;
+  return null;
+}
 
 interface WarrantyErrorBoundaryState {
   error: Error | null;
