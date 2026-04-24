@@ -30,17 +30,19 @@ import {
 type AdminTab =
   | "all"
   | "aktive"
+  | "kladder"
+  | "afventer"
   | "near"
   | "overdue"
-  | "kladder"
   | "lukkede";
 
 const ADMIN_TABS: { value: AdminTab; label: string }[] = [
   { value: "all", label: "Alle TSB'er" },
   { value: "aktive", label: "Aktive" },
+  { value: "kladder", label: "Kladder" },
+  { value: "afventer", label: "Afventer accept" },
   { value: "near", label: "Nær deadline" },
   { value: "overdue", label: "Overskredet" },
-  { value: "kladder", label: "Kladder" },
   { value: "lukkede", label: "Lukkede" },
 ];
 
@@ -51,6 +53,11 @@ function matchesAdminTab(t: Tsb, tab: AdminTab): boolean {
   if (tab === "overdue") return ps === "dato_overskredet";
   if (tab === "kladder") return ps === "ikke_paabegyndt";
   if (tab === "lukkede") return ps === "afsluttet";
+  if (tab === "afventer") {
+    // Active TSBs that still have at least one dealer awaiting acceptance
+    if (ps !== "aktiv") return false;
+    return t.dealers.some((d) => d.status === "afventer");
+  }
   if (tab === "near") {
     if (ps !== "aktiv") return false;
     const d = daysUntil(t.deadline);
