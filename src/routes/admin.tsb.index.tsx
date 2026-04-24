@@ -55,15 +55,10 @@ function AdminTsbList() {
     <ProtectedRoute adminOnly>
       <TsbAdminLayout
         intro={
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <h1 className="text-[22px] font-semibold" style={{ color: "var(--timan-red)" }}>
-                TSB'er
-              </h1>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Alle Technical Service Bulletins — kladder, aktive og lukkede.
-              </p>
-            </div>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-muted-foreground">
+              Alle Technical Service Bulletins — kladder, aktive og lukkede.
+            </p>
             <div className="flex items-center gap-2">
               <div className="text-sm text-muted-foreground">
                 <span className="font-semibold text-foreground">{rows.length}</span> af {tsbs.length}
