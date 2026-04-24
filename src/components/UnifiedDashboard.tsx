@@ -441,7 +441,7 @@ export function UnifiedDashboard({
                   <li key={`${row.kind}-${row.id}`}>
                     <Link
                       to={row.href.to as "/admin/tsb/$id"}
-                      params={row.href.params ?? {}}
+                      params={(row.href.params ?? {}) as { id: string }}
                       className="flex items-start justify-between gap-3 p-4 transition-colors hover:bg-page-bg"
                     >
                       <div className="min-w-0">
