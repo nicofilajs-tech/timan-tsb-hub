@@ -26,6 +26,10 @@ import { Route as AdminMachinesRouteImport } from './routes/admin.machines'
 import { Route as AdminDealersRouteImport } from './routes/admin.dealers'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminTsbIndexRouteImport } from './routes/admin.tsb.index'
+import { Route as AdminWarrantyNewRouteImport } from './routes/admin.warranty.new'
+import { Route as AdminWarrantyMineRouteImport } from './routes/admin.warranty.mine'
+import { Route as AdminWarrantyDashboardRouteImport } from './routes/admin.warranty.dashboard'
+import { Route as AdminWarrantyCertificatesRouteImport } from './routes/admin.warranty.certificates'
 import { Route as AdminTsbNewRouteImport } from './routes/admin.tsb.new'
 import { Route as AdminTsbDashboardRouteImport } from './routes/admin.tsb.dashboard'
 import { Route as AdminTsbIdRouteImport } from './routes/admin.tsb.$id'
@@ -115,6 +119,27 @@ const AdminTsbIndexRoute = AdminTsbIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminTsbRoute,
 } as any)
+const AdminWarrantyNewRoute = AdminWarrantyNewRouteImport.update({
+  id: '/admin/warranty/new',
+  path: '/admin/warranty/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminWarrantyMineRoute = AdminWarrantyMineRouteImport.update({
+  id: '/admin/warranty/mine',
+  path: '/admin/warranty/mine',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminWarrantyDashboardRoute = AdminWarrantyDashboardRouteImport.update({
+  id: '/admin/warranty/dashboard',
+  path: '/admin/warranty/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminWarrantyCertificatesRoute =
+  AdminWarrantyCertificatesRouteImport.update({
+    id: '/admin/warranty/certificates',
+    path: '/admin/warranty/certificates',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AdminTsbNewRoute = AdminTsbNewRouteImport.update({
   id: '/new',
   path: '/new',
@@ -151,6 +176,10 @@ export interface FileRoutesByFullPath {
   '/admin/tsb/$id': typeof AdminTsbIdRoute
   '/admin/tsb/dashboard': typeof AdminTsbDashboardRoute
   '/admin/tsb/new': typeof AdminTsbNewRoute
+  '/admin/warranty/certificates': typeof AdminWarrantyCertificatesRoute
+  '/admin/warranty/dashboard': typeof AdminWarrantyDashboardRoute
+  '/admin/warranty/mine': typeof AdminWarrantyMineRoute
+  '/admin/warranty/new': typeof AdminWarrantyNewRoute
   '/admin/tsb/': typeof AdminTsbIndexRoute
 }
 export interface FileRoutesByTo {
@@ -172,6 +201,10 @@ export interface FileRoutesByTo {
   '/admin/tsb/$id': typeof AdminTsbIdRoute
   '/admin/tsb/dashboard': typeof AdminTsbDashboardRoute
   '/admin/tsb/new': typeof AdminTsbNewRoute
+  '/admin/warranty/certificates': typeof AdminWarrantyCertificatesRoute
+  '/admin/warranty/dashboard': typeof AdminWarrantyDashboardRoute
+  '/admin/warranty/mine': typeof AdminWarrantyMineRoute
+  '/admin/warranty/new': typeof AdminWarrantyNewRoute
   '/admin/tsb': typeof AdminTsbIndexRoute
 }
 export interface FileRoutesById {
@@ -195,6 +228,10 @@ export interface FileRoutesById {
   '/admin/tsb/$id': typeof AdminTsbIdRoute
   '/admin/tsb/dashboard': typeof AdminTsbDashboardRoute
   '/admin/tsb/new': typeof AdminTsbNewRoute
+  '/admin/warranty/certificates': typeof AdminWarrantyCertificatesRoute
+  '/admin/warranty/dashboard': typeof AdminWarrantyDashboardRoute
+  '/admin/warranty/mine': typeof AdminWarrantyMineRoute
+  '/admin/warranty/new': typeof AdminWarrantyNewRoute
   '/admin/tsb/': typeof AdminTsbIndexRoute
 }
 export interface FileRouteTypes {
@@ -219,6 +256,10 @@ export interface FileRouteTypes {
     | '/admin/tsb/$id'
     | '/admin/tsb/dashboard'
     | '/admin/tsb/new'
+    | '/admin/warranty/certificates'
+    | '/admin/warranty/dashboard'
+    | '/admin/warranty/mine'
+    | '/admin/warranty/new'
     | '/admin/tsb/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -240,6 +281,10 @@ export interface FileRouteTypes {
     | '/admin/tsb/$id'
     | '/admin/tsb/dashboard'
     | '/admin/tsb/new'
+    | '/admin/warranty/certificates'
+    | '/admin/warranty/dashboard'
+    | '/admin/warranty/mine'
+    | '/admin/warranty/new'
     | '/admin/tsb'
   id:
     | '__root__'
@@ -262,6 +307,10 @@ export interface FileRouteTypes {
     | '/admin/tsb/$id'
     | '/admin/tsb/dashboard'
     | '/admin/tsb/new'
+    | '/admin/warranty/certificates'
+    | '/admin/warranty/dashboard'
+    | '/admin/warranty/mine'
+    | '/admin/warranty/new'
     | '/admin/tsb/'
   fileRoutesById: FileRoutesById
 }
@@ -282,6 +331,10 @@ export interface RootRouteChildren {
   AdminUsersRoute: typeof AdminUsersRoute
   CasesIdRoute: typeof CasesIdRoute
   CasesIndexRoute: typeof CasesIndexRoute
+  AdminWarrantyCertificatesRoute: typeof AdminWarrantyCertificatesRoute
+  AdminWarrantyDashboardRoute: typeof AdminWarrantyDashboardRoute
+  AdminWarrantyMineRoute: typeof AdminWarrantyMineRoute
+  AdminWarrantyNewRoute: typeof AdminWarrantyNewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -405,6 +458,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminTsbIndexRouteImport
       parentRoute: typeof AdminTsbRoute
     }
+    '/admin/warranty/new': {
+      id: '/admin/warranty/new'
+      path: '/admin/warranty/new'
+      fullPath: '/admin/warranty/new'
+      preLoaderRoute: typeof AdminWarrantyNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/warranty/mine': {
+      id: '/admin/warranty/mine'
+      path: '/admin/warranty/mine'
+      fullPath: '/admin/warranty/mine'
+      preLoaderRoute: typeof AdminWarrantyMineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/warranty/dashboard': {
+      id: '/admin/warranty/dashboard'
+      path: '/admin/warranty/dashboard'
+      fullPath: '/admin/warranty/dashboard'
+      preLoaderRoute: typeof AdminWarrantyDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/warranty/certificates': {
+      id: '/admin/warranty/certificates'
+      path: '/admin/warranty/certificates'
+      fullPath: '/admin/warranty/certificates'
+      preLoaderRoute: typeof AdminWarrantyCertificatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/tsb/new': {
       id: '/admin/tsb/new'
       path: '/new'
@@ -464,6 +545,10 @@ const rootRouteChildren: RootRouteChildren = {
   AdminUsersRoute: AdminUsersRoute,
   CasesIdRoute: CasesIdRoute,
   CasesIndexRoute: CasesIndexRoute,
+  AdminWarrantyCertificatesRoute: AdminWarrantyCertificatesRoute,
+  AdminWarrantyDashboardRoute: AdminWarrantyDashboardRoute,
+  AdminWarrantyMineRoute: AdminWarrantyMineRoute,
+  AdminWarrantyNewRoute: AdminWarrantyNewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
