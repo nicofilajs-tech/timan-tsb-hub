@@ -29,8 +29,6 @@ import { Route as AdminTsbIndexRouteImport } from './routes/admin.tsb.index'
 import { Route as DealerWarrantyRegistrationsRouteImport } from './routes/dealer.warranty.registrations'
 import { Route as DealerWarrantyNewRouteImport } from './routes/dealer.warranty.new'
 import { Route as DealerWarrantyDashboardRouteImport } from './routes/dealer.warranty.dashboard'
-import { Route as AdminWarrantyNewRouteImport } from './routes/admin.warranty.new'
-import { Route as AdminWarrantyMineRouteImport } from './routes/admin.warranty.mine'
 import { Route as AdminWarrantyDashboardRouteImport } from './routes/admin.warranty.dashboard'
 import { Route as AdminWarrantyCertificatesRouteImport } from './routes/admin.warranty.certificates'
 import { Route as AdminTsbNewRouteImport } from './routes/admin.tsb.new'
@@ -138,16 +136,6 @@ const DealerWarrantyDashboardRoute = DealerWarrantyDashboardRouteImport.update({
   path: '/dealer/warranty/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminWarrantyNewRoute = AdminWarrantyNewRouteImport.update({
-  id: '/admin/warranty/new',
-  path: '/admin/warranty/new',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminWarrantyMineRoute = AdminWarrantyMineRouteImport.update({
-  id: '/admin/warranty/mine',
-  path: '/admin/warranty/mine',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AdminWarrantyDashboardRoute = AdminWarrantyDashboardRouteImport.update({
   id: '/admin/warranty/dashboard',
   path: '/admin/warranty/dashboard',
@@ -197,8 +185,6 @@ export interface FileRoutesByFullPath {
   '/admin/tsb/new': typeof AdminTsbNewRoute
   '/admin/warranty/certificates': typeof AdminWarrantyCertificatesRoute
   '/admin/warranty/dashboard': typeof AdminWarrantyDashboardRoute
-  '/admin/warranty/mine': typeof AdminWarrantyMineRoute
-  '/admin/warranty/new': typeof AdminWarrantyNewRoute
   '/dealer/warranty/dashboard': typeof DealerWarrantyDashboardRoute
   '/dealer/warranty/new': typeof DealerWarrantyNewRoute
   '/dealer/warranty/registrations': typeof DealerWarrantyRegistrationsRoute
@@ -225,8 +211,6 @@ export interface FileRoutesByTo {
   '/admin/tsb/new': typeof AdminTsbNewRoute
   '/admin/warranty/certificates': typeof AdminWarrantyCertificatesRoute
   '/admin/warranty/dashboard': typeof AdminWarrantyDashboardRoute
-  '/admin/warranty/mine': typeof AdminWarrantyMineRoute
-  '/admin/warranty/new': typeof AdminWarrantyNewRoute
   '/dealer/warranty/dashboard': typeof DealerWarrantyDashboardRoute
   '/dealer/warranty/new': typeof DealerWarrantyNewRoute
   '/dealer/warranty/registrations': typeof DealerWarrantyRegistrationsRoute
@@ -255,8 +239,6 @@ export interface FileRoutesById {
   '/admin/tsb/new': typeof AdminTsbNewRoute
   '/admin/warranty/certificates': typeof AdminWarrantyCertificatesRoute
   '/admin/warranty/dashboard': typeof AdminWarrantyDashboardRoute
-  '/admin/warranty/mine': typeof AdminWarrantyMineRoute
-  '/admin/warranty/new': typeof AdminWarrantyNewRoute
   '/dealer/warranty/dashboard': typeof DealerWarrantyDashboardRoute
   '/dealer/warranty/new': typeof DealerWarrantyNewRoute
   '/dealer/warranty/registrations': typeof DealerWarrantyRegistrationsRoute
@@ -286,8 +268,6 @@ export interface FileRouteTypes {
     | '/admin/tsb/new'
     | '/admin/warranty/certificates'
     | '/admin/warranty/dashboard'
-    | '/admin/warranty/mine'
-    | '/admin/warranty/new'
     | '/dealer/warranty/dashboard'
     | '/dealer/warranty/new'
     | '/dealer/warranty/registrations'
@@ -314,8 +294,6 @@ export interface FileRouteTypes {
     | '/admin/tsb/new'
     | '/admin/warranty/certificates'
     | '/admin/warranty/dashboard'
-    | '/admin/warranty/mine'
-    | '/admin/warranty/new'
     | '/dealer/warranty/dashboard'
     | '/dealer/warranty/new'
     | '/dealer/warranty/registrations'
@@ -343,8 +321,6 @@ export interface FileRouteTypes {
     | '/admin/tsb/new'
     | '/admin/warranty/certificates'
     | '/admin/warranty/dashboard'
-    | '/admin/warranty/mine'
-    | '/admin/warranty/new'
     | '/dealer/warranty/dashboard'
     | '/dealer/warranty/new'
     | '/dealer/warranty/registrations'
@@ -370,8 +346,6 @@ export interface RootRouteChildren {
   CasesIndexRoute: typeof CasesIndexRoute
   AdminWarrantyCertificatesRoute: typeof AdminWarrantyCertificatesRoute
   AdminWarrantyDashboardRoute: typeof AdminWarrantyDashboardRoute
-  AdminWarrantyMineRoute: typeof AdminWarrantyMineRoute
-  AdminWarrantyNewRoute: typeof AdminWarrantyNewRoute
   DealerWarrantyDashboardRoute: typeof DealerWarrantyDashboardRoute
   DealerWarrantyNewRoute: typeof DealerWarrantyNewRoute
   DealerWarrantyRegistrationsRoute: typeof DealerWarrantyRegistrationsRoute
@@ -519,20 +493,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DealerWarrantyDashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/warranty/new': {
-      id: '/admin/warranty/new'
-      path: '/admin/warranty/new'
-      fullPath: '/admin/warranty/new'
-      preLoaderRoute: typeof AdminWarrantyNewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/warranty/mine': {
-      id: '/admin/warranty/mine'
-      path: '/admin/warranty/mine'
-      fullPath: '/admin/warranty/mine'
-      preLoaderRoute: typeof AdminWarrantyMineRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/admin/warranty/dashboard': {
       id: '/admin/warranty/dashboard'
       path: '/admin/warranty/dashboard'
@@ -608,8 +568,6 @@ const rootRouteChildren: RootRouteChildren = {
   CasesIndexRoute: CasesIndexRoute,
   AdminWarrantyCertificatesRoute: AdminWarrantyCertificatesRoute,
   AdminWarrantyDashboardRoute: AdminWarrantyDashboardRoute,
-  AdminWarrantyMineRoute: AdminWarrantyMineRoute,
-  AdminWarrantyNewRoute: AdminWarrantyNewRoute,
   DealerWarrantyDashboardRoute: DealerWarrantyDashboardRoute,
   DealerWarrantyNewRoute: DealerWarrantyNewRoute,
   DealerWarrantyRegistrationsRoute: DealerWarrantyRegistrationsRoute,
