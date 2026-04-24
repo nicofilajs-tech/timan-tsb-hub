@@ -11,7 +11,7 @@
  * No sidebar — this is the platform landing page.
  */
 
-import { useMemo } from "react";
+import { cloneElement, useMemo } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
@@ -499,8 +499,7 @@ function ModuleCard({
       <div
         className={`mb-5 flex h-12 w-12 items-center justify-center rounded-xl border ${colors[color]}`}
       >
-        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-        {(icon as any).type({ ...(icon.props ?? {}), size: 24 })}
+        {cloneElement(icon, { size: 24 })}
       </div>
 
       <h2 className="mb-2 text-xl font-black text-slate-900">{title}</h2>
@@ -561,8 +560,7 @@ function SectionHeader({
   return (
     <div className="flex items-center justify-between border-b border-slate-100 p-5">
       <h2 className="flex items-center gap-2 text-lg font-black">
-        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-        {(icon as any).type({ ...(icon.props ?? {}), size: 22 })}
+        {cloneElement(icon, { size: 22 })}
         {title}
       </h2>
       <button className="text-sm font-bold text-green-700 hover:underline">{action}</button>
