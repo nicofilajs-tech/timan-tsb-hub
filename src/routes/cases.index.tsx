@@ -111,6 +111,7 @@ function CasesPage() {
         return { tsb, link, dl, caseStatus };
       })
       .filter((r) => {
+        if (!matchesDealerTab(r.tsb, r.link, tab)) return false;
         if (statusFilter !== "all" && r.caseStatus !== statusFilter) return false;
         if (!q) return true;
         return (
@@ -118,7 +119,7 @@ function CasesPage() {
           r.tsb.title.toLowerCase().includes(q)
         );
       });
-  }, [items, query, statusFilter]);
+  }, [items, tab, query, statusFilter]);
 
   return (
     <ProtectedRoute>
