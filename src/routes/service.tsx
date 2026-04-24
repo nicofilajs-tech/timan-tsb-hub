@@ -34,13 +34,12 @@ function ServiceModule() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-slate-50 text-slate-950">
-        <PortalHeader {...headerProps} />
+        <PortalHeader {...headerProps} backTo={dashboardTo} />
 
         {/* Page intro */}
         <div className="border-b border-slate-200 bg-white">
           <div className="mx-auto max-w-6xl px-6 py-6">
-            <PageBackLink to={dashboardTo} />
-            <h1 className="mt-3 text-3xl font-black text-slate-950">
+            <h1 className="text-3xl font-black text-slate-950">
               Service / Claims
             </h1>
             <p className="mt-2 max-w-3xl text-sm text-slate-600">
