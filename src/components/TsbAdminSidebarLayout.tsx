@@ -34,7 +34,7 @@ interface NavItem {
 }
 
 const ADMIN_NAV: NavItem[] = [
-  { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard, match: "/admin/dashboard" },
+  { to: "/admin/tsb/dashboard", label: "Dashboard", icon: LayoutDashboard, match: "/admin/tsb/dashboard" },
   { to: "/admin/tsb", label: "TSB'er", icon: FileText, match: "/admin/tsb" },
   { to: "/admin/dealers", label: "Forhandlere", icon: Building2, match: "/admin/dealers" },
   { to: "/admin/machines", label: "Maskiner", icon: Wrench, match: "/admin/machines" },
