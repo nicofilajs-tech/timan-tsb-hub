@@ -469,11 +469,11 @@ function KpiPanel({
       </div>
       <div className="grid grid-cols-2 gap-8 p-6 md:grid-cols-3">
         {items.map((item) => (
-          <div key={item.label}>
+          <div key={item.label} className="text-center">
             <p className="text-xs font-black uppercase tracking-widest text-slate-400">
               {item.label}
             </p>
-            <p className={`mt-3 text-3xl font-black ${item.color || "text-slate-950"}`}>
+            <p className="mt-3 text-3xl font-black text-slate-950">
               {item.value}
             </p>
           </div>
