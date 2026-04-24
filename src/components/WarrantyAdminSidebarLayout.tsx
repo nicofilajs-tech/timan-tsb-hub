@@ -10,7 +10,7 @@
  */
 
 import type { ReactNode } from "react";
-import { Component, type ErrorInfo } from "react";
+import { Component, useEffect, useState, type ErrorInfo } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import {
   ClipboardList,
@@ -20,6 +20,9 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { PortalHeader } from "@/components/PortalHeader";
+import { useAuth } from "@/contexts/AuthContext";
+import { getPreviewUser, isPreviewAuthBypassEnabled } from "@/lib/preview-auth";
+import { isAdminRole, type RoleCode } from "@/lib/auth";
 
 interface NavItem {
   to: string;
@@ -27,6 +30,8 @@ interface NavItem {
   icon: LucideIcon;
   match: string;
   exact?: boolean;
+  /** If true, only dealer roles (non-Timan-admin) can see this item. */
+  dealerOnly?: boolean;
 }
 
 const NAV: NavItem[] = [
@@ -47,6 +52,7 @@ const NAV: NavItem[] = [
     label: "Ny registrering",
     icon: PlusCircle,
     match: "/admin/warranty/new",
+    dealerOnly: true,
   },
   {
     to: "/admin/warranty/certificates",
@@ -55,6 +61,16 @@ const NAV: NavItem[] = [
     match: "/admin/warranty/certificates",
   },
 ];
+
+function useEffectiveRole(): RoleCode | null {
+  const { currentUser } = useAuth();
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
+  if (currentUser?.role) return currentUser.role;
+  if (!hydrated) return null;
+  if (isPreviewAuthBypassEnabled()) return getPreviewUser().role;
+  return null;
+}
 
 interface WarrantyErrorBoundaryState {
   error: Error | null;
@@ -112,6 +128,9 @@ export function WarrantyAdminSidebarLayout({
   children,
 }: WarrantyAdminSidebarLayoutProps) {
   const location = useLocation();
+  const role = useEffectiveRole();
+  const isTimanAdmin = isAdminRole(role);
+  const visibleNav = NAV.filter((n) => !n.dealerOnly || !isTimanAdmin);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-950">
@@ -127,7 +146,7 @@ export function WarrantyAdminSidebarLayout({
       <div className="mx-auto flex max-w-[1400px] gap-6 px-6 py-6">
         <aside className="hidden w-64 shrink-0 lg:block">
           <nav className="sticky top-[88px] space-y-1 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
-            {NAV.map((item) => {
+            {visibleNav.map((item) => {
               const Icon = item.icon;
               const active = item.exact
                 ? location.pathname === item.match
