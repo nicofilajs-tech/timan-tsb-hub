@@ -75,16 +75,7 @@ function AdminTsbDetail() {
 
   return (
     <ProtectedRoute adminOnly>
-      <AppLayout
-        variant="admin"
-        company="Timan Intern"
-        user={{ initials: "TA", name: "Timan Admin", role: "Intern" }}
-        breadcrumbs={[
-          { label: "Dashboard", to: "/admin/dashboard" },
-          { label: "TSB'er", to: "/admin/tsb" },
-          { label: tsb.id },
-        ]}
-      >
+      <TsbAdminLayout>
         {/* Header */}
         <div className="rounded-[10px] border border-border-soft bg-white p-6 shadow-sm">
           <div className="flex flex-wrap items-start justify-between gap-4">
@@ -259,7 +250,7 @@ function AdminTsbDetail() {
             </table>
           </div>
         </div>
-      </AppLayout>
+      </TsbAdminLayout>
     </ProtectedRoute>
   );
 }
