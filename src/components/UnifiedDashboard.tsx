@@ -10,7 +10,7 @@
  */
 
 import { useMemo } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import {
   AlertCircle,
   BarChart3,
@@ -92,7 +92,6 @@ export function UnifiedDashboard({
 }: UnifiedDashboardProps) {
   const isAdmin = scope === "timan_admin";
   const tsbs = useTsbs();
-  const navigate = useNavigate();
 
   // Filter TSBs by scope
   const visibleTsbs = useMemo<Tsb[]>(() => {
