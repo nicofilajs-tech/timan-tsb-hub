@@ -365,7 +365,7 @@ function AdminMachinesPage() {
 
         {/* Add machine dialog */}
         <AddMachineDialog open={addOpen} onOpenChange={setAddOpen} />
-      </AppLayout>
+      </TsbAdminSidebarLayout>
     </ProtectedRoute>
   );
 }
