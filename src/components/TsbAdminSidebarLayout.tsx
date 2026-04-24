@@ -31,11 +31,13 @@ interface NavItem {
   icon: LucideIcon;
   /** Active when location.pathname starts with this prefix */
   match: string;
+  /** If true, only highlight on exact path match (no prefix matching) */
+  exact?: boolean;
 }
 
 const ADMIN_NAV: NavItem[] = [
   { to: "/admin/tsb/dashboard", label: "Dashboard", icon: LayoutDashboard, match: "/admin/tsb/dashboard" },
-  { to: "/admin/tsb", label: "TSB'er", icon: FileText, match: "/admin/tsb" },
+  { to: "/admin/tsb", label: "TSB'er", icon: FileText, match: "/admin/tsb", exact: true },
   { to: "/admin/dealers", label: "Forhandlere", icon: Building2, match: "/admin/dealers" },
   { to: "/admin/machines", label: "Maskiner", icon: Wrench, match: "/admin/machines" },
   { to: "/admin/users", label: "Brugere", icon: Users, match: "/admin/users" },
