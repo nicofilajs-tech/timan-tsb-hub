@@ -13,7 +13,7 @@ import {
   Calendar,
   Globe,
 } from "lucide-react";
-import { AppLayout } from "@/components/AppLayout";
+import { TsbAdminSidebarLayout } from "@/components/TsbAdminSidebarLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { StatusBadge } from "@/components/StatusBadge";
 import { MockDataBanner } from "@/components/MockDataBanner";
@@ -136,15 +136,7 @@ function AdminMachinesPage() {
 
   return (
     <ProtectedRoute adminOnly>
-      <AppLayout
-        variant="admin"
-        company="Timan Intern"
-        user={{ initials: "TA", name: "Timan Admin", role: "Intern" }}
-        breadcrumbs={[
-          { label: "Dashboard", to: "/admin/dashboard" },
-          { label: "Maskiner" },
-        ]}
-      >
+      <TsbAdminSidebarLayout>
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="text-[22px] font-semibold" style={{ color: "var(--timan-red)" }}>
