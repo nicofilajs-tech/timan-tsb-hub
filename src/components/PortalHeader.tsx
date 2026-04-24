@@ -13,8 +13,8 @@
  */
 
 import { useEffect, useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
-import { Bell, LogOut } from "lucide-react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { ArrowLeft, Bell, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import timanLogo from "@/assets/timan-logo.png";
