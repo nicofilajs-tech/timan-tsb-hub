@@ -1087,8 +1087,7 @@ export function ClaimTool({
                 {t("labels.disclaimer")}
               </p>
 
-              {/* Admin comment — visible to both Timan Admin and dealer.
-                  Editable only in admin mode. */}
+              {/* Admin comment — visible to both Timan Admin and dealer. */}
               {(adminMode || adminComment.trim()) && (
                 <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4">
                   <div className="mb-2 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-amber-800">
@@ -1098,7 +1097,7 @@ export function ClaimTool({
                   {adminMode ? (
                     <textarea
                       className="h-28 w-full rounded-lg border border-amber-200 bg-white p-3 text-sm outline-none focus:ring-2 focus:ring-amber-100"
-                      placeholder="Tilføj en kommentar — fx forklaring på afvisning eller intern note…"
+                      placeholder="Tilføj en kommentar…"
                       value={adminComment}
                       onChange={(event) => setAdminComment(event.target.value)}
                     />
@@ -1107,6 +1106,59 @@ export function ClaimTool({
                       {adminComment}
                     </p>
                   )}
+                </div>
+              )}
+
+              {/* Dealer comments thread + add-comment box on rejected claims. */}
+              {initialClaim && (dealerComments.length > 0 || effectiveStatus === "rejected") && (
+                <div className="mt-6 rounded-xl border border-orange-200 bg-orange-50 p-4">
+                  <div className="mb-2 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-orange-800">
+                    <MessageSquare className="h-3.5 w-3.5" />
+                    Forhandler-kommentarer
+                  </div>
+                  {dealerComments.length === 0 ? (
+                    <p className="text-xs italic text-orange-800/70">Ingen kommentarer endnu.</p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {dealerComments.map((c) => (
+                        <li key={c.id} className="rounded-lg border border-orange-200 bg-white p-3 text-sm">
+                          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-orange-700">
+                            <span>{c.author}</span>
+                            <span>{new Date(c.at).toLocaleString("da-DK")}</span>
+                          </div>
+                          <p className="mt-1 whitespace-pre-line text-orange-900">{c.text}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {!adminMode && effectiveStatus === "rejected" && (
+                    <DealerReplyBox onSubmit={handleAddDealerComment} />
+                  )}
+                </div>
+              )}
+
+              {/* Audit log — shows Timan changes after approval. */}
+              {initialClaim && auditLog.length > 0 && (
+                <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="mb-2 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-600">
+                    <History className="h-3.5 w-3.5" />
+                    Ændringslog · Changed by Timan Admin
+                  </div>
+                  <ul className="divide-y divide-slate-200">
+                    {auditLog.map((e) => (
+                      <li key={e.id} className="py-2 text-xs">
+                        <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                          <span>{e.by} · {e.field}</span>
+                          <span>{new Date(e.at).toLocaleString("da-DK")}</span>
+                        </div>
+                        <div className="mt-1 font-mono text-slate-700">
+                          <span className="line-through text-slate-400">{e.oldValue || "—"}</span>
+                          {" → "}
+                          <span className="font-bold text-slate-900">{e.newValue || "—"}</span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               )}
             </div>
