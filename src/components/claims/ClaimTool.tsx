@@ -1057,7 +1057,7 @@ export function ClaimTool({
           their `readOnly` flag is set.
         */}
         <fieldset
-          disabled={readOnly && !adminMode}
+          disabled={formReadOnly && !adminMode}
           className="contents"
         >
           <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-3">
