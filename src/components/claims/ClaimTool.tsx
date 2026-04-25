@@ -283,7 +283,7 @@ export function ClaimTool({
   const [formData, setFormData] = useState(() => {
     const d = initialClaim?.detail;
     return {
-      guaranteeNo: initialClaim?.warrantyNo ?? "",
+      guaranteeNo: initialClaim?.warrantyNo ?? generatedClaimId,
       dealer: d?.dealer ?? "",
       dealerCountry: d?.dealerCountry ?? "",
       dealerContact: d?.dealerContact ?? "",
