@@ -107,8 +107,95 @@ export function PortalHeader({
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white">
-      <div className="relative mx-auto flex h-[96px] max-w-7xl items-center justify-between gap-4 px-6">
-        <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+        <img
+          src={timanLogo}
+          alt="Timan Logo"
+          className="h-[50px] w-auto md:h-[64px]"
+        />
+      </div>
+
+      <div className="relative mx-auto grid h-[96px] max-w-[1400px] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 px-6 lg:grid-cols-[16rem_minmax(0,1fr)_auto] lg:gap-6">
+        <div className="flex min-w-0 items-center justify-start lg:justify-center">
+          {backTo ? (
+            <Link
+              to={backTo as "/dashboard"}
+              className="inline-flex shrink-0 items-center gap-2 rounded-full border border-slate-200 px-3 py-2 text-xs font-bold uppercase tracking-widest text-slate-500 transition-colors hover:border-slate-300 hover:text-slate-900"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span className="hidden md:inline">{backLabel}</span>
+            </Link>
+          ) : null}
+        </div>
+
+        {moduleTitle ? (
+          <div className="hidden min-w-0 lg:block">
+            <p className="truncate text-sm font-black leading-tight text-slate-950">
+              {moduleTitle}
+            </p>
+            {moduleSubtitle && (
+              <p className="truncate text-xs text-slate-500">
+                {moduleSubtitle}
+              </p>
+            )}
+          </div>
+        ) : (
+          <div />
+        )}
+
+        <div className="flex items-center justify-end gap-4 md:gap-6">
+          <div className="hidden rounded-full bg-slate-100 p-1 text-sm font-bold text-slate-500 md:flex">
+            {PORTAL_LANGUAGES.map((code) => (
+              <button
+                key={code}
+                type="button"
+                onClick={() => setLang(code)}
+                aria-pressed={lang === code}
+                className={`rounded-full px-4 py-2 transition-colors ${
+                  lang === code
+                    ? "bg-white text-slate-950 shadow-sm"
+                    : "hover:text-slate-700"
+                }`}
+              >
+                {code}
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            className="relative rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100"
+            aria-label="Notifikationer"
+          >
+            <Bell className="h-5 w-5" />
+            <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500" />
+          </button>
+
+          <div className="h-10 border-l border-slate-200" />
+
+          <div className="hidden text-right sm:block">
+            <p className="text-sm font-black">{displayName}</p>
+            <p className="text-xs text-slate-500">{company}</p>
+          </div>
+
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-green-700 text-lg font-black text-white">
+            {user.initials}
+          </div>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            title="Log ud"
+            aria-label="Log ud"
+            className="rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100"
+          >
+            <LogOut className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+    </header>
+  );
+}
           <img
             src={timanLogo}
             alt="Timan Logo"
