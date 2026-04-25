@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Eye } from "lucide-react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ClaimsAdminSidebarLayout } from "@/components/ClaimsAdminSidebarLayout";
 import {
@@ -80,6 +80,7 @@ function DashboardBody() {
                   <th className="px-6 py-3">Godkendt dato</th>
                   <th className="px-6 py-3 text-right">Samlet pris</th>
                   <th className="px-6 py-3">Status</th>
+                  <th className="px-6 py-3 text-right" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -106,6 +107,15 @@ function DashboardBody() {
                     </td>
                     <td className="px-6 py-3">
                       <StatusPill status={r.status} />
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-3 text-right">
+                      <Link
+                        to="/admin/claims/$claimId"
+                        params={{ claimId: r.id }}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-bold text-white hover:bg-slate-800"
+                      >
+                        <Eye className="h-3.5 w-3.5" /> Åbn
+                      </Link>
                     </td>
                   </tr>
                 ))}

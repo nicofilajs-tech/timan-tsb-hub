@@ -40,6 +40,7 @@ import { Route as AdminTsbDashboardRouteImport } from './routes/admin.tsb.dashbo
 import { Route as AdminTsbIdRouteImport } from './routes/admin.tsb.$id'
 import { Route as AdminClaimsDashboardRouteImport } from './routes/admin.claims.dashboard'
 import { Route as AdminClaimsAllRouteImport } from './routes/admin.claims.all'
+import { Route as AdminClaimsClaimIdRouteImport } from './routes/admin.claims.$claimId'
 
 const ServiceInfoRoute = ServiceInfoRouteImport.update({
   id: '/service-info',
@@ -198,6 +199,11 @@ const AdminClaimsAllRoute = AdminClaimsAllRouteImport.update({
   path: '/admin/claims/all',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminClaimsClaimIdRoute = AdminClaimsClaimIdRouteImport.update({
+  id: '/admin/claims/$claimId',
+  path: '/admin/claims/$claimId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -216,6 +222,7 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AdminUsersRoute
   '/cases/$id': typeof CasesIdRoute
   '/cases/': typeof CasesIndexRoute
+  '/admin/claims/$claimId': typeof AdminClaimsClaimIdRoute
   '/admin/claims/all': typeof AdminClaimsAllRoute
   '/admin/claims/dashboard': typeof AdminClaimsDashboardRoute
   '/admin/tsb/$id': typeof AdminTsbIdRoute
@@ -248,6 +255,7 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AdminUsersRoute
   '/cases/$id': typeof CasesIdRoute
   '/cases': typeof CasesIndexRoute
+  '/admin/claims/$claimId': typeof AdminClaimsClaimIdRoute
   '/admin/claims/all': typeof AdminClaimsAllRoute
   '/admin/claims/dashboard': typeof AdminClaimsDashboardRoute
   '/admin/tsb/$id': typeof AdminTsbIdRoute
@@ -282,6 +290,7 @@ export interface FileRoutesById {
   '/admin/users': typeof AdminUsersRoute
   '/cases/$id': typeof CasesIdRoute
   '/cases/': typeof CasesIndexRoute
+  '/admin/claims/$claimId': typeof AdminClaimsClaimIdRoute
   '/admin/claims/all': typeof AdminClaimsAllRoute
   '/admin/claims/dashboard': typeof AdminClaimsDashboardRoute
   '/admin/tsb/$id': typeof AdminTsbIdRoute
@@ -317,6 +326,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/cases/$id'
     | '/cases/'
+    | '/admin/claims/$claimId'
     | '/admin/claims/all'
     | '/admin/claims/dashboard'
     | '/admin/tsb/$id'
@@ -349,6 +359,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/cases/$id'
     | '/cases'
+    | '/admin/claims/$claimId'
     | '/admin/claims/all'
     | '/admin/claims/dashboard'
     | '/admin/tsb/$id'
@@ -382,6 +393,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/cases/$id'
     | '/cases/'
+    | '/admin/claims/$claimId'
     | '/admin/claims/all'
     | '/admin/claims/dashboard'
     | '/admin/tsb/$id'
@@ -416,6 +428,7 @@ export interface RootRouteChildren {
   AdminUsersRoute: typeof AdminUsersRoute
   CasesIdRoute: typeof CasesIdRoute
   CasesIndexRoute: typeof CasesIndexRoute
+  AdminClaimsClaimIdRoute: typeof AdminClaimsClaimIdRoute
   AdminClaimsAllRoute: typeof AdminClaimsAllRoute
   AdminClaimsDashboardRoute: typeof AdminClaimsDashboardRoute
   AdminWarrantyCertificatesRoute: typeof AdminWarrantyCertificatesRoute
@@ -648,6 +661,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminClaimsAllRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/claims/$claimId': {
+      id: '/admin/claims/$claimId'
+      path: '/admin/claims/$claimId'
+      fullPath: '/admin/claims/$claimId'
+      preLoaderRoute: typeof AdminClaimsClaimIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -686,6 +706,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminUsersRoute: AdminUsersRoute,
   CasesIdRoute: CasesIdRoute,
   CasesIndexRoute: CasesIndexRoute,
+  AdminClaimsClaimIdRoute: AdminClaimsClaimIdRoute,
   AdminClaimsAllRoute: AdminClaimsAllRoute,
   AdminClaimsDashboardRoute: AdminClaimsDashboardRoute,
   AdminWarrantyCertificatesRoute: AdminWarrantyCertificatesRoute,

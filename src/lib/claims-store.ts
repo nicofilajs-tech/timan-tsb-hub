@@ -69,6 +69,12 @@ export interface ClaimRecord {
   status: ClaimStatus;
   /** Full detail used to prefill the claim form. */
   detail: ClaimDetail;
+  /**
+   * Internal comment from Timan Admin. Visible to both Timan Admin and the
+   * dealer when the claim is opened. Editable by Timan Admin only — useful for
+   * documenting why a claim was rejected/closed or follow-up notes.
+   */
+  adminComment?: string;
 }
 
 export const CLAIM_STATUS_LABEL: Record<ClaimStatus, string> = {
@@ -359,6 +365,8 @@ const MOCK: ClaimRecord[] = [
       drivingKm: "210",
       currency: "DKK",
     },
+    adminComment:
+      "Afvist 2026-03-05: Service-historik mangler for perioden 2024-2025, og garantiperioden er udløbet. Ejer er informeret og har accepteret reparation for egen regning.",
   },
   {
     id: "CL-8801",
@@ -404,6 +412,8 @@ const MOCK: ClaimRecord[] = [
       drivingKm: "150",
       currency: "DKK",
     },
+    adminComment:
+      "Afsluttet 2026-03-10. Garantiarbejde udført komplet, kreditnota udstedt til forhandler. Sagen er lukket og arkiveret.",
   },
   {
     id: "CL-8775",
@@ -458,6 +468,30 @@ export function getAllClaims(): ClaimRecord[] {
 
 export function getClaimById(id: string): ClaimRecord | undefined {
   return MOCK.find((c) => c.id === id);
+}
+
+/**
+ * Persist Timan-Admin-only changes back to the in-memory mock store.
+ * Updates the admin comment plus the editable price-overview fields
+ * (working hours, driving km, total price). Returns the updated record
+ * or undefined if not found.
+ */
+export function updateAdminFields(
+  id: string,
+  fields: {
+    adminComment?: string;
+    laborHours?: string;
+    drivingKm?: string;
+    totalPrice?: number;
+  },
+): ClaimRecord | undefined {
+  const claim = MOCK.find((c) => c.id === id);
+  if (!claim) return undefined;
+  if (fields.adminComment !== undefined) claim.adminComment = fields.adminComment;
+  if (fields.laborHours !== undefined) claim.detail.laborHours = fields.laborHours;
+  if (fields.drivingKm !== undefined) claim.detail.drivingKm = fields.drivingKm;
+  if (fields.totalPrice !== undefined) claim.totalPrice = fields.totalPrice;
+  return claim;
 }
 
 export function getDealerClaims(dealerName: string): ClaimRecord[] {

@@ -10,15 +10,17 @@ import {
   AlertTriangle,
   Check,
   Loader2,
+  MessageSquare,
   Phone,
   Plus,
   Printer,
+  Save,
   Trash2,
   User,
   Wrench,
 } from "lucide-react";
 import { usePortalLanguage, type PortalLang } from "@/components/PortalHeader";
-import type { ClaimRecord } from "@/lib/claims-store";
+import { updateAdminFields, type ClaimRecord } from "@/lib/claims-store";
 
 const LANGUAGES = [
   { code: "dk", name: "Dansk", flag: "DK" },
@@ -178,16 +180,31 @@ export interface ClaimToolProps {
   initialClaim?: ClaimRecord;
   /** When true, the entire form is rendered read-only and submission is hidden. */
   readOnly?: boolean;
+  /**
+   * Timan-Admin mode. When true, the admin comment field becomes editable
+   * and a small set of price-overview fields (working hours, driving km,
+   * total price) remain editable even if the claim is otherwise read-only
+   * (e.g. closed/rejected). Replaces the dealer "Generer PDF" submit with
+   * an admin "Gem ændringer" save action.
+   */
+  adminMode?: boolean;
 }
 
-export function ClaimTool({ initialClaim, readOnly = false }: ClaimToolProps = {}) {
+export function ClaimTool({
+  initialClaim,
+  readOnly = false,
+  adminMode = false,
+}: ClaimToolProps = {}) {
   const [portalLang] = usePortalLanguage();
   const lang = mapPortalLang(portalLang);
   const [showErrors, setShowErrors] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
+  const [isSavingAdmin, setIsSavingAdmin] = useState(false);
+  const [adminSaved, setAdminSaved] = useState(false);
   // Skip the intro modal when opening an existing claim (view/edit), or in
   // read-only mode where no submission is possible anyway.
   const [showIntro, setShowIntro] = useState(!initialClaim && !readOnly);
+  const [adminComment, setAdminComment] = useState(initialClaim?.adminComment ?? "");
 
   const t = (key: string): string => {
     const parts = key.split(".");
@@ -384,11 +401,20 @@ export function ClaimTool({ initialClaim, readOnly = false }: ClaimToolProps = {
       </div>
 
       <main className="mx-auto max-w-5xl space-y-8 px-4 py-8">
-        {readOnly && (
+        {readOnly && !adminMode && (
           <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-slate-700 no-print">
             <AlertTriangle className="h-5 w-5 text-slate-500" />
             <p className="text-sm font-bold">
               Denne sag er låst og kan kun ses. Status tillader ikke redigering.
+            </p>
+          </div>
+        )}
+        {readOnly && adminMode && (
+          <div className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-900 no-print">
+            <AlertTriangle className="h-5 w-5 text-amber-600" />
+            <p className="text-sm font-bold">
+              Admin review — sagen er låst for forhandleren. Du kan tilføje en
+              kommentar og justere arbejdstimer, kørte km og samlet pris.
             </p>
           </div>
         )}
@@ -700,69 +726,104 @@ export function ClaimTool({ initialClaim, readOnly = false }: ClaimToolProps = {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-3">
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:col-span-2">
-            <div className="grid grid-cols-2 gap-6">
-              <FormInput
-                label={t("labels.workingHours")}
-                value={formData.laborHours}
-                onChange={(value) =>
-                  setFormData({ ...formData, laborHours: value })
-                }
-              />
-              <FormInput
-                label={t("labels.drivingKm")}
-                value={formData.drivingKm}
-                onChange={(value) =>
-                  setFormData({ ...formData, drivingKm: value })
-                }
-              />
-            </div>
-            <p className="mt-8 text-[10px] font-bold italic leading-relaxed text-red-600 opacity-80">
-              {t("labels.disclaimer")}
-            </p>
-          </div>
-
-          <div className="relative overflow-hidden rounded-3xl border-b-8 border-green-600 bg-[#111827] p-8 text-white shadow-2xl">
-            <div className="absolute right-0 top-0 -mr-16 -mt-16 h-32 w-32 rounded-full bg-green-600/5 blur-2xl" />
-            <div className="relative z-10 mb-8 flex items-center justify-between">
-              <span className="text-sm font-black uppercase tracking-[0.2em] text-green-400">
-                {t("sections.summary")}
-              </span>
-              <span className="rounded-lg bg-green-600 px-3 py-1 text-xs font-black shadow-lg shadow-green-900/40">
-                {formData.currency}
-              </span>
-            </div>
-
-            <div className="relative z-10 mb-8 space-y-4">
-              <SummaryRow
-                label={t("sections.parts")}
-                value={totals.parts.toFixed(2)}
-              />
-              <SummaryRow
-                label={t("labels.workingHours")}
-                value={`${formData.laborHours || 0} h`}
-              />
-              <SummaryRow
-                label={t("labels.summaryKm")}
-                value={`${formData.drivingKm || 0} km`}
-              />
-            </div>
-
-            <div className="relative z-10 border-t border-slate-800 pt-8 text-right">
-              <span className="mb-2 block text-[11px] font-bold uppercase leading-none tracking-widest text-slate-500">
-                {t("labels.totalSum")}
-              </span>
-              <span className="text-5xl font-black italic leading-none tracking-tighter text-white">
-                {totals.grandTotal.toFixed(2)}
-              </span>
-            </div>
-          </div>
-        </div>
-
         </fieldset>
 
-        {!readOnly && (
+        {/*
+          Price-overview row + admin comment.
+          In admin mode, working hours / driving km / total price remain
+          editable here even when the rest of the claim form is read-only
+          (e.g. closed/rejected). Dealers see this block as read-only when
+          their `readOnly` flag is set.
+        */}
+        <fieldset
+          disabled={readOnly && !adminMode}
+          className="contents"
+        >
+          <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-3">
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:col-span-2">
+              <div className="grid grid-cols-2 gap-6">
+                <FormInput
+                  label={t("labels.workingHours")}
+                  value={formData.laborHours}
+                  onChange={(value) =>
+                    setFormData({ ...formData, laborHours: value })
+                  }
+                />
+                <FormInput
+                  label={t("labels.drivingKm")}
+                  value={formData.drivingKm}
+                  onChange={(value) =>
+                    setFormData({ ...formData, drivingKm: value })
+                  }
+                />
+              </div>
+              <p className="mt-8 text-[10px] font-bold italic leading-relaxed text-red-600 opacity-80">
+                {t("labels.disclaimer")}
+              </p>
+
+              {/* Admin comment — visible to both Timan Admin and dealer.
+                  Editable only in admin mode. */}
+              {(adminMode || adminComment.trim()) && (
+                <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                  <div className="mb-2 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-amber-800">
+                    <MessageSquare className="h-3.5 w-3.5" />
+                    Kommentar fra Timan Admin
+                  </div>
+                  {adminMode ? (
+                    <textarea
+                      className="h-28 w-full rounded-lg border border-amber-200 bg-white p-3 text-sm outline-none focus:ring-2 focus:ring-amber-100"
+                      placeholder="Tilføj en kommentar — fx forklaring på afvisning eller intern note…"
+                      value={adminComment}
+                      onChange={(event) => setAdminComment(event.target.value)}
+                    />
+                  ) : (
+                    <p className="whitespace-pre-line text-sm leading-relaxed text-amber-900">
+                      {adminComment}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="relative overflow-hidden rounded-3xl border-b-8 border-green-600 bg-[#111827] p-8 text-white shadow-2xl">
+              <div className="absolute right-0 top-0 -mr-16 -mt-16 h-32 w-32 rounded-full bg-green-600/5 blur-2xl" />
+              <div className="relative z-10 mb-8 flex items-center justify-between">
+                <span className="text-sm font-black uppercase tracking-[0.2em] text-green-400">
+                  {t("sections.summary")}
+                </span>
+                <span className="rounded-lg bg-green-600 px-3 py-1 text-xs font-black shadow-lg shadow-green-900/40">
+                  {formData.currency}
+                </span>
+              </div>
+
+              <div className="relative z-10 mb-8 space-y-4">
+                <SummaryRow
+                  label={t("sections.parts")}
+                  value={totals.parts.toFixed(2)}
+                />
+                <SummaryRow
+                  label={t("labels.workingHours")}
+                  value={`${formData.laborHours || 0} h`}
+                />
+                <SummaryRow
+                  label={t("labels.summaryKm")}
+                  value={`${formData.drivingKm || 0} km`}
+                />
+              </div>
+
+              <div className="relative z-10 border-t border-slate-800 pt-8 text-right">
+                <span className="mb-2 block text-[11px] font-bold uppercase leading-none tracking-widest text-slate-500">
+                  {t("labels.totalSum")}
+                </span>
+                <span className="text-5xl font-black italic leading-none tracking-tighter text-white">
+                  {totals.grandTotal.toFixed(2)}
+                </span>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        {!readOnly && !adminMode && (
           <div className="flex justify-center py-8 no-print">
             <button
               type="button"
@@ -781,6 +842,43 @@ export function ClaimTool({ initialClaim, readOnly = false }: ClaimToolProps = {
               )}
               {t("labels.submit")}
             </button>
+          </div>
+        )}
+
+        {adminMode && initialClaim && (
+          <div className="flex flex-col items-center gap-3 py-8 no-print">
+            <button
+              type="button"
+              onClick={() => {
+                setIsSavingAdmin(true);
+                setAdminSaved(false);
+                updateAdminFields(initialClaim.id, {
+                  adminComment,
+                  laborHours: formData.laborHours,
+                  drivingKm: formData.drivingKm,
+                  totalPrice: Math.round(totals.grandTotal),
+                });
+                setTimeout(() => {
+                  setIsSavingAdmin(false);
+                  setAdminSaved(true);
+                  setTimeout(() => setAdminSaved(false), 2500);
+                }, 350);
+              }}
+              disabled={isSavingAdmin}
+              className="flex items-center gap-3 rounded-2xl bg-slate-900 px-10 py-4 text-sm font-black uppercase tracking-widest text-white shadow-xl transition-all hover:-translate-y-0.5 hover:bg-slate-800 disabled:opacity-60"
+            >
+              {isSavingAdmin ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Save className="h-5 w-5" />
+              )}
+              Gem ændringer
+            </button>
+            {adminSaved && (
+              <p className="text-xs font-bold text-emerald-700">
+                Ændringer gemt.
+              </p>
+            )}
           </div>
         )}
       </main>
