@@ -1569,7 +1569,6 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
 }
 
 /**
-/**
  * MachineTypeSelect — fixed dropdown of supported Timan machine types.
  *
  * Replaces the free-text Maskintype input in the claim form. Same styling
