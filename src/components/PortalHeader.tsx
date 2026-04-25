@@ -107,13 +107,37 @@ export function PortalHeader({
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white">
-      <div className="relative flex h-[96px] items-center justify-end gap-4 px-6">
+      <div className="relative flex h-[96px] items-center justify-between gap-4 px-6">
         <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           <img
             src={timanLogo}
             alt="Timan Logo"
             className="h-[50px] w-auto md:h-[64px]"
           />
+        </div>
+
+        <div className="flex min-w-0 items-center gap-4 pl-2 md:pl-6">
+          {backTo ? (
+            <Link
+              to={backTo as "/dashboard"}
+              className="inline-flex shrink-0 items-center gap-2 rounded-full border border-slate-200 px-3 py-2 text-xs font-bold uppercase tracking-widest text-slate-500 transition-colors hover:border-slate-300 hover:text-slate-900"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span className="hidden md:inline">{backLabel}</span>
+            </Link>
+          ) : null}
+          {moduleTitle ? (
+            <div className="hidden min-w-0 md:block">
+              <p className="truncate text-sm font-black leading-tight text-slate-950">
+                {moduleTitle}
+              </p>
+              {moduleSubtitle && (
+                <p className="truncate text-xs text-slate-500">
+                  {moduleSubtitle}
+                </p>
+              )}
+            </div>
+          ) : null}
         </div>
 
         <div className="flex items-center gap-4 md:gap-6">
@@ -166,34 +190,6 @@ export function PortalHeader({
           </button>
         </div>
       </div>
-
-      {(backTo || moduleTitle) && (
-        <div className="border-t border-slate-100 bg-white">
-          <div className="mx-auto flex max-w-[1400px] flex-wrap items-center gap-4 px-6 py-4 lg:gap-6">
-            {backTo ? (
-              <div className="w-full lg:w-64 lg:shrink-0">
-                <Link
-                  to={backTo as "/dashboard"}
-                  className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-xs font-bold uppercase tracking-widest text-slate-500 transition-colors hover:border-slate-300 hover:text-slate-900"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  {backLabel}
-                </Link>
-              </div>
-            ) : null}
-            {moduleTitle ? (
-              <div className="min-w-0 flex-1">
-                <p className="text-lg font-black leading-tight text-slate-950">
-                  {moduleTitle}
-                </p>
-                {moduleSubtitle && (
-                  <p className="text-xs text-slate-500">{moduleSubtitle}</p>
-                )}
-              </div>
-            ) : null}
-          </div>
-        </div>
-      )}
     </header>
   );
 }
