@@ -11,13 +11,14 @@ import {
   AlertTriangle,
   Check,
   Copy,
+  FileEdit,
   Layers,
   Loader2,
   MessageSquare,
   Phone,
   Plus,
-  Printer,
   Save,
+  Send,
   Trash2,
   User,
   Wrench,
@@ -26,9 +27,12 @@ import { usePortalLanguage, type PortalLang } from "@/components/PortalHeader";
 import {
   addConnectedClaim,
   claimDisplayId,
+  createDealerClaim,
+  generateClaimNumber,
   getGroupClaims,
   updateAdminFields,
   type ClaimRecord,
+  type ClaimStatus,
 } from "@/lib/claims-store";
 import {
   COUNTRY_GROUP_LABEL,
