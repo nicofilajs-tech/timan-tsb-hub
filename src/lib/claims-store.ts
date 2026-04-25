@@ -6,10 +6,21 @@
 
 export type ClaimStatus =
   | "open"
-  | "waiting"
+  /** Gemt / ikke afsendt (dealer draft, full edit) */
   | "in_progress"
+  /** Afventer accept (submitted, dealer can still edit until Timan approves) */
+  | "waiting"
+  /** Godkendt af Timan (locked for dealer, awaits dealer action) */
   | "approved"
+  /** I gang hos forhandler (dealer accepted approval) */
+  | "dealer_in_progress"
+  /** Afventer Timan afslutning (dealer finished, Timan must close) */
+  | "awaiting_timan_close"
+  /** Afventer Timan kommentar (dealer disagreed/commented) */
+  | "awaiting_timan_comment"
+  /** Afvist af Timan */
   | "rejected"
+  /** Lukket — final */
   | "closed";
 
 export interface ClaimPartLine {
