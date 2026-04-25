@@ -202,7 +202,7 @@ export function WarrantyRegistrationsTable({
                     </td>
                     {scope === "admin" && (
                       <td className="whitespace-nowrap px-6 py-3 text-slate-600">
-                        {r.createdAt.slice(0, 10)}
+                        {formatDate(r.createdAt)}
                       </td>
                     )}
                     <td className="px-6 py-3">
