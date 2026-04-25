@@ -854,13 +854,14 @@ export function ClaimTool({
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 print:grid-cols-2 print:gap-2">
           <SectionBox title={t("sections.machine")}>
-            <FormInput
+            <MachineTypeSelect
               label={t("labels.machineType")}
               value={formData.machineType}
               onChange={(value) =>
                 setFormData({ ...formData, machineType: value })
               }
               required
+              disabled={readOnly && !adminMode}
             />
             <div className="mt-3 grid grid-cols-2 gap-3">
               <FormInput
