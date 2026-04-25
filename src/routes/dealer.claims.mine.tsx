@@ -7,6 +7,7 @@ import { useDealerName } from "@/components/warranty/useDealerName";
 import {
   CLAIM_STATUS_LABEL,
   getDealerClaims,
+  isClaimEditable,
   type ClaimStatus,
 } from "@/lib/claims-store";
 
