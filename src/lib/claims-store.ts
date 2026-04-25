@@ -470,6 +470,30 @@ export function getClaimById(id: string): ClaimRecord | undefined {
   return MOCK.find((c) => c.id === id);
 }
 
+/**
+ * Persist Timan-Admin-only changes back to the in-memory mock store.
+ * Updates the admin comment plus the editable price-overview fields
+ * (working hours, driving km, total price). Returns the updated record
+ * or undefined if not found.
+ */
+export function updateAdminFields(
+  id: string,
+  fields: {
+    adminComment?: string;
+    laborHours?: string;
+    drivingKm?: string;
+    totalPrice?: number;
+  },
+): ClaimRecord | undefined {
+  const claim = MOCK.find((c) => c.id === id);
+  if (!claim) return undefined;
+  if (fields.adminComment !== undefined) claim.adminComment = fields.adminComment;
+  if (fields.laborHours !== undefined) claim.detail.laborHours = fields.laborHours;
+  if (fields.drivingKm !== undefined) claim.detail.drivingKm = fields.drivingKm;
+  if (fields.totalPrice !== undefined) claim.totalPrice = fields.totalPrice;
+  return claim;
+}
+
 export function getDealerClaims(dealerName: string): ClaimRecord[] {
   if (!dealerName) return MOCK;
   const needle = dealerName.toLowerCase();
