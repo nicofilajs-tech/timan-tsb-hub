@@ -114,7 +114,11 @@ export function isClaimEditable(status: ClaimStatus): boolean {
 
 const NORDIC_DEALER = "Nordic Machinery Aps";
 
-const MOCK: ClaimRecord[] = [
+// Entries may omit groupId/subIndex; they are backfilled below so each
+// standalone claim becomes its own single-machine group.
+type SeedClaim = Omit<ClaimRecord, "groupId" | "subIndex"> &
+  Partial<Pick<ClaimRecord, "groupId" | "subIndex">>;
+const MOCK: SeedClaim[] = [
   {
     id: "CL-9013",
     warrantyNo: "T-001931",
