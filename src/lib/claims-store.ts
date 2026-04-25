@@ -251,7 +251,7 @@ const MOCK: SeedClaim[] = [
     damageDate: "2026-04-04",
     approvedDate: "2026-04-14",
     totalPrice: 14250,
-    status: "in_progress",
+    status: "dealer_in_progress",
     detail: {
       dealer: NORDIC_DEALER,
       dealerCountry: "Denmark",
@@ -341,7 +341,16 @@ const MOCK: SeedClaim[] = [
     damageDate: "2026-03-21",
     approvedDate: "2026-04-02",
     totalPrice: 5640,
-    status: "approved",
+    status: "awaiting_timan_comment",
+    dealerComments: [
+      {
+        id: "c-8951-1",
+        author: "Forhandler",
+        at: "2026-04-03T09:14:00.000Z",
+        text:
+          "Vi er ikke enige i prisreduktionen for ECU-arbejdet — diagnose tog længere tid end aftalt. Bedes vurderet på ny.",
+      },
+    ],
     detail: {
       dealer: "Bayern Garten- und Kommunaltechnik GmbH",
       dealerCountry: "Germany",
@@ -385,7 +394,7 @@ const MOCK: SeedClaim[] = [
     damageDate: "2026-03-12",
     approvedDate: "2026-03-25",
     totalPrice: 17890,
-    status: "approved",
+    status: "awaiting_timan_close",
     detail: {
       dealer: NORDIC_DEALER,
       dealerCountry: "Denmark",
