@@ -18,6 +18,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { usePortalLanguage, type PortalLang } from "@/components/PortalHeader";
+import type { ClaimRecord } from "@/lib/claims-store";
 
 const LANGUAGES = [
   { code: "dk", name: "Dansk", flag: "DK" },
@@ -172,12 +173,21 @@ function mapPortalLang(p: PortalLang): LanguageCode {
   return p === "DK" ? "dk" : "gb";
 }
 
-export function ClaimTool() {
+export interface ClaimToolProps {
+  /** When provided, the form is prefilled with this claim's detail. */
+  initialClaim?: ClaimRecord;
+  /** When true, the entire form is rendered read-only and submission is hidden. */
+  readOnly?: boolean;
+}
+
+export function ClaimTool({ initialClaim, readOnly = false }: ClaimToolProps = {}) {
   const [portalLang] = usePortalLanguage();
   const lang = mapPortalLang(portalLang);
   const [showErrors, setShowErrors] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
-  const [showIntro, setShowIntro] = useState(true);
+  // Skip the intro modal when opening an existing claim (view/edit), or in
+  // read-only mode where no submission is possible anyway.
+  const [showIntro, setShowIntro] = useState(!initialClaim && !readOnly);
 
   const t = (key: string): string => {
     const parts = key.split(".");
@@ -192,36 +202,41 @@ export function ClaimTool() {
     return typeof translation === "string" ? translation : key;
   };
 
-  const [formData, setFormData] = useState({
-    guaranteeNo: "",
-    dealer: "",
-    dealerCountry: "",
-    dealerContact: "",
-    dealerPhone: "",
-    dealerEmail: "",
-    owner: "",
-    ownerCountry: "",
-    ownerAddress: "",
-    ownerPostal: "",
-    ownerPhone: "",
-    ownerEmail: "",
-    machineType: "",
-    serialNo: "",
-    hours: "",
-    saleDate: "",
-    damageDate: "",
-    approvedDate: "",
-    repairDate: "",
-    faultDesc: "",
-    repairDesc: "",
-    parts: [
-      { id: 1, qty: "1", partNo: "", desc: "", unitPrice: "" },
-      { id: 2, qty: "1", partNo: "", desc: "", unitPrice: "" },
-      { id: 3, qty: "1", partNo: "", desc: "", unitPrice: "" },
-    ] as PartLine[],
-    laborHours: "0",
-    drivingKm: "0",
-    currency: "DKK",
+  const [formData, setFormData] = useState(() => {
+    const d = initialClaim?.detail;
+    return {
+      guaranteeNo: initialClaim?.warrantyNo ?? "",
+      dealer: d?.dealer ?? "",
+      dealerCountry: d?.dealerCountry ?? "",
+      dealerContact: d?.dealerContact ?? "",
+      dealerPhone: d?.dealerPhone ?? "",
+      dealerEmail: d?.dealerEmail ?? "",
+      owner: d?.owner ?? "",
+      ownerCountry: d?.ownerCountry ?? "",
+      ownerAddress: d?.ownerAddress ?? "",
+      ownerPostal: d?.ownerPostal ?? "",
+      ownerPhone: "",
+      ownerEmail: "",
+      machineType: d?.machineType ?? "",
+      serialNo: d?.serialNo ?? "",
+      hours: d?.hours ?? "",
+      saleDate: d?.saleDate ?? "",
+      damageDate: d?.damageDate ?? "",
+      approvedDate: d?.approvedDate ?? "",
+      repairDate: d?.repairDate ?? "",
+      faultDesc: d?.faultDesc ?? "",
+      repairDesc: d?.repairDesc ?? "",
+      parts: (d?.parts && d.parts.length > 0
+        ? d.parts.map((p, idx) => ({ id: idx + 1, ...p }))
+        : [
+            { id: 1, qty: "1", partNo: "", desc: "", unitPrice: "" },
+            { id: 2, qty: "1", partNo: "", desc: "", unitPrice: "" },
+            { id: 3, qty: "1", partNo: "", desc: "", unitPrice: "" },
+          ]) as PartLine[],
+      laborHours: d?.laborHours ?? "0",
+      drivingKm: d?.drivingKm ?? "0",
+      currency: d?.currency ?? "DKK",
+    };
   });
 
   const stepStatus = useMemo(() => {
@@ -369,12 +384,22 @@ export function ClaimTool() {
       </div>
 
       <main className="mx-auto max-w-5xl space-y-8 px-4 py-8">
-        {showErrors && (
+        {readOnly && (
+          <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-slate-700 no-print">
+            <AlertTriangle className="h-5 w-5 text-slate-500" />
+            <p className="text-sm font-bold">
+              Denne sag er låst og kan kun ses. Status tillader ikke redigering.
+            </p>
+          </div>
+        )}
+        {showErrors && !readOnly && (
           <div className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700 no-print">
             <AlertTriangle className="h-5 w-5" />
             <p className="text-sm font-bold">{t("validationError")}</p>
           </div>
         )}
+
+        <fieldset disabled={readOnly} className="contents">
 
         <div className="rounded-2xl border border-slate-200 border-l-8 border-l-green-700 bg-white p-6 shadow-sm print:border-none print:p-0 print:shadow-none">
           <label className="mb-2 block text-[10px] font-black uppercase tracking-widest text-green-800">
@@ -735,25 +760,29 @@ export function ClaimTool() {
           </div>
         </div>
 
-        <div className="flex justify-center py-8 no-print">
-          <button
-            type="button"
-            onClick={handlePrint}
-            disabled={isPrinting}
-            className={`flex items-center gap-4 rounded-3xl px-16 py-6 font-black uppercase tracking-[0.2em] transition-all duration-300 ${
-              stepStatus.s8
-                ? "bg-green-600 text-white shadow-2xl shadow-green-100 hover:-translate-y-1 hover:bg-green-700 active:scale-95"
-                : "cursor-not-allowed bg-slate-200 text-slate-400"
-            }`}
-          >
-            {isPrinting ? (
-              <Loader2 className="h-6 w-6 animate-spin" />
-            ) : (
-              <Printer className="h-6 w-6" />
-            )}
-            {t("labels.submit")}
-          </button>
-        </div>
+        </fieldset>
+
+        {!readOnly && (
+          <div className="flex justify-center py-8 no-print">
+            <button
+              type="button"
+              onClick={handlePrint}
+              disabled={isPrinting}
+              className={`flex items-center gap-4 rounded-3xl px-16 py-6 font-black uppercase tracking-[0.2em] transition-all duration-300 ${
+                stepStatus.s8
+                  ? "bg-green-600 text-white shadow-2xl shadow-green-100 hover:-translate-y-1 hover:bg-green-700 active:scale-95"
+                  : "cursor-not-allowed bg-slate-200 text-slate-400"
+              }`}
+            >
+              {isPrinting ? (
+                <Loader2 className="h-6 w-6 animate-spin" />
+              ) : (
+                <Printer className="h-6 w-6" />
+              )}
+              {t("labels.submit")}
+            </button>
+          </div>
+        )}
       </main>
 
       <footer className="mx-auto mt-8 max-w-6xl border-t px-4 py-12 text-center text-slate-400 no-print">
