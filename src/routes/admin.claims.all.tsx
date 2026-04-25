@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Eye, Search } from "lucide-react";
+import { Eye, MessageSquare, Search } from "lucide-react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ClaimsAdminSidebarLayout } from "@/components/ClaimsAdminSidebarLayout";
 import {
@@ -44,9 +44,12 @@ function Intro() {
 
 const STATUS_OPTIONS: { value: "" | ClaimStatus; label: string }[] = [
   { value: "", label: "Alle statusser" },
-  { value: "waiting", label: CLAIM_STATUS_LABEL.waiting },
   { value: "in_progress", label: CLAIM_STATUS_LABEL.in_progress },
+  { value: "waiting", label: CLAIM_STATUS_LABEL.waiting },
   { value: "approved", label: CLAIM_STATUS_LABEL.approved },
+  { value: "dealer_in_progress", label: CLAIM_STATUS_LABEL.dealer_in_progress },
+  { value: "awaiting_timan_close", label: CLAIM_STATUS_LABEL.awaiting_timan_close },
+  { value: "awaiting_timan_comment", label: CLAIM_STATUS_LABEL.awaiting_timan_comment },
   { value: "rejected", label: CLAIM_STATUS_LABEL.rejected },
   { value: "closed", label: CLAIM_STATUS_LABEL.closed },
 ];
