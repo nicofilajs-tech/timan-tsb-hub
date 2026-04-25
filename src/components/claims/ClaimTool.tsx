@@ -760,25 +760,29 @@ export function ClaimTool({ initialClaim, readOnly = false }: ClaimToolProps = {
           </div>
         </div>
 
-        <div className="flex justify-center py-8 no-print">
-          <button
-            type="button"
-            onClick={handlePrint}
-            disabled={isPrinting}
-            className={`flex items-center gap-4 rounded-3xl px-16 py-6 font-black uppercase tracking-[0.2em] transition-all duration-300 ${
-              stepStatus.s8
-                ? "bg-green-600 text-white shadow-2xl shadow-green-100 hover:-translate-y-1 hover:bg-green-700 active:scale-95"
-                : "cursor-not-allowed bg-slate-200 text-slate-400"
-            }`}
-          >
-            {isPrinting ? (
-              <Loader2 className="h-6 w-6 animate-spin" />
-            ) : (
-              <Printer className="h-6 w-6" />
-            )}
-            {t("labels.submit")}
-          </button>
-        </div>
+        </fieldset>
+
+        {!readOnly && (
+          <div className="flex justify-center py-8 no-print">
+            <button
+              type="button"
+              onClick={handlePrint}
+              disabled={isPrinting}
+              className={`flex items-center gap-4 rounded-3xl px-16 py-6 font-black uppercase tracking-[0.2em] transition-all duration-300 ${
+                stepStatus.s8
+                  ? "bg-green-600 text-white shadow-2xl shadow-green-100 hover:-translate-y-1 hover:bg-green-700 active:scale-95"
+                  : "cursor-not-allowed bg-slate-200 text-slate-400"
+              }`}
+            >
+              {isPrinting ? (
+                <Loader2 className="h-6 w-6 animate-spin" />
+              ) : (
+                <Printer className="h-6 w-6" />
+              )}
+              {t("labels.submit")}
+            </button>
+          </div>
+        )}
       </main>
 
       <footer className="mx-auto mt-8 max-w-6xl border-t px-4 py-12 text-center text-slate-400 no-print">
