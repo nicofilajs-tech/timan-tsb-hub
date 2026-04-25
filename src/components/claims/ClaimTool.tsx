@@ -365,17 +365,68 @@ export function ClaimTool({
     return { parts: partsTotal, grandTotal: partsTotal };
   }, [formData.parts]);
 
-  const handlePrint = () => {
-    if (!stepStatus.s8) {
-      setShowErrors(true);
-      return;
-    }
-    setIsPrinting(true);
+  /**
+   * Build a {@link ClaimDetail} payload from the current form state.
+   * Used by both "Gem til senere" and "Aktiver claim".
+   */
+  function buildDetailFromForm() {
+    return {
+      dealer: formData.dealer,
+      dealerCountry: formData.dealerCountry,
+      dealerContact: formData.dealerContact,
+      dealerPhone: formData.dealerPhone,
+      dealerEmail: formData.dealerEmail,
+      owner: formData.owner,
+      ownerCountry: formData.ownerCountry,
+      ownerAddress: formData.ownerAddress,
+      ownerPostal: formData.ownerPostal,
+      machineType: formData.machineType,
+      serialNo: formData.serialNo,
+      hours: formData.hours,
+      saleDate: formData.saleDate,
+      damageDate: formData.damageDate,
+      approvedDate: formData.approvedDate,
+      repairDate: formData.repairDate,
+      faultDesc: formData.faultDesc,
+      repairDesc: formData.repairDesc,
+      parts: formData.parts.map(({ id: _id, ...p }) => p),
+      laborHours: formData.laborHours,
+      drivingKm: formData.drivingKm,
+      currency: formData.currency as "DKK",
+    };
+  }
+
+  /**
+   * Save & navigate to the freshly created claim. `status` decides:
+   *  - `in_progress` → "Gem til senere redigering" (draft, dealer can still edit)
+   *  - `waiting`     → "Aktiver claim og afvent Timan"
+   */
+  function handleSave(status: Extract<ClaimStatus, "in_progress" | "waiting">) {
+    if (initialClaim) return; // existing-claim editing is handled elsewhere
+    setSavingAction(status === "waiting" ? "activate" : "draft");
+    setShowErrors(false);
+    setDealerSavedMsg(null);
+    const created = createDealerClaim({
+      groupId: generatedClaimId,
+      warrantyNo: generatedClaimId,
+      status,
+      detail: buildDetailFromForm(),
+      totalPrice: totals.grandTotal,
+    });
+    setDealerSavedMsg(
+      status === "waiting"
+        ? "Claim aktiveret. Timan er nu informeret og kan se sagen."
+        : "Kladde gemt. Du kan fortsætte redigeringen senere.",
+    );
+    // Small delay so the success message is visible before navigation.
     setTimeout(() => {
-      window.print();
-      setIsPrinting(false);
-    }, 500);
-  };
+      setSavingAction(null);
+      navigate({
+        to: "/dealer/claims/$claimId",
+        params: { claimId: created.id },
+      });
+    }, 800);
+  }
 
   const updatePart = (id: number, field: keyof PartLine, value: string) => {
     setFormData({
