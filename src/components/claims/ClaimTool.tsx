@@ -1156,3 +1156,67 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+/**
+ * CountrySelect — grouped dropdown of standardized country names.
+ *
+ * Replaces the free-text Land input in the claim form. Countries are
+ * sourced from `src/lib/countries-store.ts` and grouped into Europe /
+ * Outside Europe. Timan Admin can extend the list via /admin/countries.
+ */
+function CountrySelect({
+  label,
+  value,
+  onChange,
+  required,
+  disabled,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  required?: boolean;
+  disabled?: boolean;
+}) {
+  const groups = useMemo(() => getCountriesGrouped(), []);
+  const missing = required && !value.trim();
+  return (
+    <div className="w-full">
+      <label className="mb-1 block text-[9px] font-bold uppercase text-slate-400 print:text-black">
+        {label} {required && "*"}
+      </label>
+      <Select
+        value={value || undefined}
+        onValueChange={onChange}
+        disabled={disabled}
+      >
+        <SelectTrigger
+          className={`h-auto w-full rounded-lg border px-3 py-2 text-sm shadow-none ${
+            missing
+              ? "border-red-200 bg-red-50"
+              : "border-slate-200 bg-slate-50"
+          } print:border-black print:bg-white`}
+        >
+          <SelectValue placeholder="Vælg land" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectLabel>{COUNTRY_GROUP_LABEL.europe}</SelectLabel>
+            {groups.europe.map((c) => (
+              <SelectItem key={`eu-${c.name}`} value={c.name}>
+                {c.name}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+          <SelectGroup>
+            <SelectLabel>{COUNTRY_GROUP_LABEL.outside}</SelectLabel>
+            {groups.outside.map((c) => (
+              <SelectItem key={`ow-${c.name}`} value={c.name}>
+                {c.name}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
