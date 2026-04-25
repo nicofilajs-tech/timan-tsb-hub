@@ -98,6 +98,37 @@ export interface ClaimRecord {
    * documenting why a claim was rejected/closed or follow-up notes.
    */
   adminComment?: string;
+  /**
+   * Comments left by the dealer. Used in the disagreement/"Ikke accepteret"
+   * flow and on rejected claims so the dealer can reply. Each comment is
+   * surfaced to Timan Admin with a notification icon when the claim is in
+   * a status that requires Timan attention.
+   */
+  dealerComments?: ClaimComment[];
+  /**
+   * Audit log of changes made by Timan Admin after the claim was approved.
+   * Visible to both Timan Admin and the dealer so any later edits are
+   * transparent.
+   */
+  auditLog?: ClaimAuditEntry[];
+}
+
+export interface ClaimComment {
+  id: string;
+  author: string;
+  /** ISO timestamp */
+  at: string;
+  text: string;
+}
+
+export interface ClaimAuditEntry {
+  id: string;
+  /** ISO timestamp */
+  at: string;
+  by: string;
+  field: string;
+  oldValue: string;
+  newValue: string;
 }
 
 /** Format the user-facing display id, e.g. "CL-9013/2". */
@@ -107,20 +138,52 @@ export function claimDisplayId(claim: Pick<ClaimRecord, "groupId" | "subIndex">)
 
 export const CLAIM_STATUS_LABEL: Record<ClaimStatus, string> = {
   open: "Åben",
+  in_progress: "Gemt / ikke afsendt",
   waiting: "Afventer accept",
-  in_progress: "I gang",
-  approved: "Godkendt",
+  approved: "Godkendt af Timan",
+  dealer_in_progress: "I gang hos forhandler",
+  awaiting_timan_close: "Afventer Timan afslutning",
+  awaiting_timan_comment: "Afventer Timan kommentar",
   rejected: "Afvist",
   closed: "Lukket",
 };
 
+/** Tailwind classes for the status pill, keyed by status. */
+export const CLAIM_STATUS_PILL: Record<ClaimStatus, string> = {
+  open: "bg-blue-50 text-blue-700",
+  in_progress: "bg-slate-100 text-slate-700",
+  waiting: "bg-amber-50 text-amber-700",
+  approved: "bg-emerald-50 text-emerald-700",
+  dealer_in_progress: "bg-indigo-50 text-indigo-700",
+  awaiting_timan_close: "bg-purple-50 text-purple-700",
+  awaiting_timan_comment: "bg-orange-50 text-orange-700",
+  rejected: "bg-red-50 text-red-700",
+  closed: "bg-slate-100 text-slate-600",
+};
+
 /**
- * Whether the dealer is allowed to edit a claim in this status.
- * Editable: waiting (Afventer accept), in_progress (I gang).
- * Read-only: approved, rejected, closed (and legacy "open").
+ * Whether the dealer is allowed to fully edit the claim form in this status.
+ * Editable: in_progress (draft), waiting (Afventer accept).
+ * After Timan approval the dealer is locked out of all claim data.
  */
 export function isClaimEditable(status: ClaimStatus): boolean {
-  return status === "waiting" || status === "in_progress";
+  return status === "in_progress" || status === "waiting";
+}
+
+/** Statuses that require Timan Admin attention because of a dealer comment. */
+export const TIMAN_NEEDS_ATTENTION_STATUSES: ClaimStatus[] = [
+  "awaiting_timan_comment",
+  "awaiting_timan_close",
+];
+
+/** True if the claim should display a notification badge to Timan Admin. */
+export function claimNeedsTimanAttention(claim: ClaimRecord): boolean {
+  if (TIMAN_NEEDS_ATTENTION_STATUSES.includes(claim.status)) return true;
+  // Dealer left a comment on a rejected claim — Timan should see the icon.
+  if (claim.status === "rejected" && (claim.dealerComments?.length ?? 0) > 0) {
+    return true;
+  }
+  return false;
 }
 
 const NORDIC_DEALER = "Nordic Machinery Aps";
