@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { PlusCircle, Search } from "lucide-react";
+import { Eye, Pencil, PlusCircle, Search } from "lucide-react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ClaimsAdminSidebarLayout } from "@/components/ClaimsAdminSidebarLayout";
 import { useDealerName } from "@/components/warranty/useDealerName";
@@ -144,6 +144,7 @@ function MineBody({ dealerName }: { dealerName: string }) {
                   <th className="px-6 py-3">Serienr</th>
                   <th className="px-6 py-3">Oprettet</th>
                   <th className="px-6 py-3">Status</th>
+                  <th className="px-6 py-3 text-right">Handlinger</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -165,6 +166,24 @@ function MineBody({ dealerName }: { dealerName: string }) {
                     </td>
                     <td className="px-6 py-3">
                       <StatusPill status={r.status} />
+                    </td>
+                    <td className="px-6 py-3">
+                      <div className="flex items-center justify-end gap-2">
+                        <Link
+                          to="/dealer/claims/$claimId"
+                          params={{ claimId: r.id }}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100"
+                        >
+                          <Eye className="h-3.5 w-3.5" /> Åbn
+                        </Link>
+                        <Link
+                          to="/dealer/claims/$claimId"
+                          params={{ claimId: r.id }}
+                          className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-2.5 py-1.5 text-xs font-bold text-white hover:bg-slate-800"
+                        >
+                          <Pencil className="h-3.5 w-3.5" /> Rediger
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 ))}
