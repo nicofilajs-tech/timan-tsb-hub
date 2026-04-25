@@ -1630,3 +1630,162 @@ function CountrySelect({
     </div>
   );
 }
+
+/**
+ * WorkflowPanel — status-driven action buttons for both Dealer and Timan Admin.
+ * Renders the right buttons based on the live status of the open claim.
+ */
+function WorkflowPanel({
+  status,
+  adminMode,
+  onAccept,
+  onWait,
+  onDealerReject,
+  onReadyToClose,
+  onAdminApprove,
+  onAdminReject,
+  onAdminClose,
+  onAdminSendBack,
+  onAdminReopen,
+  onAdminMoveForward,
+}: {
+  status: ClaimStatus;
+  adminMode: boolean;
+  onAccept: () => void;
+  onWait: () => void;
+  onDealerReject: () => void;
+  onReadyToClose: () => void;
+  onAdminApprove: () => void;
+  onAdminReject: () => void;
+  onAdminClose: () => void;
+  onAdminSendBack: () => void;
+  onAdminReopen: () => void;
+  onAdminMoveForward: () => void;
+}) {
+  const [waited, setWaited] = useState(false);
+  const wait = () => {
+    onWait();
+    setWaited(true);
+    setTimeout(() => setWaited(false), 2000);
+  };
+
+  const Btn = ({
+    onClick,
+    children,
+    tone = "default",
+    icon: Icon,
+  }: {
+    onClick: () => void;
+    children: React.ReactNode;
+    tone?: "default" | "primary" | "danger" | "warn";
+    icon?: typeof ThumbsUp;
+  }) => {
+    const cls =
+      tone === "primary"
+        ? "bg-emerald-600 text-white hover:bg-emerald-700"
+        : tone === "danger"
+        ? "bg-red-600 text-white hover:bg-red-700"
+        : tone === "warn"
+        ? "bg-orange-600 text-white hover:bg-orange-700"
+        : "border border-slate-300 bg-white text-slate-800 hover:bg-slate-50";
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-black uppercase tracking-widest shadow-sm ${cls}`}
+      >
+        {Icon && <Icon className="h-4 w-4" />}
+        {children}
+      </button>
+    );
+  };
+
+  let content: React.ReactNode = null;
+  if (!adminMode) {
+    if (status === "approved") {
+      content = (
+        <>
+          <Btn onClick={onAccept} tone="primary" icon={ThumbsUp}>Accepter</Btn>
+          <Btn onClick={wait}>Afvent</Btn>
+          <Btn onClick={onDealerReject} tone="warn" icon={ThumbsDown}>Ikke accepteret</Btn>
+        </>
+      );
+    } else if (status === "dealer_in_progress") {
+      content = (
+        <>
+          <Btn onClick={onReadyToClose} tone="primary" icon={Check}>Klar til afslutning</Btn>
+          <Btn onClick={wait}>Afvent</Btn>
+          <Btn onClick={onDealerReject} tone="warn" icon={ThumbsDown}>Ikke accepteret</Btn>
+        </>
+      );
+    }
+  } else {
+    if (status === "waiting") {
+      content = (
+        <>
+          <Btn onClick={onAdminApprove} tone="primary" icon={ThumbsUp}>Godkend</Btn>
+          <Btn onClick={onAdminReject} tone="danger" icon={ThumbsDown}>Afvis</Btn>
+        </>
+      );
+    } else if (status === "awaiting_timan_close") {
+      content = (
+        <>
+          <Btn onClick={onAdminClose} tone="primary" icon={Check}>Luk sag</Btn>
+          <Btn onClick={onAdminSendBack}>Send tilbage til forhandler</Btn>
+        </>
+      );
+    } else if (status === "awaiting_timan_comment") {
+      content = (
+        <>
+          <Btn onClick={onAdminMoveForward} tone="primary" icon={ThumbsUp}>Godkend igen</Btn>
+          <Btn onClick={onAdminReject} tone="danger" icon={ThumbsDown}>Afvis</Btn>
+          <Btn onClick={onAdminSendBack}>Send tilbage til forhandler</Btn>
+        </>
+      );
+    } else if (status === "rejected" || status === "closed") {
+      content = <Btn onClick={onAdminReopen} tone="warn">Genåben sag</Btn>;
+    }
+  }
+
+  if (!content) return null;
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm no-print">
+      <div className="mb-3 text-[10px] font-black uppercase tracking-widest text-slate-500">
+        Handlinger · {CLAIM_STATUS_LABEL[status]}
+      </div>
+      <div className="flex flex-wrap items-center gap-2">{content}</div>
+      {waited && (
+        <p className="mt-2 text-[11px] font-bold text-slate-500">
+          Status uændret. Du kan vende tilbage senere.
+        </p>
+      )}
+    </div>
+  );
+}
+
+function DealerReplyBox({ onSubmit }: { onSubmit: (text: string) => void }) {
+  const [text, setText] = useState("");
+  return (
+    <div className="mt-3 space-y-2">
+      <textarea
+        className="h-20 w-full rounded-lg border border-orange-200 bg-white p-2 text-sm outline-none focus:border-orange-400"
+        placeholder="Skriv et svar til Timan…"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+      />
+      <div className="flex justify-end">
+        <button
+          type="button"
+          disabled={!text.trim()}
+          onClick={() => {
+            onSubmit(text);
+            setText("");
+          }}
+          className="rounded-lg bg-orange-600 px-3 py-1.5 text-xs font-black uppercase tracking-widest text-white shadow-sm hover:bg-orange-700 disabled:opacity-50"
+        >
+          Send svar
+        </button>
+      </div>
+    </div>
+  );
+}
