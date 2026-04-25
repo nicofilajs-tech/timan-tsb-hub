@@ -248,6 +248,20 @@ export function mostUsedMachineType(records: WarrantyRegistration[]): {
   return { type: top[0], count: top[1] };
 }
 
+export function yearlyOverview(
+  records: WarrantyRegistration[],
+): { year: number; count: number }[] {
+  const counts = new Map<number, number>();
+  for (const r of records) {
+    const y = Number((r.submittedAt || r.createdAt).slice(0, 4));
+    if (!y) continue;
+    counts.set(y, (counts.get(y) ?? 0) + 1);
+  }
+  return Array.from(counts.entries())
+    .map(([year, count]) => ({ year, count }))
+    .sort((a, b) => a.year - b.year);
+}
+
 export function dealerOverview(
   records: WarrantyRegistration[],
 ): { dealer: string; count: number }[] {
