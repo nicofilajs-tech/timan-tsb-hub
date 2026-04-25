@@ -20,7 +20,13 @@ export const Route = createFileRoute("/admin/claims/dashboard")({
   component: AdminClaimsDashboardRoute,
 });
 
-const ACTIVE_STATUSES: ClaimStatus[] = ["waiting", "in_progress", "approved"];
+const ACTIVE_STATUSES: ClaimStatus[] = [
+  "waiting",
+  "approved",
+  "dealer_in_progress",
+  "awaiting_timan_close",
+  "awaiting_timan_comment",
+];
 
 function AdminClaimsDashboardRoute() {
   return (
