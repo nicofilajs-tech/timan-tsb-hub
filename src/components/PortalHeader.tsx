@@ -107,7 +107,7 @@ export function PortalHeader({
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white">
-      <div className="relative flex h-[96px] items-center justify-between gap-4 px-6">
+      <div className="relative mx-auto flex h-[96px] max-w-[1400px] items-center justify-between gap-4 px-6">
         <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           <img
             src={timanLogo}
@@ -116,7 +116,7 @@ export function PortalHeader({
           />
         </div>
 
-        <div className="flex min-w-0 items-center gap-4 pl-2 md:pl-6">
+        <div className="flex min-w-0 items-center gap-4">
           {backTo ? (
             <Link
               to={backTo as "/dashboard"}
