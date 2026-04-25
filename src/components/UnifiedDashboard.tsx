@@ -151,7 +151,7 @@ export function UnifiedDashboard({
       title: "Service / Claims",
       desc: "Opret og håndter reklamationssager, følg status og se historik på maskiner.",
       action: "Åbn reklamationer",
-      href: isAdmin ? "/service" : "/dealer/claims/dashboard",
+      href: isAdmin ? "/admin/claims/dashboard" : "/dealer/claims/dashboard",
       color: "green",
       icon: Wrench,
     },
@@ -264,7 +264,7 @@ export function UnifiedDashboard({
         deadline: "Deadline: I dag",
         icon: Wrench,
         color: "amber",
-        href: "/service",
+        href: "/admin/claims/dashboard",
       });
       items.push({
         type: "Claim",
@@ -274,7 +274,7 @@ export function UnifiedDashboard({
         deadline: "Deadline: I går",
         icon: Wrench,
         color: "red",
-        href: "/service",
+        href: "/admin/claims/dashboard",
       });
     } else {
       items.push({
@@ -285,7 +285,7 @@ export function UnifiedDashboard({
         deadline: "Modtaget i går",
         icon: Wrench,
         color: "amber",
-        href: "/service",
+        href: "/dealer/claims/dashboard",
       });
     }
 

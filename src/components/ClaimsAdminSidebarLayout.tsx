@@ -16,12 +16,23 @@ import {
 } from "lucide-react";
 import { PortalHeader } from "@/components/PortalHeader";
 
+export type ClaimsLayoutScope = "admin" | "dealer";
+
 interface NavItem {
   to: string;
   label: string;
   icon: LucideIcon;
   match: string;
 }
+
+const ADMIN_NAV: NavItem[] = [
+  {
+    to: "/admin/claims/dashboard",
+    label: "Dashboard",
+    icon: LayoutDashboard,
+    match: "/admin/claims/dashboard",
+  },
+];
 
 const DEALER_NAV: NavItem[] = [
   {
@@ -85,24 +96,39 @@ class ClaimsErrorBoundary extends Component<
 }
 
 interface ClaimsAdminSidebarLayoutProps {
+  /** Defaults to "dealer" so the existing dealer routes keep working. */
+  scope?: ClaimsLayoutScope;
   intro?: ReactNode;
   children: ReactNode;
 }
 
 export function ClaimsAdminSidebarLayout({
+  scope = "dealer",
   intro,
   children,
 }: ClaimsAdminSidebarLayoutProps) {
   const location = useLocation();
-  const nav = DEALER_NAV;
+  const nav = scope === "admin" ? ADMIN_NAV : DEALER_NAV;
+
+  const headerProps =
+    scope === "admin"
+      ? {
+          displayName: "Timan Admin",
+          company: "Timan Intern",
+          user: { initials: "TA", name: "Timan Admin", role: "Intern" },
+          backTo: "/admin/dashboard",
+        }
+      : {
+          displayName: "Forhandler",
+          company: "Service / Claims",
+          user: { initials: "FH", name: "Forhandler", role: "Dealer" },
+          backTo: "/dashboard",
+        };
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-950">
       <PortalHeader
-        displayName="Forhandler"
-        company="Service / Claims"
-        user={{ initials: "FH", name: "Forhandler", role: "Dealer" }}
-        backTo="/dashboard"
+        {...headerProps}
         moduleTitle="Service / Claims"
         moduleSubtitle="Officiel portal for forhandlere"
       />
