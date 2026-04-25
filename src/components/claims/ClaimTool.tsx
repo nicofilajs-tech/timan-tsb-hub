@@ -214,6 +214,24 @@ export function ClaimTool({
   // read-only mode where no submission is possible anyway.
   const [showIntro, setShowIntro] = useState(!initialClaim && !readOnly);
   const [adminComment, setAdminComment] = useState(initialClaim?.adminComment ?? "");
+  const navigate = useNavigate();
+
+  // Connected (grouped) claims — siblings of the current claim sharing the
+  // same main case number (groupId). Only meaningful when an existing claim
+  // is open.
+  const groupClaims = useMemo(
+    () => (initialClaim ? getGroupClaims(initialClaim.groupId) : []),
+    [initialClaim],
+  );
+  const isGrouped = groupClaims.length > 1;
+
+  function handleAddConnectedMachine() {
+    if (!initialClaim) return;
+    const created = addConnectedClaim(initialClaim.id);
+    if (!created) return;
+    const target = adminMode ? "/admin/claims/$claimId" : "/dealer/claims/$claimId";
+    navigate({ to: target, params: { claimId: created.id } });
+  }
 
   const t = (key: string): string => {
     const parts = key.split(".");
