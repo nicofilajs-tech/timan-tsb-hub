@@ -479,6 +479,168 @@ const MOCK: ClaimRecord[] = [
   },
 ];
 
+// ---------------------------------------------------------------------------
+// Grouped / connected claims
+// ---------------------------------------------------------------------------
+//
+// Demo case: a Danish municipality reports the same hydraulic-block leak on
+// three identical RC-1000 machines from the same delivery batch. The dealer
+// files one main case ("CL-9050") and adds two connected machines under it,
+// resulting in CL-9050/1, CL-9050/2 and CL-9050/3.
+const GROUP_DEMO: ClaimRecord[] = [
+  {
+    id: "CL-9050-1",
+    groupId: "CL-9050",
+    subIndex: 1,
+    warrantyNo: "T-002010",
+    title: "Hydraulik lækage — fælles batch RC-1000 (maskine 1)",
+    dealer: NORDIC_DEALER,
+    country: "DK",
+    customer: "Vejle Park & Materielgård",
+    machineType: "RC-1000",
+    serial: "RC1000-23001",
+    createdAt: "2026-04-20",
+    damageDate: "2026-04-19",
+    approvedDate: null,
+    totalPrice: 8420,
+    status: "waiting",
+    detail: {
+      dealer: NORDIC_DEALER,
+      dealerCountry: "DK",
+      dealerContact: "Mads Holm",
+      dealerPhone: "+45 22 14 88 02",
+      dealerEmail: "service@nordicmachinery.dk",
+      owner: "Vejle Park & Materielgård",
+      ownerCountry: "DK",
+      ownerAddress: "Materielvej 4",
+      ownerPostal: "7100 Vejle",
+      machineType: "RC-1000",
+      serialNo: "RC1000-23001",
+      hours: "640",
+      saleDate: "2025-09-02",
+      damageDate: "2026-04-19",
+      approvedDate: "",
+      repairDate: "2026-04-22",
+      faultDesc:
+        "Olielækage ved hovedhydraulikblok. Samme fejlmønster konstateret på tre RC-1000 fra samme leveringsbatch.",
+      repairDesc:
+        "Udskiftning af pakningssæt og O-ringe på hovedblok. Trykprøvet ved 210 bar uden lækage.",
+      parts: [
+        { qty: "1", partNo: "HYD-PK-220", desc: "Pakningssæt hovedblok", unitPrice: "1450.00" },
+        { qty: "4", partNo: "OR-18x2", desc: "O-ring 18x2 NBR", unitPrice: "45.00" },
+        { qty: "6", partNo: "HYD-OIL-46", desc: "Hydraulikolie HVLP46 (l)", unitPrice: "85.00" },
+      ],
+      laborHours: "5.5",
+      drivingKm: "40",
+      currency: "DKK",
+    },
+  },
+  {
+    id: "CL-9050-2",
+    groupId: "CL-9050",
+    subIndex: 2,
+    warrantyNo: "T-002010",
+    title: "Hydraulik lækage — fælles batch RC-1000 (maskine 2)",
+    dealer: NORDIC_DEALER,
+    country: "DK",
+    customer: "Vejle Park & Materielgård",
+    machineType: "RC-1000",
+    serial: "RC1000-23002",
+    createdAt: "2026-04-20",
+    damageDate: "2026-04-19",
+    approvedDate: null,
+    totalPrice: 8420,
+    status: "waiting",
+    detail: {
+      dealer: NORDIC_DEALER,
+      dealerCountry: "DK",
+      dealerContact: "Mads Holm",
+      dealerPhone: "+45 22 14 88 02",
+      dealerEmail: "service@nordicmachinery.dk",
+      owner: "Vejle Park & Materielgård",
+      ownerCountry: "DK",
+      ownerAddress: "Materielvej 4",
+      ownerPostal: "7100 Vejle",
+      machineType: "RC-1000",
+      serialNo: "RC1000-23002",
+      hours: "612",
+      saleDate: "2025-09-02",
+      damageDate: "2026-04-19",
+      approvedDate: "",
+      repairDate: "2026-04-22",
+      faultDesc:
+        "Identisk olielækage ved hovedhydraulikblok som søstermaskine RC1000-23001.",
+      repairDesc:
+        "Udskiftning af pakningssæt og O-ringe på hovedblok. Trykprøvet uden lækage.",
+      parts: [
+        { qty: "1", partNo: "HYD-PK-220", desc: "Pakningssæt hovedblok", unitPrice: "1450.00" },
+        { qty: "4", partNo: "OR-18x2", desc: "O-ring 18x2 NBR", unitPrice: "45.00" },
+        { qty: "6", partNo: "HYD-OIL-46", desc: "Hydraulikolie HVLP46 (l)", unitPrice: "85.00" },
+      ],
+      laborHours: "5.5",
+      drivingKm: "0",
+      currency: "DKK",
+    },
+  },
+  {
+    id: "CL-9050-3",
+    groupId: "CL-9050",
+    subIndex: 3,
+    warrantyNo: "T-002010",
+    title: "Hydraulik lækage — fælles batch RC-1000 (maskine 3)",
+    dealer: NORDIC_DEALER,
+    country: "DK",
+    customer: "Vejle Park & Materielgård",
+    machineType: "RC-1000",
+    serial: "RC1000-23003",
+    createdAt: "2026-04-20",
+    damageDate: "2026-04-19",
+    approvedDate: "2026-04-24",
+    totalPrice: 8420,
+    status: "in_progress",
+    detail: {
+      dealer: NORDIC_DEALER,
+      dealerCountry: "DK",
+      dealerContact: "Mads Holm",
+      dealerPhone: "+45 22 14 88 02",
+      dealerEmail: "service@nordicmachinery.dk",
+      owner: "Vejle Park & Materielgård",
+      ownerCountry: "DK",
+      ownerAddress: "Materielvej 4",
+      ownerPostal: "7100 Vejle",
+      machineType: "RC-1000",
+      serialNo: "RC1000-23003",
+      hours: "705",
+      saleDate: "2025-09-02",
+      damageDate: "2026-04-19",
+      approvedDate: "2026-04-24",
+      repairDate: "2026-04-23",
+      faultDesc:
+        "Tredje maskine fra samme batch med identisk hydraulik-lækage.",
+      repairDesc:
+        "Udskiftning af pakningssæt og O-ringe. Funktionstestet ok.",
+      parts: [
+        { qty: "1", partNo: "HYD-PK-220", desc: "Pakningssæt hovedblok", unitPrice: "1450.00" },
+        { qty: "4", partNo: "OR-18x2", desc: "O-ring 18x2 NBR", unitPrice: "45.00" },
+        { qty: "6", partNo: "HYD-OIL-46", desc: "Hydraulikolie HVLP46 (l)", unitPrice: "85.00" },
+      ],
+      laborHours: "5.5",
+      drivingKm: "0",
+      currency: "DKK",
+    },
+  },
+];
+MOCK.push(...GROUP_DEMO);
+
+// Backfill standalone records (no explicit groupId): each becomes its own
+// single-machine group where groupId == id and subIndex == 1.
+for (const c of MOCK) {
+  if (!(c as Partial<ClaimRecord>).groupId) {
+    (c as ClaimRecord).groupId = c.id;
+    (c as ClaimRecord).subIndex = 1;
+  }
+}
+
 export function getAllClaims(): ClaimRecord[] {
   return MOCK;
 }
