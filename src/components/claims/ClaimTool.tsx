@@ -224,14 +224,31 @@ export function ClaimTool({
   const [portalLang] = usePortalLanguage();
   const lang = mapPortalLang(portalLang);
   const [showErrors, setShowErrors] = useState(false);
-  const [isPrinting, setIsPrinting] = useState(false);
   const [isSavingAdmin, setIsSavingAdmin] = useState(false);
   const [adminSaved, setAdminSaved] = useState(false);
+  // Saving state for the dealer-side "draft" / "activate" actions.
+  const [savingAction, setSavingAction] = useState<null | "draft" | "activate">(
+    null,
+  );
+  const [dealerSavedMsg, setDealerSavedMsg] = useState<string | null>(null);
   // Skip the intro modal when opening an existing claim (view/edit), or in
   // read-only mode where no submission is possible anyway.
   const [showIntro, setShowIntro] = useState(!initialClaim && !readOnly);
   const [adminComment, setAdminComment] = useState(initialClaim?.adminComment ?? "");
   const navigate = useNavigate();
+
+  /**
+   * Auto-generated claim number for *new* claims (Ny claim).
+   * Format: `CL-YYYY-NNNN`. The dealer never types this manually.
+   * For an existing claim, we fall back to its stored groupId so the
+   * top-of-form display still shows the same case number.
+   */
+  const [generatedClaimId] = useState(() =>
+    initialClaim ? initialClaim.groupId : generateClaimNumber(),
+  );
+  const displayClaimNumber = initialClaim
+    ? claimDisplayId(initialClaim)
+    : `${generatedClaimId}/1`;
 
   // Connected (grouped) claims — siblings of the current claim sharing the
   // same main case number (groupId). Only meaningful when an existing claim
