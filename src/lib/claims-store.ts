@@ -412,6 +412,8 @@ const MOCK: ClaimRecord[] = [
       drivingKm: "150",
       currency: "DKK",
     },
+    adminComment:
+      "Afsluttet 2026-03-10. Garantiarbejde udført komplet, kreditnota udstedt til forhandler. Sagen er lukket og arkiveret.",
   },
   {
     id: "CL-8775",
