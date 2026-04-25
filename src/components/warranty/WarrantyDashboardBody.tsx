@@ -112,7 +112,7 @@ export function WarrantyDashboardBody({ scope, dealerName }: Props) {
         ) : (
           <Kpi
             label="Seneste levering"
-            value={stats.latest[0]?.deliveryDate || "—"}
+            value={formatDate(stats.latest[0]?.deliveryDate)}
             icon={Factory}
             accent="text-sky-600"
           />
@@ -162,7 +162,7 @@ export function WarrantyDashboardBody({ scope, dealerName }: Props) {
                     </div>
                   </div>
                   <div className="shrink-0 text-right text-xs text-slate-500">
-                    <div>{r.deliveryDate || "—"}</div>
+                    <div>{formatDate(r.deliveryDate)}</div>
                   </div>
                 </div>
               ))}
