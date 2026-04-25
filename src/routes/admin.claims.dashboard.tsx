@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Eye } from "lucide-react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ClaimsAdminSidebarLayout } from "@/components/ClaimsAdminSidebarLayout";
 import {
