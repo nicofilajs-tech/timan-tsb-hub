@@ -646,13 +646,14 @@ export function ClaimTool({
                 onChange={(value) => setFormData({ ...formData, owner: value })}
                 required
               />
-              <FormInput
+              <CountrySelect
                 label={t("labels.country")}
                 value={formData.ownerCountry}
                 onChange={(value) =>
                   setFormData({ ...formData, ownerCountry: value })
                 }
                 required
+                disabled={readOnly && !adminMode}
               />
               <FormInput
                 label={t("labels.address")}
