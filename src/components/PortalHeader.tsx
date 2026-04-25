@@ -107,22 +107,21 @@ export function PortalHeader({
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white">
-      <div className="flex h-[72px] items-center justify-between px-6">
-        <div className="flex items-center gap-6">
-          <img src={timanLogo} alt="Timan Logo" className="h-9 w-auto" />
+      <div className="relative flex h-[96px] items-center justify-between gap-4 px-6">
+        <div className="flex items-center gap-4 md:gap-6">
           {backTo && (
             <Link
               to={backTo as "/dashboard"}
               className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-xs font-bold uppercase tracking-widest text-slate-500 transition-colors hover:border-slate-300 hover:text-slate-900"
             >
               <ArrowLeft className="h-4 w-4" />
-              {backLabel}
+              <span className="hidden sm:inline">{backLabel}</span>
             </Link>
           )}
           {moduleTitle && (
             <>
-              <div className="h-10 border-l border-slate-200" />
-              <div>
+              <div className="hidden h-10 border-l border-slate-200 md:block" />
+              <div className="hidden md:block">
                 <p className="text-lg font-black leading-tight text-slate-950">
                   {moduleTitle}
                 </p>
@@ -134,7 +133,15 @@ export function PortalHeader({
           )}
         </div>
 
-        <div className="flex items-center gap-6">
+        <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          <img
+            src={timanLogo}
+            alt="Timan Logo"
+            className="h-[50px] w-auto md:h-[64px]"
+          />
+        </div>
+
+        <div className="flex items-center gap-4 md:gap-6">
           <div className="hidden rounded-full bg-slate-100 p-1 text-sm font-bold text-slate-500 md:flex">
             {PORTAL_LANGUAGES.map((code) => (
               <button
