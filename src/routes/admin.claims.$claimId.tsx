@@ -5,8 +5,10 @@ import { ClaimsAdminSidebarLayout } from "@/components/ClaimsAdminSidebarLayout"
 import { ClaimTool } from "@/components/claims/ClaimTool";
 import {
   CLAIM_STATUS_LABEL,
+  claimDisplayId,
   getClaimById,
   isClaimEditable,
+  isClaimGrouped,
   type ClaimRecord,
   type ClaimStatus,
 } from "@/lib/claims-store";
@@ -74,11 +76,16 @@ function DetailIntro({ claim, readOnly }: { claim: ClaimRecord; readOnly: boolea
           <ArrowLeft className="h-3.5 w-3.5" /> Alle claims
         </Link>
         <div className="mt-1 flex flex-wrap items-center gap-3">
-          <h1 className="text-3xl font-black tracking-tight">{claim.id}</h1>
+          <h1 className="text-3xl font-black tracking-tight">{claimDisplayId(claim)}</h1>
           <StatusPill status={claim.status} />
           <span className="inline-flex rounded-full bg-amber-500 px-2.5 py-0.5 text-xs font-black text-white">
             Admin review
           </span>
+          {isClaimGrouped(claim) && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-black text-indigo-700">
+              Samlet sag · {claim.groupId}
+            </span>
+          )}
           {readOnly && (
             <span className="inline-flex rounded-full bg-slate-900 px-2.5 py-0.5 text-xs font-black text-white">
               Forhandler-låst
