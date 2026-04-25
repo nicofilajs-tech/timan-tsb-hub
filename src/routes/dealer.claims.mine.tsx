@@ -177,13 +177,15 @@ function MineBody({ dealerName }: { dealerName: string }) {
                         >
                           <Eye className="h-3.5 w-3.5" /> Åbn
                         </Link>
-                        <Link
-                          to="/dealer/claims/$claimId"
-                          params={{ claimId: r.id }}
-                          className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-2.5 py-1.5 text-xs font-bold text-white hover:bg-slate-800"
-                        >
-                          <Pencil className="h-3.5 w-3.5" /> Rediger
-                        </Link>
+                        {isClaimEditable(r.status) && (
+                          <Link
+                            to="/dealer/claims/$claimId"
+                            params={{ claimId: r.id }}
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-2.5 py-1.5 text-xs font-bold text-white hover:bg-slate-800"
+                          >
+                            <Pencil className="h-3.5 w-3.5" /> Rediger
+                          </Link>
+                        )}
                       </div>
                     </td>
                   </tr>
