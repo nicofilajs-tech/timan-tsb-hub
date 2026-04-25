@@ -11,13 +11,14 @@ import {
   AlertTriangle,
   Check,
   Copy,
+  FileEdit,
   Layers,
   Loader2,
   MessageSquare,
   Phone,
   Plus,
-  Printer,
   Save,
+  Send,
   Trash2,
   User,
   Wrench,
@@ -26,9 +27,12 @@ import { usePortalLanguage, type PortalLang } from "@/components/PortalHeader";
 import {
   addConnectedClaim,
   claimDisplayId,
+  createDealerClaim,
+  generateClaimNumber,
   getGroupClaims,
   updateAdminFields,
   type ClaimRecord,
+  type ClaimStatus,
 } from "@/lib/claims-store";
 import {
   COUNTRY_GROUP_LABEL,
@@ -220,14 +224,31 @@ export function ClaimTool({
   const [portalLang] = usePortalLanguage();
   const lang = mapPortalLang(portalLang);
   const [showErrors, setShowErrors] = useState(false);
-  const [isPrinting, setIsPrinting] = useState(false);
   const [isSavingAdmin, setIsSavingAdmin] = useState(false);
   const [adminSaved, setAdminSaved] = useState(false);
+  // Saving state for the dealer-side "draft" / "activate" actions.
+  const [savingAction, setSavingAction] = useState<null | "draft" | "activate">(
+    null,
+  );
+  const [dealerSavedMsg, setDealerSavedMsg] = useState<string | null>(null);
   // Skip the intro modal when opening an existing claim (view/edit), or in
   // read-only mode where no submission is possible anyway.
   const [showIntro, setShowIntro] = useState(!initialClaim && !readOnly);
   const [adminComment, setAdminComment] = useState(initialClaim?.adminComment ?? "");
   const navigate = useNavigate();
+
+  /**
+   * Auto-generated claim number for *new* claims (Ny claim).
+   * Format: `CL-YYYY-NNNN`. The dealer never types this manually.
+   * For an existing claim, we fall back to its stored groupId so the
+   * top-of-form display still shows the same case number.
+   */
+  const [generatedClaimId] = useState(() =>
+    initialClaim ? initialClaim.groupId : generateClaimNumber(),
+  );
+  const displayClaimNumber = initialClaim
+    ? claimDisplayId(initialClaim)
+    : `${generatedClaimId}/1`;
 
   // Connected (grouped) claims — siblings of the current claim sharing the
   // same main case number (groupId). Only meaningful when an existing claim
@@ -262,7 +283,7 @@ export function ClaimTool({
   const [formData, setFormData] = useState(() => {
     const d = initialClaim?.detail;
     return {
-      guaranteeNo: initialClaim?.warrantyNo ?? "",
+      guaranteeNo: initialClaim?.warrantyNo ?? generatedClaimId,
       dealer: d?.dealer ?? "",
       dealerCountry: d?.dealerCountry ?? "",
       dealerContact: d?.dealerContact ?? "",
@@ -344,17 +365,68 @@ export function ClaimTool({
     return { parts: partsTotal, grandTotal: partsTotal };
   }, [formData.parts]);
 
-  const handlePrint = () => {
-    if (!stepStatus.s8) {
-      setShowErrors(true);
-      return;
-    }
-    setIsPrinting(true);
+  /**
+   * Build a {@link ClaimDetail} payload from the current form state.
+   * Used by both "Gem til senere" and "Aktiver claim".
+   */
+  function buildDetailFromForm() {
+    return {
+      dealer: formData.dealer,
+      dealerCountry: formData.dealerCountry,
+      dealerContact: formData.dealerContact,
+      dealerPhone: formData.dealerPhone,
+      dealerEmail: formData.dealerEmail,
+      owner: formData.owner,
+      ownerCountry: formData.ownerCountry,
+      ownerAddress: formData.ownerAddress,
+      ownerPostal: formData.ownerPostal,
+      machineType: formData.machineType,
+      serialNo: formData.serialNo,
+      hours: formData.hours,
+      saleDate: formData.saleDate,
+      damageDate: formData.damageDate,
+      approvedDate: formData.approvedDate,
+      repairDate: formData.repairDate,
+      faultDesc: formData.faultDesc,
+      repairDesc: formData.repairDesc,
+      parts: formData.parts.map(({ id: _id, ...p }) => p),
+      laborHours: formData.laborHours,
+      drivingKm: formData.drivingKm,
+      currency: formData.currency as "DKK",
+    };
+  }
+
+  /**
+   * Save & navigate to the freshly created claim. `status` decides:
+   *  - `in_progress` → "Gem til senere redigering" (draft, dealer can still edit)
+   *  - `waiting`     → "Aktiver claim og afvent Timan"
+   */
+  function handleSave(status: Extract<ClaimStatus, "in_progress" | "waiting">) {
+    if (initialClaim) return; // existing-claim editing is handled elsewhere
+    setSavingAction(status === "waiting" ? "activate" : "draft");
+    setShowErrors(false);
+    setDealerSavedMsg(null);
+    const created = createDealerClaim({
+      groupId: generatedClaimId,
+      warrantyNo: generatedClaimId,
+      status,
+      detail: buildDetailFromForm(),
+      totalPrice: totals.grandTotal,
+    });
+    setDealerSavedMsg(
+      status === "waiting"
+        ? "Claim aktiveret. Timan er nu informeret og kan se sagen."
+        : "Kladde gemt. Du kan fortsætte redigeringen senere.",
+    );
+    // Small delay so the success message is visible before navigation.
     setTimeout(() => {
-      window.print();
-      setIsPrinting(false);
-    }, 500);
-  };
+      setSavingAction(null);
+      navigate({
+        to: "/dealer/claims/$claimId",
+        params: { claimId: created.id },
+      });
+    }, 800);
+  }
 
   const updatePart = (id: number, field: keyof PartLine, value: string) => {
     setFormData({
@@ -568,20 +640,20 @@ export function ClaimTool({
 
         <div className="rounded-2xl border border-slate-200 border-l-8 border-l-green-700 bg-white p-6 shadow-sm print:border-none print:p-0 print:shadow-none">
           <label className="mb-2 block text-[10px] font-black uppercase tracking-widest text-green-800">
-            {t("labels.guaranteeNo")} *
+            Reklamations nr. {!initialClaim && (
+              <span className="ml-1 rounded bg-green-100 px-1.5 py-0.5 text-[9px] font-bold text-green-800">
+                Auto-genereret
+              </span>
+            )}
           </label>
-          <input
-            className={`w-full rounded-xl border px-4 py-3 font-mono text-xl outline-none transition-all ${
-              isFieldMissing(formData.guaranteeNo, true)
-                ? "border-red-200 bg-red-50"
-                : "border-slate-200 bg-slate-50 focus:ring-2 focus:ring-green-100"
-            }`}
-            placeholder="T-XXXXXX"
-            value={formData.guaranteeNo}
-            onChange={(event) =>
-              setFormData({ ...formData, guaranteeNo: event.target.value })
-            }
-          />
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 print:bg-white">
+            <span className="font-mono text-2xl font-black tracking-tight text-slate-900">
+              {displayClaimNumber}
+            </span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              {initialClaim ? "Eksisterende sag" : "Tildeles ved oprettelse"}
+            </span>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 print:grid-cols-2 print:gap-2">
@@ -972,25 +1044,53 @@ export function ClaimTool({
           </div>
         </fieldset>
 
-        {!readOnly && !adminMode && (
-          <div className="flex justify-center py-8 no-print">
-            <button
-              type="button"
-              onClick={handlePrint}
-              disabled={isPrinting}
-              className={`flex items-center gap-4 rounded-3xl px-16 py-6 font-black uppercase tracking-[0.2em] transition-all duration-300 ${
-                stepStatus.s8
-                  ? "bg-green-600 text-white shadow-2xl shadow-green-100 hover:-translate-y-1 hover:bg-green-700 active:scale-95"
-                  : "cursor-not-allowed bg-slate-200 text-slate-400"
-              }`}
-            >
-              {isPrinting ? (
-                <Loader2 className="h-6 w-6 animate-spin" />
-              ) : (
-                <Printer className="h-6 w-6" />
-              )}
-              {t("labels.submit")}
-            </button>
+        {/*
+          New-claim bottom actions for the dealer:
+            1. "Gem til senere redigering" — saves as draft (status I gang)
+            2. "Aktiver claim og afvent Timan" — submits (status Afventer accept)
+          Existing claims open in edit mode and don't need these — the
+          dealer there uses the regular form fields.
+        */}
+        {!readOnly && !adminMode && !initialClaim && (
+          <div className="flex flex-col items-center gap-4 py-8 no-print">
+            {dealerSavedMsg && (
+              <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-800">
+                <Check className="h-4 w-4" />
+                {dealerSavedMsg}
+              </div>
+            )}
+            <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+              <button
+                type="button"
+                onClick={() => handleSave("in_progress")}
+                disabled={savingAction !== null}
+                className="inline-flex items-center justify-center gap-3 rounded-2xl border border-slate-300 bg-white px-8 py-4 text-sm font-black uppercase tracking-widest text-slate-800 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-400 hover:bg-slate-50 disabled:opacity-60"
+              >
+                {savingAction === "draft" ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <FileEdit className="h-5 w-5" />
+                )}
+                Gem til senere redigering
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSave("waiting")}
+                disabled={savingAction !== null}
+                className="inline-flex items-center justify-center gap-3 rounded-2xl bg-green-600 px-8 py-4 text-sm font-black uppercase tracking-widest text-white shadow-xl shadow-green-100 transition-all hover:-translate-y-0.5 hover:bg-green-700 disabled:opacity-60"
+              >
+                {savingAction === "activate" ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <Send className="h-5 w-5" />
+                )}
+                Aktiver claim og afvent Timan
+              </button>
+            </div>
+            <p className="max-w-md text-center text-[11px] text-slate-500">
+              Claim-nummer <span className="font-mono font-bold text-slate-700">{displayClaimNumber}</span>{" "}
+              er automatisk genereret. Du kan altid finde sagen igen under "Mine claims".
+            </p>
           </div>
         )}
 

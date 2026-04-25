@@ -657,6 +657,70 @@ export function getClaimById(id: string): ClaimRecord | undefined {
 }
 
 /**
+ * Generate the next claim number on the format `CL-YYYY-NNNN`, where NNNN
+ * is a 4-digit zero-padded sequence number that is unique within the
+ * current calendar year. The dealer never types the number manually — the
+ * Claim form auto-generates it when opening "Ny claim".
+ */
+export function generateClaimNumber(): string {
+  const year = new Date().getFullYear();
+  const prefix = `CL-${year}-`;
+  let max = 0;
+  for (const c of RECORDS) {
+    if (c.groupId.startsWith(prefix)) {
+      const tail = c.groupId.slice(prefix.length);
+      const n = parseInt(tail, 10);
+      if (!isNaN(n) && n > max) max = n;
+    }
+  }
+  const next = (max + 1).toString().padStart(4, "0");
+  return `${prefix}${next}`;
+}
+
+/**
+ * Persist a brand-new dealer claim into the in-memory store.
+ *
+ * - `groupId` becomes the claim's auto-generated number (e.g. `CL-2026-0001`).
+ * - `subIndex` is always 1 for a fresh case (grouped/connected machines are
+ *   added separately via {@link addConnectedClaim}).
+ * - `status` controls draft vs activated:
+ *     - `in_progress` → "Gem til senere redigering" (still editable by dealer)
+ *     - `waiting`     → "Aktiver claim og afvent Timan"
+ */
+export function createDealerClaim(args: {
+  groupId: string;
+  warrantyNo: string;
+  status: Extract<ClaimStatus, "in_progress" | "waiting">;
+  detail: ClaimDetail;
+  totalPrice: number;
+}): ClaimRecord {
+  const today = new Date().toISOString().slice(0, 10);
+  const titleSeed =
+    args.detail.faultDesc.trim().split(/\r?\n/)[0]?.slice(0, 80) ||
+    `Reklamation ${args.detail.machineType || ""}`.trim();
+  const created: ClaimRecord = {
+    id: `${args.groupId}-1`,
+    groupId: args.groupId,
+    subIndex: 1,
+    warrantyNo: args.warrantyNo || args.groupId,
+    title: titleSeed,
+    dealer: args.detail.dealer,
+    country: args.detail.dealerCountry,
+    customer: args.detail.owner,
+    machineType: args.detail.machineType,
+    serial: args.detail.serialNo,
+    createdAt: today,
+    damageDate: args.detail.damageDate || today,
+    approvedDate: null,
+    totalPrice: Math.round(args.totalPrice),
+    status: args.status,
+    detail: args.detail,
+  };
+  RECORDS.push(created);
+  return created;
+}
+
+/**
  * True when the claim is part of a multi-machine grouped case (has siblings).
  */
 export function isClaimGrouped(claim: Pick<ClaimRecord, "groupId">): boolean {
