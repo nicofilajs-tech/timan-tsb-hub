@@ -69,6 +69,12 @@ export interface ClaimRecord {
   status: ClaimStatus;
   /** Full detail used to prefill the claim form. */
   detail: ClaimDetail;
+  /**
+   * Internal comment from Timan Admin. Visible to both Timan Admin and the
+   * dealer when the claim is opened. Editable by Timan Admin only — useful for
+   * documenting why a claim was rejected/closed or follow-up notes.
+   */
+  adminComment?: string;
 }
 
 export const CLAIM_STATUS_LABEL: Record<ClaimStatus, string> = {
