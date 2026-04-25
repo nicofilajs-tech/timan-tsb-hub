@@ -6,9 +6,12 @@
  */
 
 import { useMemo, useState, type ReactNode } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   AlertTriangle,
   Check,
+  Copy,
+  Layers,
   Loader2,
   MessageSquare,
   Phone,
@@ -20,7 +23,13 @@ import {
   Wrench,
 } from "lucide-react";
 import { usePortalLanguage, type PortalLang } from "@/components/PortalHeader";
-import { updateAdminFields, type ClaimRecord } from "@/lib/claims-store";
+import {
+  addConnectedClaim,
+  claimDisplayId,
+  getGroupClaims,
+  updateAdminFields,
+  type ClaimRecord,
+} from "@/lib/claims-store";
 
 const LANGUAGES = [
   { code: "dk", name: "Dansk", flag: "DK" },
