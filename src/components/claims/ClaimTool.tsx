@@ -640,20 +640,20 @@ export function ClaimTool({
 
         <div className="rounded-2xl border border-slate-200 border-l-8 border-l-green-700 bg-white p-6 shadow-sm print:border-none print:p-0 print:shadow-none">
           <label className="mb-2 block text-[10px] font-black uppercase tracking-widest text-green-800">
-            {t("labels.guaranteeNo")} *
+            Reklamations nr. {!initialClaim && (
+              <span className="ml-1 rounded bg-green-100 px-1.5 py-0.5 text-[9px] font-bold text-green-800">
+                Auto-genereret
+              </span>
+            )}
           </label>
-          <input
-            className={`w-full rounded-xl border px-4 py-3 font-mono text-xl outline-none transition-all ${
-              isFieldMissing(formData.guaranteeNo, true)
-                ? "border-red-200 bg-red-50"
-                : "border-slate-200 bg-slate-50 focus:ring-2 focus:ring-green-100"
-            }`}
-            placeholder="T-XXXXXX"
-            value={formData.guaranteeNo}
-            onChange={(event) =>
-              setFormData({ ...formData, guaranteeNo: event.target.value })
-            }
-          />
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 print:bg-white">
+            <span className="font-mono text-2xl font-black tracking-tight text-slate-900">
+              {displayClaimNumber}
+            </span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              {initialClaim ? "Eksisterende sag" : "Tildeles ved oprettelse"}
+            </span>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 print:grid-cols-2 print:gap-2">
