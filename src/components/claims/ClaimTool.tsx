@@ -596,13 +596,14 @@ export function ClaimTool({
                 onChange={(value) => setFormData({ ...formData, dealer: value })}
                 required
               />
-              <FormInput
+              <CountrySelect
                 label={t("labels.country")}
                 value={formData.dealerCountry}
                 onChange={(value) =>
                   setFormData({ ...formData, dealerCountry: value })
                 }
                 required
+                disabled={readOnly && !adminMode}
               />
               <FormInput
                 label={t("labels.contact")}
