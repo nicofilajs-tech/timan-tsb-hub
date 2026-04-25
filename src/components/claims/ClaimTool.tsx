@@ -330,6 +330,7 @@ export function ClaimTool({
     setRejectModalOpen(false);
   }
 
+  function handleAddConnectedMachine() {
     if (!initialClaim) return;
     const created = addConnectedClaim(initialClaim.id);
     if (!created) return;
