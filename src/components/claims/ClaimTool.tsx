@@ -683,31 +683,65 @@ export function ClaimTool({
           </div>
         )}
 
-        {readOnly && !adminMode && (
+        {dealerLocked && !adminMode && (
+          <div className="flex items-start gap-3 rounded-xl border border-slate-300 bg-slate-50 p-4 text-slate-800 no-print">
+            <Lock className="mt-0.5 h-5 w-5 text-slate-500" />
+            <div className="text-sm">
+              <p className="font-black">Låst efter Timan-godkendelse</p>
+              <p className="mt-0.5 text-slate-600">
+                Status: <span className="font-bold">{CLAIM_STATUS_LABEL[effectiveStatus!]}</span>.
+                Claim-data kan ikke længere redigeres af forhandleren. Eventuelle
+                ændringer foretaget af Timan Admin vises i ændringsloggen nederst.
+              </p>
+            </div>
+          </div>
+        )}
+        {readOnly && !adminMode && !dealerLocked && (
           <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-slate-700 no-print">
             <AlertTriangle className="h-5 w-5 text-slate-500" />
             <p className="text-sm font-bold">
-              Denne sag er låst og kan kun ses. Status tillader ikke redigering.
+              Denne sag er låst og kan kun ses.
             </p>
           </div>
         )}
-        {readOnly && adminMode && (
+        {adminMode && (
           <div className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-900 no-print">
             <AlertTriangle className="h-5 w-5 text-amber-600" />
             <p className="text-sm font-bold">
-              Admin review — sagen er låst for forhandleren. Du kan tilføje en
-              kommentar og justere arbejdstimer, kørte km og samlet pris.
+              Admin review — du kan justere claim-data. Ændringer efter godkendelse
+              registreres automatisk i ændringsloggen.
             </p>
           </div>
         )}
-        {showErrors && !readOnly && (
+
+        {/* Workflow actions panel — status-driven buttons for dealer + admin. */}
+        {initialClaim && effectiveStatus && (
+          <WorkflowPanel
+            status={effectiveStatus}
+            adminMode={adminMode}
+            onAccept={() => handleSetStatus("dealer_in_progress")}
+            onWait={() => {
+              /* status unchanged — visual confirmation only */
+            }}
+            onDealerReject={() => setRejectModalOpen(true)}
+            onReadyToClose={() => handleSetStatus("awaiting_timan_close")}
+            onAdminApprove={() => handleSetStatus("approved")}
+            onAdminReject={() => handleSetStatus("rejected")}
+            onAdminClose={() => handleSetStatus("closed")}
+            onAdminSendBack={() => handleSetStatus("dealer_in_progress")}
+            onAdminReopen={() => handleSetStatus("dealer_in_progress")}
+            onAdminMoveForward={() => handleSetStatus("approved")}
+          />
+        )}
+
+        {showErrors && !formReadOnly && (
           <div className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700 no-print">
             <AlertTriangle className="h-5 w-5" />
             <p className="text-sm font-bold">{t("validationError")}</p>
           </div>
         )}
 
-        <fieldset disabled={readOnly} className="contents">
+        <fieldset disabled={formReadOnly} className="contents">
 
         <div className="rounded-2xl border border-slate-200 border-l-8 border-l-green-700 bg-white p-6 shadow-sm print:border-none print:p-0 print:shadow-none">
           <label className="mb-2 block text-[10px] font-black uppercase tracking-widest text-green-800">
