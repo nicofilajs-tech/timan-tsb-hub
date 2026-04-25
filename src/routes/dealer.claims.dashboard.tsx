@@ -123,10 +123,30 @@ function DashboardBody({ dealerName }: { dealerName: string }) {
                     {r.customer} • {r.machineType} • {r.serial}
                   </div>
                 </div>
-                <div className="shrink-0 text-right">
-                  <StatusPill status={r.status} />
-                  <div className="mt-1 text-xs text-slate-500">
-                    {r.createdAt}
+                <div className="flex shrink-0 items-center gap-3">
+                  <div className="text-right">
+                    <StatusPill status={r.status} />
+                    <div className="mt-1 text-xs text-slate-500">
+                      {r.createdAt}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Link
+                      to="/dealer/claims/$claimId"
+                      params={{ claimId: r.id }}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100"
+                    >
+                      <Eye className="h-3.5 w-3.5" /> Åbn
+                    </Link>
+                    {isClaimEditable(r.status) && (
+                      <Link
+                        to="/dealer/claims/$claimId"
+                        params={{ claimId: r.id }}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-2.5 py-1.5 text-xs font-bold text-white hover:bg-slate-800"
+                      >
+                        <Pencil className="h-3.5 w-3.5" /> Rediger
+                      </Link>
+                    )}
                   </div>
                 </div>
               </div>
