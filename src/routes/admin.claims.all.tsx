@@ -184,6 +184,15 @@ function Body() {
                             Samlet sag
                           </span>
                         )}
+                        {claimNeedsTimanAttention(r) && (
+                          <span
+                            title="Forhandler-kommentar afventer Timan"
+                            className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-orange-700"
+                          >
+                            <MessageSquare className="h-3 w-3" />
+                            Kommentar
+                          </span>
+                        )}
                       </div>
                     </td>
                     <td className="whitespace-nowrap px-6 py-3 font-mono text-xs text-slate-600">

@@ -1,12 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo } from "react";
-import { ArrowRight, Eye } from "lucide-react";
+import { ArrowRight, Eye, MessageSquare } from "lucide-react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ClaimsAdminSidebarLayout } from "@/components/ClaimsAdminSidebarLayout";
 import {
   CLAIM_STATUS_LABEL,
   CLAIM_STATUS_PILL,
   claimDisplayId,
+  claimNeedsTimanAttention,
   formatDkk,
   getAllClaims,
   isClaimGrouped,
