@@ -13,6 +13,7 @@ import {
   isClaimGrouped,
   type ClaimStatus,
 } from "@/lib/claims-store";
+import { formatDate } from "@/lib/format-date";
 
 export const Route = createFileRoute("/dealer/claims/mine")({
   head: () => ({
@@ -173,7 +174,7 @@ function MineBody({ dealerName }: { dealerName: string }) {
                       {r.serial}
                     </td>
                     <td className="whitespace-nowrap px-6 py-3 text-slate-600">
-                      {r.createdAt}
+                      {formatDate(r.createdAt)}
                     </td>
                     <td className="px-6 py-3">
                       <StatusPill status={r.status} />

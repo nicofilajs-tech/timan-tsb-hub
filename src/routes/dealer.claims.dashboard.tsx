@@ -23,6 +23,7 @@ import {
   summarizeDealerClaims,
   type ClaimStatus,
 } from "@/lib/claims-store";
+import { formatDate } from "@/lib/format-date";
 
 export const Route = createFileRoute("/dealer/claims/dashboard")({
   head: () => ({
@@ -135,7 +136,7 @@ function DashboardBody({ dealerName }: { dealerName: string }) {
                   <div className="text-right">
                     <StatusPill status={r.status} />
                     <div className="mt-1 text-xs text-slate-500">
-                      {r.createdAt}
+                      {formatDate(r.createdAt)}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
