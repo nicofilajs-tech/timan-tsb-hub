@@ -823,7 +823,7 @@ export function ClaimTool({
           </div>
         </fieldset>
 
-        {!readOnly && (
+        {!readOnly && !adminMode && (
           <div className="flex justify-center py-8 no-print">
             <button
               type="button"
@@ -842,6 +842,43 @@ export function ClaimTool({
               )}
               {t("labels.submit")}
             </button>
+          </div>
+        )}
+
+        {adminMode && initialClaim && (
+          <div className="flex flex-col items-center gap-3 py-8 no-print">
+            <button
+              type="button"
+              onClick={() => {
+                setIsSavingAdmin(true);
+                setAdminSaved(false);
+                updateAdminFields(initialClaim.id, {
+                  adminComment,
+                  laborHours: formData.laborHours,
+                  drivingKm: formData.drivingKm,
+                  totalPrice: Math.round(totals.grandTotal),
+                });
+                setTimeout(() => {
+                  setIsSavingAdmin(false);
+                  setAdminSaved(true);
+                  setTimeout(() => setAdminSaved(false), 2500);
+                }, 350);
+              }}
+              disabled={isSavingAdmin}
+              className="flex items-center gap-3 rounded-2xl bg-slate-900 px-10 py-4 text-sm font-black uppercase tracking-widest text-white shadow-xl transition-all hover:-translate-y-0.5 hover:bg-slate-800 disabled:opacity-60"
+            >
+              {isSavingAdmin ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Save className="h-5 w-5" />
+              )}
+              Gem ændringer
+            </button>
+            {adminSaved && (
+              <p className="text-xs font-bold text-emerald-700">
+                Ændringer gemt.
+              </p>
+            )}
           </div>
         )}
       </main>
