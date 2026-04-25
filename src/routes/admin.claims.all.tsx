@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Search } from "lucide-react";
+import { Eye, Search } from "lucide-react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ClaimsAdminSidebarLayout } from "@/components/ClaimsAdminSidebarLayout";
 import {
