@@ -5,8 +5,10 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ClaimsAdminSidebarLayout } from "@/components/ClaimsAdminSidebarLayout";
 import {
   CLAIM_STATUS_LABEL,
+  claimDisplayId,
   formatDkk,
   getAllClaims,
+  isClaimGrouped,
   type ClaimStatus,
 } from "@/lib/claims-store";
 
@@ -170,7 +172,14 @@ function Body() {
                 {filtered.map((r) => (
                   <tr key={r.id} className="hover:bg-slate-50">
                     <td className="whitespace-nowrap px-6 py-3 font-mono text-xs font-black text-slate-700">
-                      {r.id}
+                      <div className="flex items-center gap-2">
+                        <span>{claimDisplayId(r)}</span>
+                        {isClaimGrouped(r) && (
+                          <span className="rounded bg-indigo-100 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-indigo-700">
+                            Samlet sag
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="whitespace-nowrap px-6 py-3 font-mono text-xs text-slate-600">
                       {r.warrantyNo}
