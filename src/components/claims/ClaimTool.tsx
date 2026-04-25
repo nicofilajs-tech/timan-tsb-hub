@@ -401,11 +401,20 @@ export function ClaimTool({
       </div>
 
       <main className="mx-auto max-w-5xl space-y-8 px-4 py-8">
-        {readOnly && (
+        {readOnly && !adminMode && (
           <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-slate-700 no-print">
             <AlertTriangle className="h-5 w-5 text-slate-500" />
             <p className="text-sm font-bold">
               Denne sag er låst og kan kun ses. Status tillader ikke redigering.
+            </p>
+          </div>
+        )}
+        {readOnly && adminMode && (
+          <div className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-900 no-print">
+            <AlertTriangle className="h-5 w-5 text-amber-600" />
+            <p className="text-sm font-bold">
+              Admin review — sagen er låst for forhandleren. Du kan tilføje en
+              kommentar og justere arbejdstimer, kørte km og samlet pris.
             </p>
           </div>
         )}
