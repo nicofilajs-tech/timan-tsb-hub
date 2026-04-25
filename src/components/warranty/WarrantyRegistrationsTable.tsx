@@ -13,6 +13,7 @@ import {
   useWarrantyRecords,
   type WarrantyRegistration,
 } from "@/lib/warranty-store";
+import { formatDate } from "@/lib/format-date";
 
 export type WarrantyScope = "admin" | "dealer";
 
@@ -197,7 +198,7 @@ export function WarrantyRegistrationsTable({
                       {r.machineSerial || "—"}
                     </td>
                     <td className="whitespace-nowrap px-6 py-3 text-slate-600">
-                      {r.deliveryDate || "—"}
+                      {formatDate(r.deliveryDate)}
                     </td>
                     {scope === "admin" && (
                       <td className="whitespace-nowrap px-6 py-3 text-slate-600">
@@ -310,7 +311,7 @@ function CertificateDialog({
           <DRow label="Serienr" value={record.machineSerial} mono />
           <DRow label="Demo" value={record.isDemo} />
           <DRow label="Erstatter" value={record.replacementBrand ?? "—"} />
-          <DRow label="Leveringsdato" value={record.deliveryDate || "—"} />
+          <DRow label="Leveringsdato" value={formatDate(record.deliveryDate)} />
           <DRow label="Adresse" value={record.customerAddress} />
           <DRow label="Postnr/by" value={record.postalCity} />
           <DRow label="Telefon" value={record.phone} />

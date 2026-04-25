@@ -59,6 +59,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { formatDateTime } from "@/lib/format-date";
 
 const LANGUAGES = [
   { code: "dk", name: "Dansk", flag: "DK" },
@@ -1152,7 +1153,7 @@ export function ClaimTool({
                         <li key={c.id} className="rounded-lg border border-orange-200 bg-white p-3 text-sm">
                           <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-orange-700">
                             <span>{c.author}</span>
-                            <span>{new Date(c.at).toLocaleString("da-DK")}</span>
+                            <span>{formatDateTime(c.at)}</span>
                           </div>
                           <p className="mt-1 whitespace-pre-line text-orange-900">{c.text}</p>
                         </li>
@@ -1177,7 +1178,7 @@ export function ClaimTool({
                       <li key={e.id} className="py-2 text-xs">
                         <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-slate-500">
                           <span>{e.by} · {e.field}</span>
-                          <span>{new Date(e.at).toLocaleString("da-DK")}</span>
+                          <span>{formatDateTime(e.at)}</span>
                         </div>
                         <div className="mt-1 font-mono text-slate-700">
                           <span className="line-through text-slate-400">{e.oldValue || "—"}</span>

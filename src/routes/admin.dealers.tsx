@@ -44,17 +44,7 @@ function partnerBadge(type: PartnerType) {
   return <StatusBadge variant={variant}>{PARTNER_TYPE_LABEL[type]}</StatusBadge>;
 }
 
-function formatSync(iso?: string) {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  return d.toLocaleString("da-DK", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
+import { formatDateTime as formatSync } from "@/lib/format-date";
 
 function applyFilter(d: Dealer, f: Filter, q: string): boolean {
   if (q) {
