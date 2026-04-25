@@ -717,66 +717,101 @@ export function ClaimTool({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-3">
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:col-span-2">
-            <div className="grid grid-cols-2 gap-6">
-              <FormInput
-                label={t("labels.workingHours")}
-                value={formData.laborHours}
-                onChange={(value) =>
-                  setFormData({ ...formData, laborHours: value })
-                }
-              />
-              <FormInput
-                label={t("labels.drivingKm")}
-                value={formData.drivingKm}
-                onChange={(value) =>
-                  setFormData({ ...formData, drivingKm: value })
-                }
-              />
+        </fieldset>
+
+        {/*
+          Price-overview row + admin comment.
+          In admin mode, working hours / driving km / total price remain
+          editable here even when the rest of the claim form is read-only
+          (e.g. closed/rejected). Dealers see this block as read-only when
+          their `readOnly` flag is set.
+        */}
+        <fieldset
+          disabled={readOnly && !adminMode}
+          className="contents"
+        >
+          <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-3">
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:col-span-2">
+              <div className="grid grid-cols-2 gap-6">
+                <FormInput
+                  label={t("labels.workingHours")}
+                  value={formData.laborHours}
+                  onChange={(value) =>
+                    setFormData({ ...formData, laborHours: value })
+                  }
+                />
+                <FormInput
+                  label={t("labels.drivingKm")}
+                  value={formData.drivingKm}
+                  onChange={(value) =>
+                    setFormData({ ...formData, drivingKm: value })
+                  }
+                />
+              </div>
+              <p className="mt-8 text-[10px] font-bold italic leading-relaxed text-red-600 opacity-80">
+                {t("labels.disclaimer")}
+              </p>
+
+              {/* Admin comment — visible to both Timan Admin and dealer.
+                  Editable only in admin mode. */}
+              {(adminMode || adminComment.trim()) && (
+                <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                  <div className="mb-2 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-amber-800">
+                    <MessageSquare className="h-3.5 w-3.5" />
+                    Kommentar fra Timan Admin
+                  </div>
+                  {adminMode ? (
+                    <textarea
+                      className="h-28 w-full rounded-lg border border-amber-200 bg-white p-3 text-sm outline-none focus:ring-2 focus:ring-amber-100"
+                      placeholder="Tilføj en kommentar — fx forklaring på afvisning eller intern note…"
+                      value={adminComment}
+                      onChange={(event) => setAdminComment(event.target.value)}
+                    />
+                  ) : (
+                    <p className="whitespace-pre-line text-sm leading-relaxed text-amber-900">
+                      {adminComment}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
-            <p className="mt-8 text-[10px] font-bold italic leading-relaxed text-red-600 opacity-80">
-              {t("labels.disclaimer")}
-            </p>
+
+            <div className="relative overflow-hidden rounded-3xl border-b-8 border-green-600 bg-[#111827] p-8 text-white shadow-2xl">
+              <div className="absolute right-0 top-0 -mr-16 -mt-16 h-32 w-32 rounded-full bg-green-600/5 blur-2xl" />
+              <div className="relative z-10 mb-8 flex items-center justify-between">
+                <span className="text-sm font-black uppercase tracking-[0.2em] text-green-400">
+                  {t("sections.summary")}
+                </span>
+                <span className="rounded-lg bg-green-600 px-3 py-1 text-xs font-black shadow-lg shadow-green-900/40">
+                  {formData.currency}
+                </span>
+              </div>
+
+              <div className="relative z-10 mb-8 space-y-4">
+                <SummaryRow
+                  label={t("sections.parts")}
+                  value={totals.parts.toFixed(2)}
+                />
+                <SummaryRow
+                  label={t("labels.workingHours")}
+                  value={`${formData.laborHours || 0} h`}
+                />
+                <SummaryRow
+                  label={t("labels.summaryKm")}
+                  value={`${formData.drivingKm || 0} km`}
+                />
+              </div>
+
+              <div className="relative z-10 border-t border-slate-800 pt-8 text-right">
+                <span className="mb-2 block text-[11px] font-bold uppercase leading-none tracking-widest text-slate-500">
+                  {t("labels.totalSum")}
+                </span>
+                <span className="text-5xl font-black italic leading-none tracking-tighter text-white">
+                  {totals.grandTotal.toFixed(2)}
+                </span>
+              </div>
+            </div>
           </div>
-
-          <div className="relative overflow-hidden rounded-3xl border-b-8 border-green-600 bg-[#111827] p-8 text-white shadow-2xl">
-            <div className="absolute right-0 top-0 -mr-16 -mt-16 h-32 w-32 rounded-full bg-green-600/5 blur-2xl" />
-            <div className="relative z-10 mb-8 flex items-center justify-between">
-              <span className="text-sm font-black uppercase tracking-[0.2em] text-green-400">
-                {t("sections.summary")}
-              </span>
-              <span className="rounded-lg bg-green-600 px-3 py-1 text-xs font-black shadow-lg shadow-green-900/40">
-                {formData.currency}
-              </span>
-            </div>
-
-            <div className="relative z-10 mb-8 space-y-4">
-              <SummaryRow
-                label={t("sections.parts")}
-                value={totals.parts.toFixed(2)}
-              />
-              <SummaryRow
-                label={t("labels.workingHours")}
-                value={`${formData.laborHours || 0} h`}
-              />
-              <SummaryRow
-                label={t("labels.summaryKm")}
-                value={`${formData.drivingKm || 0} km`}
-              />
-            </div>
-
-            <div className="relative z-10 border-t border-slate-800 pt-8 text-right">
-              <span className="mb-2 block text-[11px] font-bold uppercase leading-none tracking-widest text-slate-500">
-                {t("labels.totalSum")}
-              </span>
-              <span className="text-5xl font-black italic leading-none tracking-tighter text-white">
-                {totals.grandTotal.toFixed(2)}
-              </span>
-            </div>
-          </div>
-        </div>
-
         </fieldset>
 
         {!readOnly && (
