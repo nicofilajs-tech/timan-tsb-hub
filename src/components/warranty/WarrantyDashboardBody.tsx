@@ -72,6 +72,7 @@ export function WarrantyDashboardBody({ scope, dealerName }: Props) {
       topMachine: mostUsedMachineType(records),
       latest: records.slice(0, 5),
       dealers: dealerOverview(records).slice(0, 8),
+      yearly: yearlyOverview(records),
     };
   }, [records]);
 
