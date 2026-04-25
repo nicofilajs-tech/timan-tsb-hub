@@ -657,6 +657,13 @@ export function getClaimById(id: string): ClaimRecord | undefined {
 }
 
 /**
+ * True when the claim is part of a multi-machine grouped case (has siblings).
+ */
+export function isClaimGrouped(claim: Pick<ClaimRecord, "groupId">): boolean {
+  return RECORDS.filter((c) => c.groupId === claim.groupId).length > 1;
+}
+
+/**
  * All claims that share a main-case number (groupId), sorted by sub-index.
  * For a standalone claim this returns just that single record.
  */
