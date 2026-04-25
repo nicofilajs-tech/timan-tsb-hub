@@ -249,6 +249,23 @@ export function ClaimTool({
   const [adminComment, setAdminComment] = useState(initialClaim?.adminComment ?? "");
   const navigate = useNavigate();
 
+  // Live status — mutated locally so the UI reflects workflow transitions
+  // (Accept/Reject/Reopen/etc.) without a full route reload. Initialised
+  // from the loaded claim and synced back to the in-memory store via
+  // setClaimStatus().
+  const [liveStatus, setLiveStatus] = useState<ClaimStatus | undefined>(
+    initialClaim?.status,
+  );
+  const [dealerComments, setDealerComments] = useState<ClaimComment[]>(
+    initialClaim?.dealerComments ?? [],
+  );
+  const [auditLog, setAuditLog] = useState<ClaimAuditEntry[]>(
+    initialClaim?.auditLog ?? [],
+  );
+  // "Ikke accepteret" comment modal state.
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [rejectComment, setRejectComment] = useState("");
+
   /**
    * Auto-generated claim number for *new* claims (Ny claim).
    * Format: `CL-YYYY-NNNN`. The dealer never types this manually.
@@ -271,7 +288,48 @@ export function ClaimTool({
   );
   const isGrouped = groupClaims.length > 1;
 
-  function handleAddConnectedMachine() {
+  /** Resolve effective status (live edits override props for the open claim). */
+  const effectiveStatus: ClaimStatus | undefined = liveStatus;
+
+  /**
+   * After Timan approval the dealer is locked out of the entire claim form,
+   * regardless of the prop passed by the route. Approved/rejected/closed/
+   * dealer_in_progress/awaiting_* statuses all mean the dealer cannot edit
+   * the claim data — only Timan can.
+   */
+  const dealerLocked =
+    !adminMode && !!effectiveStatus && isPastApproval(effectiveStatus);
+  const formReadOnly = readOnly || dealerLocked;
+
+  function refreshFromStore() {
+    if (!initialClaim) return;
+    const fresh = getClaimById(initialClaim.id);
+    if (!fresh) return;
+    setLiveStatus(fresh.status);
+    setDealerComments(fresh.dealerComments ?? []);
+    setAuditLog(fresh.auditLog ?? []);
+  }
+
+  function handleSetStatus(next: ClaimStatus) {
+    if (!initialClaim) return;
+    setClaimStatus(initialClaim.id, next);
+    setLiveStatus(next);
+  }
+
+  function handleAddDealerComment(text: string) {
+    if (!initialClaim || !text.trim()) return;
+    addDealerComment(initialClaim.id, text);
+    refreshFromStore();
+  }
+
+  function handleRejectConfirm(nextStatus: ClaimStatus) {
+    if (!rejectComment.trim()) return;
+    handleAddDealerComment(rejectComment);
+    handleSetStatus(nextStatus);
+    setRejectComment("");
+    setRejectModalOpen(false);
+  }
+
     if (!initialClaim) return;
     const created = addConnectedClaim(initialClaim.id);
     if (!created) return;
