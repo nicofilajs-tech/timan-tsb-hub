@@ -52,7 +52,19 @@ export interface ClaimDetail {
 }
 
 export interface ClaimRecord {
+  /**
+   * Unique storage id. For grouped claims this is `${groupId}-${subIndex}`,
+   * e.g. "CL-9013-2". The user-facing display id uses a slash:
+   * "CL-9013/2" — see {@link claimDisplayId}.
+   */
   id: string;
+  /**
+   * Main case number shared by all connected claims in a group, e.g.
+   * "CL-9013". A standalone claim has groupId = id and subIndex = 1.
+   */
+  groupId: string;
+  /** 1-based position within the group. */
+  subIndex: number;
   /** Warranty / guarantee number issued by Timan, e.g. "T-001234". */
   warrantyNo: string;
   title: string;
@@ -75,6 +87,11 @@ export interface ClaimRecord {
    * documenting why a claim was rejected/closed or follow-up notes.
    */
   adminComment?: string;
+}
+
+/** Format the user-facing display id, e.g. "CL-9013/2". */
+export function claimDisplayId(claim: Pick<ClaimRecord, "groupId" | "subIndex">): string {
+  return `${claim.groupId}/${claim.subIndex}`;
 }
 
 export const CLAIM_STATUS_LABEL: Record<ClaimStatus, string> = {
