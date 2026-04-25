@@ -23,6 +23,7 @@ import {
   useWarrantyRecords,
   yearlyOverview,
 } from "@/lib/warranty-store";
+import { formatDate } from "@/lib/format-date";
 
 export type WarrantyScope = "admin" | "dealer";
 

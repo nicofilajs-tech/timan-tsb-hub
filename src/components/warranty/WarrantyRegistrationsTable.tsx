@@ -13,6 +13,7 @@ import {
   useWarrantyRecords,
   type WarrantyRegistration,
 } from "@/lib/warranty-store";
+import { formatDate } from "@/lib/format-date";
 
 export type WarrantyScope = "admin" | "dealer";
 
