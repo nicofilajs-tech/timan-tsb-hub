@@ -32,6 +32,12 @@ const ADMIN_NAV: NavItem[] = [
     icon: LayoutDashboard,
     match: "/admin/claims/dashboard",
   },
+  {
+    to: "/admin/claims/all",
+    label: "Alle claims",
+    icon: ClipboardList,
+    match: "/admin/claims/all",
+  },
 ];
 
 const DEALER_NAV: NavItem[] = [
