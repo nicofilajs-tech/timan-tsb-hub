@@ -3,6 +3,8 @@ import { useMemo } from "react";
 import {
   CheckCircle2,
   ClipboardList,
+  Eye,
+  Pencil,
   PlusCircle,
   Wrench,
   XCircle,
@@ -14,6 +16,7 @@ import { useDealerName } from "@/components/warranty/useDealerName";
 import {
   CLAIM_STATUS_LABEL,
   getDealerClaims,
+  isClaimEditable,
   summarizeDealerClaims,
   type ClaimStatus,
 } from "@/lib/claims-store";
