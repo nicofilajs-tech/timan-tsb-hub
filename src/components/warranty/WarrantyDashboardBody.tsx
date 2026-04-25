@@ -8,6 +8,7 @@ import { useMemo } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   ArrowRight,
+  CalendarRange,
   ClipboardList,
   Factory,
   PlusCircle,
@@ -15,7 +16,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import {
-  CalendarRange,
   dealerOverview,
   mostUsedMachineType,
   thisMonthCount,
