@@ -25,6 +25,7 @@ import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminMachinesRouteImport } from './routes/admin.machines'
 import { Route as AdminDealersRouteImport } from './routes/admin.dealers'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
+import { Route as AdminCountriesRouteImport } from './routes/admin.countries'
 import { Route as AdminTsbIndexRouteImport } from './routes/admin.tsb.index'
 import { Route as DealerWarrantyRegistrationsRouteImport } from './routes/dealer.warranty.registrations'
 import { Route as DealerWarrantyNewRouteImport } from './routes/dealer.warranty.new'
@@ -122,6 +123,11 @@ const AdminDashboardRoute = AdminDashboardRouteImport.update({
   path: '/admin/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminCountriesRoute = AdminCountriesRouteImport.update({
+  id: '/admin/countries',
+  path: '/admin/countries',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminTsbIndexRoute = AdminTsbIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -214,6 +220,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/service': typeof ServiceRoute
   '/service-info': typeof ServiceInfoRoute
+  '/admin/countries': typeof AdminCountriesRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/dealers': typeof AdminDealersRoute
   '/admin/machines': typeof AdminMachinesRoute
@@ -248,6 +255,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/service': typeof ServiceRoute
   '/service-info': typeof ServiceInfoRoute
+  '/admin/countries': typeof AdminCountriesRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/dealers': typeof AdminDealersRoute
   '/admin/machines': typeof AdminMachinesRoute
@@ -282,6 +290,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/service': typeof ServiceRoute
   '/service-info': typeof ServiceInfoRoute
+  '/admin/countries': typeof AdminCountriesRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/dealers': typeof AdminDealersRoute
   '/admin/machines': typeof AdminMachinesRoute
@@ -318,6 +327,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/service'
     | '/service-info'
+    | '/admin/countries'
     | '/admin/dashboard'
     | '/admin/dealers'
     | '/admin/machines'
@@ -352,6 +362,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/service'
     | '/service-info'
+    | '/admin/countries'
     | '/admin/dashboard'
     | '/admin/dealers'
     | '/admin/machines'
@@ -385,6 +396,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/service'
     | '/service-info'
+    | '/admin/countries'
     | '/admin/dashboard'
     | '/admin/dealers'
     | '/admin/machines'
@@ -420,6 +432,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   ServiceRoute: typeof ServiceRoute
   ServiceInfoRoute: typeof ServiceInfoRoute
+  AdminCountriesRoute: typeof AdminCountriesRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminDealersRoute: typeof AdminDealersRoute
   AdminMachinesRoute: typeof AdminMachinesRoute
@@ -554,6 +567,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/dashboard'
       fullPath: '/admin/dashboard'
       preLoaderRoute: typeof AdminDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/countries': {
+      id: '/admin/countries'
+      path: '/admin/countries'
+      fullPath: '/admin/countries'
+      preLoaderRoute: typeof AdminCountriesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/tsb/': {
@@ -698,6 +718,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   ServiceRoute: ServiceRoute,
   ServiceInfoRoute: ServiceInfoRoute,
+  AdminCountriesRoute: AdminCountriesRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminDealersRoute: AdminDealersRoute,
   AdminMachinesRoute: AdminMachinesRoute,
