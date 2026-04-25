@@ -639,18 +639,77 @@ MOCK.push(...GROUP_DEMO);
 // Backfill standalone records (no explicit groupId): each becomes its own
 // single-machine group where groupId == id and subIndex == 1.
 for (const c of MOCK) {
-  if (!(c as Partial<ClaimRecord>).groupId) {
-    (c as ClaimRecord).groupId = c.id;
-    (c as ClaimRecord).subIndex = 1;
+  if (!c.groupId) {
+    c.groupId = c.id;
+    c.subIndex = 1;
   }
 }
 
+// Normalized array — every entry now satisfies the full ClaimRecord shape.
+const RECORDS: ClaimRecord[] = MOCK as ClaimRecord[];
+
 export function getAllClaims(): ClaimRecord[] {
-  return MOCK;
+  return RECORDS;
 }
 
 export function getClaimById(id: string): ClaimRecord | undefined {
-  return MOCK.find((c) => c.id === id);
+  return RECORDS.find((c) => c.id === id);
+}
+
+/**
+ * All claims that share a main-case number (groupId), sorted by sub-index.
+ * For a standalone claim this returns just that single record.
+ */
+export function getGroupClaims(groupId: string): ClaimRecord[] {
+  return RECORDS.filter((c) => c.groupId === groupId).sort(
+    (a, b) => a.subIndex - b.subIndex,
+  );
+}
+
+/**
+ * Create a new connected claim under the same main case as `sourceId`,
+ * copying common dealer/owner/machine-type/dates/description data from the
+ * source so the dealer doesn't have to retype everything. Per-machine fields
+ * (serialNo, hours) are intentionally cleared so the dealer must fill them
+ * in for the new machine. Returns the newly created record.
+ */
+export function addConnectedClaim(sourceId: string): ClaimRecord | undefined {
+  const source = RECORDS.find((c) => c.id === sourceId);
+  if (!source) return undefined;
+  const siblings = getGroupClaims(source.groupId);
+  const nextIndex = siblings.reduce((max, c) => Math.max(max, c.subIndex), 0) + 1;
+  const newId = `${source.groupId}-${nextIndex}`;
+  const today = new Date().toISOString().slice(0, 10);
+  const created: ClaimRecord = {
+    id: newId,
+    groupId: source.groupId,
+    subIndex: nextIndex,
+    warrantyNo: source.warrantyNo,
+    title: source.title,
+    dealer: source.dealer,
+    country: source.country,
+    customer: source.customer,
+    machineType: source.machineType,
+    serial: "",
+    createdAt: today,
+    damageDate: source.damageDate,
+    approvedDate: null,
+    totalPrice: 0,
+    status: "waiting",
+    detail: {
+      ...source.detail,
+      // Per-machine fields the dealer must review/update:
+      serialNo: "",
+      hours: "",
+      approvedDate: "",
+      // Reset price-overview fields for the new machine.
+      laborHours: "0",
+      drivingKm: "0",
+      parts: source.detail.parts.map((p) => ({ ...p })),
+    },
+  };
+  RECORDS.push(created);
+  return created;
 }
 
 /**
@@ -668,7 +727,7 @@ export function updateAdminFields(
     totalPrice?: number;
   },
 ): ClaimRecord | undefined {
-  const claim = MOCK.find((c) => c.id === id);
+  const claim = RECORDS.find((c) => c.id === id);
   if (!claim) return undefined;
   if (fields.adminComment !== undefined) claim.adminComment = fields.adminComment;
   if (fields.laborHours !== undefined) claim.detail.laborHours = fields.laborHours;
@@ -678,12 +737,12 @@ export function updateAdminFields(
 }
 
 export function getDealerClaims(dealerName: string): ClaimRecord[] {
-  if (!dealerName) return MOCK;
+  if (!dealerName) return RECORDS;
   const needle = dealerName.toLowerCase();
-  const scoped = MOCK.filter((c) => c.dealer.toLowerCase() === needle);
+  const scoped = RECORDS.filter((c) => c.dealer.toLowerCase() === needle);
   // In preview, if the current dealer has no records yet, fall back to the
   // demo dealer so the page is not empty.
-  return scoped.length > 0 ? scoped : MOCK.filter((c) => c.dealer === NORDIC_DEALER);
+  return scoped.length > 0 ? scoped : RECORDS.filter((c) => c.dealer === NORDIC_DEALER);
 }
 
 export interface DealerClaimsSummary {
