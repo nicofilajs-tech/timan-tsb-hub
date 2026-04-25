@@ -1044,25 +1044,53 @@ export function ClaimTool({
           </div>
         </fieldset>
 
-        {!readOnly && !adminMode && (
-          <div className="flex justify-center py-8 no-print">
-            <button
-              type="button"
-              onClick={handlePrint}
-              disabled={isPrinting}
-              className={`flex items-center gap-4 rounded-3xl px-16 py-6 font-black uppercase tracking-[0.2em] transition-all duration-300 ${
-                stepStatus.s8
-                  ? "bg-green-600 text-white shadow-2xl shadow-green-100 hover:-translate-y-1 hover:bg-green-700 active:scale-95"
-                  : "cursor-not-allowed bg-slate-200 text-slate-400"
-              }`}
-            >
-              {isPrinting ? (
-                <Loader2 className="h-6 w-6 animate-spin" />
-              ) : (
-                <Printer className="h-6 w-6" />
-              )}
-              {t("labels.submit")}
-            </button>
+        {/*
+          New-claim bottom actions for the dealer:
+            1. "Gem til senere redigering" — saves as draft (status I gang)
+            2. "Aktiver claim og afvent Timan" — submits (status Afventer accept)
+          Existing claims open in edit mode and don't need these — the
+          dealer there uses the regular form fields.
+        */}
+        {!readOnly && !adminMode && !initialClaim && (
+          <div className="flex flex-col items-center gap-4 py-8 no-print">
+            {dealerSavedMsg && (
+              <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-800">
+                <Check className="h-4 w-4" />
+                {dealerSavedMsg}
+              </div>
+            )}
+            <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+              <button
+                type="button"
+                onClick={() => handleSave("in_progress")}
+                disabled={savingAction !== null}
+                className="inline-flex items-center justify-center gap-3 rounded-2xl border border-slate-300 bg-white px-8 py-4 text-sm font-black uppercase tracking-widest text-slate-800 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-400 hover:bg-slate-50 disabled:opacity-60"
+              >
+                {savingAction === "draft" ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <FileEdit className="h-5 w-5" />
+                )}
+                Gem til senere redigering
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSave("waiting")}
+                disabled={savingAction !== null}
+                className="inline-flex items-center justify-center gap-3 rounded-2xl bg-green-600 px-8 py-4 text-sm font-black uppercase tracking-widest text-white shadow-xl shadow-green-100 transition-all hover:-translate-y-0.5 hover:bg-green-700 disabled:opacity-60"
+              >
+                {savingAction === "activate" ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <Send className="h-5 w-5" />
+                )}
+                Aktiver claim og afvent Timan
+              </button>
+            </div>
+            <p className="max-w-md text-center text-[11px] text-slate-500">
+              Claim-nummer <span className="font-mono font-bold text-slate-700">{displayClaimNumber}</span>{" "}
+              er automatisk genereret. Du kan altid finde sagen igen under "Mine claims".
+            </p>
           </div>
         )}
 
