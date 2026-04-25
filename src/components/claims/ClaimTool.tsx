@@ -12,25 +12,37 @@ import {
   Check,
   Copy,
   FileEdit,
+  History,
   Layers,
+  Lock,
   Loader2,
   MessageSquare,
   Phone,
   Plus,
   Save,
   Send,
+  ThumbsDown,
+  ThumbsUp,
   Trash2,
   User,
   Wrench,
+  X,
 } from "lucide-react";
 import { usePortalLanguage, type PortalLang } from "@/components/PortalHeader";
 import {
   addConnectedClaim,
+  addDealerComment,
+  CLAIM_STATUS_LABEL,
   claimDisplayId,
   createDealerClaim,
   generateClaimNumber,
+  getClaimById,
   getGroupClaims,
+  isPastApproval,
+  setClaimStatus,
   updateAdminFields,
+  type ClaimAuditEntry,
+  type ClaimComment,
   type ClaimRecord,
   type ClaimStatus,
 } from "@/lib/claims-store";
@@ -237,6 +249,23 @@ export function ClaimTool({
   const [adminComment, setAdminComment] = useState(initialClaim?.adminComment ?? "");
   const navigate = useNavigate();
 
+  // Live status — mutated locally so the UI reflects workflow transitions
+  // (Accept/Reject/Reopen/etc.) without a full route reload. Initialised
+  // from the loaded claim and synced back to the in-memory store via
+  // setClaimStatus().
+  const [liveStatus, setLiveStatus] = useState<ClaimStatus | undefined>(
+    initialClaim?.status,
+  );
+  const [dealerComments, setDealerComments] = useState<ClaimComment[]>(
+    initialClaim?.dealerComments ?? [],
+  );
+  const [auditLog, setAuditLog] = useState<ClaimAuditEntry[]>(
+    initialClaim?.auditLog ?? [],
+  );
+  // "Ikke accepteret" comment modal state.
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [rejectComment, setRejectComment] = useState("");
+
   /**
    * Auto-generated claim number for *new* claims (Ny claim).
    * Format: `CL-YYYY-NNNN`. The dealer never types this manually.
@@ -258,6 +287,48 @@ export function ClaimTool({
     [initialClaim],
   );
   const isGrouped = groupClaims.length > 1;
+
+  /** Resolve effective status (live edits override props for the open claim). */
+  const effectiveStatus: ClaimStatus | undefined = liveStatus;
+
+  /**
+   * After Timan approval the dealer is locked out of the entire claim form,
+   * regardless of the prop passed by the route. Approved/rejected/closed/
+   * dealer_in_progress/awaiting_* statuses all mean the dealer cannot edit
+   * the claim data — only Timan can.
+   */
+  const dealerLocked =
+    !adminMode && !!effectiveStatus && isPastApproval(effectiveStatus);
+  const formReadOnly = readOnly || dealerLocked;
+
+  function refreshFromStore() {
+    if (!initialClaim) return;
+    const fresh = getClaimById(initialClaim.id);
+    if (!fresh) return;
+    setLiveStatus(fresh.status);
+    setDealerComments(fresh.dealerComments ?? []);
+    setAuditLog(fresh.auditLog ?? []);
+  }
+
+  function handleSetStatus(next: ClaimStatus) {
+    if (!initialClaim) return;
+    setClaimStatus(initialClaim.id, next);
+    setLiveStatus(next);
+  }
+
+  function handleAddDealerComment(text: string) {
+    if (!initialClaim || !text.trim()) return;
+    addDealerComment(initialClaim.id, text);
+    refreshFromStore();
+  }
+
+  function handleRejectConfirm(nextStatus: ClaimStatus) {
+    if (!rejectComment.trim()) return;
+    handleAddDealerComment(rejectComment);
+    handleSetStatus(nextStatus);
+    setRejectComment("");
+    setRejectModalOpen(false);
+  }
 
   function handleAddConnectedMachine() {
     if (!initialClaim) return;
@@ -612,31 +683,65 @@ export function ClaimTool({
           </div>
         )}
 
-        {readOnly && !adminMode && (
+        {dealerLocked && !adminMode && (
+          <div className="flex items-start gap-3 rounded-xl border border-slate-300 bg-slate-50 p-4 text-slate-800 no-print">
+            <Lock className="mt-0.5 h-5 w-5 text-slate-500" />
+            <div className="text-sm">
+              <p className="font-black">Låst efter Timan-godkendelse</p>
+              <p className="mt-0.5 text-slate-600">
+                Status: <span className="font-bold">{CLAIM_STATUS_LABEL[effectiveStatus!]}</span>.
+                Claim-data kan ikke længere redigeres af forhandleren. Eventuelle
+                ændringer foretaget af Timan Admin vises i ændringsloggen nederst.
+              </p>
+            </div>
+          </div>
+        )}
+        {readOnly && !adminMode && !dealerLocked && (
           <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-slate-700 no-print">
             <AlertTriangle className="h-5 w-5 text-slate-500" />
             <p className="text-sm font-bold">
-              Denne sag er låst og kan kun ses. Status tillader ikke redigering.
+              Denne sag er låst og kan kun ses.
             </p>
           </div>
         )}
-        {readOnly && adminMode && (
+        {adminMode && (
           <div className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-900 no-print">
             <AlertTriangle className="h-5 w-5 text-amber-600" />
             <p className="text-sm font-bold">
-              Admin review — sagen er låst for forhandleren. Du kan tilføje en
-              kommentar og justere arbejdstimer, kørte km og samlet pris.
+              Admin review — du kan justere claim-data. Ændringer efter godkendelse
+              registreres automatisk i ændringsloggen.
             </p>
           </div>
         )}
-        {showErrors && !readOnly && (
+
+        {/* Workflow actions panel — status-driven buttons for dealer + admin. */}
+        {initialClaim && effectiveStatus && (
+          <WorkflowPanel
+            status={effectiveStatus}
+            adminMode={adminMode}
+            onAccept={() => handleSetStatus("dealer_in_progress")}
+            onWait={() => {
+              /* status unchanged — visual confirmation only */
+            }}
+            onDealerReject={() => setRejectModalOpen(true)}
+            onReadyToClose={() => handleSetStatus("awaiting_timan_close")}
+            onAdminApprove={() => handleSetStatus("approved")}
+            onAdminReject={() => handleSetStatus("rejected")}
+            onAdminClose={() => handleSetStatus("closed")}
+            onAdminSendBack={() => handleSetStatus("dealer_in_progress")}
+            onAdminReopen={() => handleSetStatus("dealer_in_progress")}
+            onAdminMoveForward={() => handleSetStatus("approved")}
+          />
+        )}
+
+        {showErrors && !formReadOnly && (
           <div className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700 no-print">
             <AlertTriangle className="h-5 w-5" />
             <p className="text-sm font-bold">{t("validationError")}</p>
           </div>
         )}
 
-        <fieldset disabled={readOnly} className="contents">
+        <fieldset disabled={formReadOnly} className="contents">
 
         <div className="rounded-2xl border border-slate-200 border-l-8 border-l-green-700 bg-white p-6 shadow-sm print:border-none print:p-0 print:shadow-none">
           <label className="mb-2 block text-[10px] font-black uppercase tracking-widest text-green-800">
@@ -952,7 +1057,7 @@ export function ClaimTool({
           their `readOnly` flag is set.
         */}
         <fieldset
-          disabled={readOnly && !adminMode}
+          disabled={formReadOnly && !adminMode}
           className="contents"
         >
           <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-3">
@@ -982,8 +1087,7 @@ export function ClaimTool({
                 {t("labels.disclaimer")}
               </p>
 
-              {/* Admin comment — visible to both Timan Admin and dealer.
-                  Editable only in admin mode. */}
+              {/* Admin comment — visible to both Timan Admin and dealer. */}
               {(adminMode || adminComment.trim()) && (
                 <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4">
                   <div className="mb-2 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-amber-800">
@@ -993,7 +1097,7 @@ export function ClaimTool({
                   {adminMode ? (
                     <textarea
                       className="h-28 w-full rounded-lg border border-amber-200 bg-white p-3 text-sm outline-none focus:ring-2 focus:ring-amber-100"
-                      placeholder="Tilføj en kommentar — fx forklaring på afvisning eller intern note…"
+                      placeholder="Tilføj en kommentar…"
                       value={adminComment}
                       onChange={(event) => setAdminComment(event.target.value)}
                     />
@@ -1002,6 +1106,59 @@ export function ClaimTool({
                       {adminComment}
                     </p>
                   )}
+                </div>
+              )}
+
+              {/* Dealer comments thread + add-comment box on rejected claims. */}
+              {initialClaim && (dealerComments.length > 0 || effectiveStatus === "rejected") && (
+                <div className="mt-6 rounded-xl border border-orange-200 bg-orange-50 p-4">
+                  <div className="mb-2 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-orange-800">
+                    <MessageSquare className="h-3.5 w-3.5" />
+                    Forhandler-kommentarer
+                  </div>
+                  {dealerComments.length === 0 ? (
+                    <p className="text-xs italic text-orange-800/70">Ingen kommentarer endnu.</p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {dealerComments.map((c) => (
+                        <li key={c.id} className="rounded-lg border border-orange-200 bg-white p-3 text-sm">
+                          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-orange-700">
+                            <span>{c.author}</span>
+                            <span>{new Date(c.at).toLocaleString("da-DK")}</span>
+                          </div>
+                          <p className="mt-1 whitespace-pre-line text-orange-900">{c.text}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {!adminMode && effectiveStatus === "rejected" && (
+                    <DealerReplyBox onSubmit={handleAddDealerComment} />
+                  )}
+                </div>
+              )}
+
+              {/* Audit log — shows Timan changes after approval. */}
+              {initialClaim && auditLog.length > 0 && (
+                <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="mb-2 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-600">
+                    <History className="h-3.5 w-3.5" />
+                    Ændringslog · Changed by Timan Admin
+                  </div>
+                  <ul className="divide-y divide-slate-200">
+                    {auditLog.map((e) => (
+                      <li key={e.id} className="py-2 text-xs">
+                        <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                          <span>{e.by} · {e.field}</span>
+                          <span>{new Date(e.at).toLocaleString("da-DK")}</span>
+                        </div>
+                        <div className="mt-1 font-mono text-slate-700">
+                          <span className="line-through text-slate-400">{e.oldValue || "—"}</span>
+                          {" → "}
+                          <span className="font-bold text-slate-900">{e.newValue || "—"}</span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               )}
             </div>
@@ -1131,6 +1288,55 @@ export function ClaimTool({
           </div>
         )}
       </main>
+
+      {/* "Ikke accepteret" — required-comment modal. */}
+      {rejectModalOpen && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/70 p-4 no-print">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b bg-slate-50 px-5 py-3">
+              <h3 className="text-sm font-black uppercase tracking-widest text-slate-800">
+                Ikke accepteret — kommentar krævet
+              </h3>
+              <button
+                type="button"
+                onClick={() => setRejectModalOpen(false)}
+                className="text-slate-400 hover:text-slate-700"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="p-5">
+              <p className="mb-3 text-sm text-slate-600">
+                Forklar hvorfor du ikke kan acceptere. Sagen sendes til Timan Admin
+                med din kommentar.
+              </p>
+              <textarea
+                className="h-32 w-full rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm outline-none focus:border-slate-400"
+                placeholder="Skriv din kommentar her…"
+                value={rejectComment}
+                onChange={(e) => setRejectComment(e.target.value)}
+              />
+              <div className="mt-4 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setRejectModalOpen(false)}
+                  className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100"
+                >
+                  Annullér
+                </button>
+                <button
+                  type="button"
+                  disabled={!rejectComment.trim()}
+                  onClick={() => handleRejectConfirm("awaiting_timan_comment")}
+                  className="rounded-lg bg-orange-600 px-3 py-2 text-xs font-black uppercase tracking-widest text-white shadow-sm hover:bg-orange-700 disabled:opacity-50"
+                >
+                  Send til Timan
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <footer className="mx-auto mt-8 max-w-6xl border-t px-4 py-12 text-center text-slate-400 no-print">
         <p className="text-sm font-black uppercase italic tracking-tighter text-slate-800">
@@ -1421,6 +1627,165 @@ function CountrySelect({
           </SelectGroup>
         </SelectContent>
       </Select>
+    </div>
+  );
+}
+
+/**
+ * WorkflowPanel — status-driven action buttons for both Dealer and Timan Admin.
+ * Renders the right buttons based on the live status of the open claim.
+ */
+function WorkflowPanel({
+  status,
+  adminMode,
+  onAccept,
+  onWait,
+  onDealerReject,
+  onReadyToClose,
+  onAdminApprove,
+  onAdminReject,
+  onAdminClose,
+  onAdminSendBack,
+  onAdminReopen,
+  onAdminMoveForward,
+}: {
+  status: ClaimStatus;
+  adminMode: boolean;
+  onAccept: () => void;
+  onWait: () => void;
+  onDealerReject: () => void;
+  onReadyToClose: () => void;
+  onAdminApprove: () => void;
+  onAdminReject: () => void;
+  onAdminClose: () => void;
+  onAdminSendBack: () => void;
+  onAdminReopen: () => void;
+  onAdminMoveForward: () => void;
+}) {
+  const [waited, setWaited] = useState(false);
+  const wait = () => {
+    onWait();
+    setWaited(true);
+    setTimeout(() => setWaited(false), 2000);
+  };
+
+  const Btn = ({
+    onClick,
+    children,
+    tone = "default",
+    icon: Icon,
+  }: {
+    onClick: () => void;
+    children: React.ReactNode;
+    tone?: "default" | "primary" | "danger" | "warn";
+    icon?: typeof ThumbsUp;
+  }) => {
+    const cls =
+      tone === "primary"
+        ? "bg-emerald-600 text-white hover:bg-emerald-700"
+        : tone === "danger"
+        ? "bg-red-600 text-white hover:bg-red-700"
+        : tone === "warn"
+        ? "bg-orange-600 text-white hover:bg-orange-700"
+        : "border border-slate-300 bg-white text-slate-800 hover:bg-slate-50";
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-black uppercase tracking-widest shadow-sm ${cls}`}
+      >
+        {Icon && <Icon className="h-4 w-4" />}
+        {children}
+      </button>
+    );
+  };
+
+  let content: React.ReactNode = null;
+  if (!adminMode) {
+    if (status === "approved") {
+      content = (
+        <>
+          <Btn onClick={onAccept} tone="primary" icon={ThumbsUp}>Accepter</Btn>
+          <Btn onClick={wait}>Afvent</Btn>
+          <Btn onClick={onDealerReject} tone="warn" icon={ThumbsDown}>Ikke accepteret</Btn>
+        </>
+      );
+    } else if (status === "dealer_in_progress") {
+      content = (
+        <>
+          <Btn onClick={onReadyToClose} tone="primary" icon={Check}>Klar til afslutning</Btn>
+          <Btn onClick={wait}>Afvent</Btn>
+          <Btn onClick={onDealerReject} tone="warn" icon={ThumbsDown}>Ikke accepteret</Btn>
+        </>
+      );
+    }
+  } else {
+    if (status === "waiting") {
+      content = (
+        <>
+          <Btn onClick={onAdminApprove} tone="primary" icon={ThumbsUp}>Godkend</Btn>
+          <Btn onClick={onAdminReject} tone="danger" icon={ThumbsDown}>Afvis</Btn>
+        </>
+      );
+    } else if (status === "awaiting_timan_close") {
+      content = (
+        <>
+          <Btn onClick={onAdminClose} tone="primary" icon={Check}>Luk sag</Btn>
+          <Btn onClick={onAdminSendBack}>Send tilbage til forhandler</Btn>
+        </>
+      );
+    } else if (status === "awaiting_timan_comment") {
+      content = (
+        <>
+          <Btn onClick={onAdminMoveForward} tone="primary" icon={ThumbsUp}>Godkend igen</Btn>
+          <Btn onClick={onAdminReject} tone="danger" icon={ThumbsDown}>Afvis</Btn>
+          <Btn onClick={onAdminSendBack}>Send tilbage til forhandler</Btn>
+        </>
+      );
+    } else if (status === "rejected" || status === "closed") {
+      content = <Btn onClick={onAdminReopen} tone="warn">Genåben sag</Btn>;
+    }
+  }
+
+  if (!content) return null;
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm no-print">
+      <div className="mb-3 text-[10px] font-black uppercase tracking-widest text-slate-500">
+        Handlinger · {CLAIM_STATUS_LABEL[status]}
+      </div>
+      <div className="flex flex-wrap items-center gap-2">{content}</div>
+      {waited && (
+        <p className="mt-2 text-[11px] font-bold text-slate-500">
+          Status uændret. Du kan vende tilbage senere.
+        </p>
+      )}
+    </div>
+  );
+}
+
+function DealerReplyBox({ onSubmit }: { onSubmit: (text: string) => void }) {
+  const [text, setText] = useState("");
+  return (
+    <div className="mt-3 space-y-2">
+      <textarea
+        className="h-20 w-full rounded-lg border border-orange-200 bg-white p-2 text-sm outline-none focus:border-orange-400"
+        placeholder="Skriv et svar til Timan…"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+      />
+      <div className="flex justify-end">
+        <button
+          type="button"
+          disabled={!text.trim()}
+          onClick={() => {
+            onSubmit(text);
+            setText("");
+          }}
+          className="rounded-lg bg-orange-600 px-3 py-1.5 text-xs font-black uppercase tracking-widest text-white shadow-sm hover:bg-orange-700 disabled:opacity-50"
+        >
+          Send svar
+        </button>
+      </div>
     </div>
   );
 }

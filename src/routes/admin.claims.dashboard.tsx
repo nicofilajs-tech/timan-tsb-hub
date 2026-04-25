@@ -1,11 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo } from "react";
-import { ArrowRight, Eye } from "lucide-react";
+import { ArrowRight, Eye, MessageSquare } from "lucide-react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ClaimsAdminSidebarLayout } from "@/components/ClaimsAdminSidebarLayout";
 import {
   CLAIM_STATUS_LABEL,
+  CLAIM_STATUS_PILL,
   claimDisplayId,
+  claimNeedsTimanAttention,
   formatDkk,
   getAllClaims,
   isClaimGrouped,
@@ -19,7 +21,13 @@ export const Route = createFileRoute("/admin/claims/dashboard")({
   component: AdminClaimsDashboardRoute,
 });
 
-const ACTIVE_STATUSES: ClaimStatus[] = ["waiting", "in_progress", "approved"];
+const ACTIVE_STATUSES: ClaimStatus[] = [
+  "waiting",
+  "approved",
+  "dealer_in_progress",
+  "awaiting_timan_close",
+  "awaiting_timan_comment",
+];
 
 function AdminClaimsDashboardRoute() {
   return (
@@ -96,6 +104,15 @@ function DashboardBody() {
                             Samlet sag
                           </span>
                         )}
+                        {claimNeedsTimanAttention(r) && (
+                          <span
+                            title="Forhandler-kommentar afventer Timan"
+                            className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-orange-700"
+                          >
+                            <MessageSquare className="h-3 w-3" />
+                            Kommentar
+                          </span>
+                        )}
                       </div>
                     </td>
                     <td className="whitespace-nowrap px-6 py-3 font-mono text-xs text-slate-600">
@@ -138,17 +155,9 @@ function DashboardBody() {
 }
 
 function StatusPill({ status }: { status: ClaimStatus }) {
-  const cls: Record<ClaimStatus, string> = {
-    open: "bg-blue-50 text-blue-700",
-    waiting: "bg-amber-50 text-amber-700",
-    in_progress: "bg-indigo-50 text-indigo-700",
-    approved: "bg-emerald-50 text-emerald-700",
-    rejected: "bg-red-50 text-red-700",
-    closed: "bg-slate-100 text-slate-600",
-  };
   return (
     <span
-      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-black ${cls[status]}`}
+      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-black ${CLAIM_STATUS_PILL[status]}`}
     >
       {CLAIM_STATUS_LABEL[status]}
     </span>

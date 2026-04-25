@@ -6,10 +6,21 @@
 
 export type ClaimStatus =
   | "open"
-  | "waiting"
+  /** Gemt / ikke afsendt (dealer draft, full edit) */
   | "in_progress"
+  /** Afventer accept (submitted, dealer can still edit until Timan approves) */
+  | "waiting"
+  /** Godkendt af Timan (locked for dealer, awaits dealer action) */
   | "approved"
+  /** I gang hos forhandler (dealer accepted approval) */
+  | "dealer_in_progress"
+  /** Afventer Timan afslutning (dealer finished, Timan must close) */
+  | "awaiting_timan_close"
+  /** Afventer Timan kommentar (dealer disagreed/commented) */
+  | "awaiting_timan_comment"
+  /** Afvist af Timan */
   | "rejected"
+  /** Lukket — final */
   | "closed";
 
 export interface ClaimPartLine {
@@ -87,6 +98,37 @@ export interface ClaimRecord {
    * documenting why a claim was rejected/closed or follow-up notes.
    */
   adminComment?: string;
+  /**
+   * Comments left by the dealer. Used in the disagreement/"Ikke accepteret"
+   * flow and on rejected claims so the dealer can reply. Each comment is
+   * surfaced to Timan Admin with a notification icon when the claim is in
+   * a status that requires Timan attention.
+   */
+  dealerComments?: ClaimComment[];
+  /**
+   * Audit log of changes made by Timan Admin after the claim was approved.
+   * Visible to both Timan Admin and the dealer so any later edits are
+   * transparent.
+   */
+  auditLog?: ClaimAuditEntry[];
+}
+
+export interface ClaimComment {
+  id: string;
+  author: string;
+  /** ISO timestamp */
+  at: string;
+  text: string;
+}
+
+export interface ClaimAuditEntry {
+  id: string;
+  /** ISO timestamp */
+  at: string;
+  by: string;
+  field: string;
+  oldValue: string;
+  newValue: string;
 }
 
 /** Format the user-facing display id, e.g. "CL-9013/2". */
@@ -96,20 +138,52 @@ export function claimDisplayId(claim: Pick<ClaimRecord, "groupId" | "subIndex">)
 
 export const CLAIM_STATUS_LABEL: Record<ClaimStatus, string> = {
   open: "Åben",
+  in_progress: "Gemt / ikke afsendt",
   waiting: "Afventer accept",
-  in_progress: "I gang",
-  approved: "Godkendt",
+  approved: "Godkendt af Timan",
+  dealer_in_progress: "I gang hos forhandler",
+  awaiting_timan_close: "Afventer Timan afslutning",
+  awaiting_timan_comment: "Afventer Timan kommentar",
   rejected: "Afvist",
   closed: "Lukket",
 };
 
+/** Tailwind classes for the status pill, keyed by status. */
+export const CLAIM_STATUS_PILL: Record<ClaimStatus, string> = {
+  open: "bg-blue-50 text-blue-700",
+  in_progress: "bg-slate-100 text-slate-700",
+  waiting: "bg-amber-50 text-amber-700",
+  approved: "bg-emerald-50 text-emerald-700",
+  dealer_in_progress: "bg-indigo-50 text-indigo-700",
+  awaiting_timan_close: "bg-purple-50 text-purple-700",
+  awaiting_timan_comment: "bg-orange-50 text-orange-700",
+  rejected: "bg-red-50 text-red-700",
+  closed: "bg-slate-100 text-slate-600",
+};
+
 /**
- * Whether the dealer is allowed to edit a claim in this status.
- * Editable: waiting (Afventer accept), in_progress (I gang).
- * Read-only: approved, rejected, closed (and legacy "open").
+ * Whether the dealer is allowed to fully edit the claim form in this status.
+ * Editable: in_progress (draft), waiting (Afventer accept).
+ * After Timan approval the dealer is locked out of all claim data.
  */
 export function isClaimEditable(status: ClaimStatus): boolean {
-  return status === "waiting" || status === "in_progress";
+  return status === "in_progress" || status === "waiting";
+}
+
+/** Statuses that require Timan Admin attention because of a dealer comment. */
+export const TIMAN_NEEDS_ATTENTION_STATUSES: ClaimStatus[] = [
+  "awaiting_timan_comment",
+  "awaiting_timan_close",
+];
+
+/** True if the claim should display a notification badge to Timan Admin. */
+export function claimNeedsTimanAttention(claim: ClaimRecord): boolean {
+  if (TIMAN_NEEDS_ATTENTION_STATUSES.includes(claim.status)) return true;
+  // Dealer left a comment on a rejected claim — Timan should see the icon.
+  if (claim.status === "rejected" && (claim.dealerComments?.length ?? 0) > 0) {
+    return true;
+  }
+  return false;
 }
 
 const NORDIC_DEALER = "Nordic Machinery Aps";
@@ -177,7 +251,7 @@ const MOCK: SeedClaim[] = [
     damageDate: "2026-04-04",
     approvedDate: "2026-04-14",
     totalPrice: 14250,
-    status: "in_progress",
+    status: "dealer_in_progress",
     detail: {
       dealer: NORDIC_DEALER,
       dealerCountry: "Denmark",
@@ -267,7 +341,16 @@ const MOCK: SeedClaim[] = [
     damageDate: "2026-03-21",
     approvedDate: "2026-04-02",
     totalPrice: 5640,
-    status: "approved",
+    status: "awaiting_timan_comment",
+    dealerComments: [
+      {
+        id: "c-8951-1",
+        author: "Forhandler",
+        at: "2026-04-03T09:14:00.000Z",
+        text:
+          "Vi er ikke enige i prisreduktionen for ECU-arbejdet — diagnose tog længere tid end aftalt. Bedes vurderet på ny.",
+      },
+    ],
     detail: {
       dealer: "Bayern Garten- und Kommunaltechnik GmbH",
       dealerCountry: "Germany",
@@ -311,7 +394,7 @@ const MOCK: SeedClaim[] = [
     damageDate: "2026-03-12",
     approvedDate: "2026-03-25",
     totalPrice: 17890,
-    status: "approved",
+    status: "awaiting_timan_close",
     detail: {
       dealer: NORDIC_DEALER,
       dealerCountry: "Denmark",
@@ -786,8 +869,10 @@ export function addConnectedClaim(sourceId: string): ClaimRecord | undefined {
 /**
  * Persist Timan-Admin-only changes back to the in-memory mock store.
  * Updates the admin comment plus the editable price-overview fields
- * (working hours, driving km, total price). Returns the updated record
- * or undefined if not found.
+ * (working hours, driving km, total price). When the claim is already
+ * past Timan approval and a tracked field actually changes value,
+ * appends entries to the audit log so the dealer can see what changed.
+ * Returns the updated record or undefined if not found.
  */
 export function updateAdminFields(
   id: string,
@@ -797,13 +882,87 @@ export function updateAdminFields(
     drivingKm?: string;
     totalPrice?: number;
   },
+  /** Display name for the audit log entry, e.g. "Timan Admin". */
+  changedBy = "Timan Admin",
 ): ClaimRecord | undefined {
   const claim = RECORDS.find((c) => c.id === id);
   if (!claim) return undefined;
+  const trackAudit = isPastApproval(claim.status);
+  const log = (field: string, oldValue: string, newValue: string) => {
+    if (oldValue === newValue) return;
+    if (!claim.auditLog) claim.auditLog = [];
+    claim.auditLog.push({
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      at: new Date().toISOString(),
+      by: changedBy,
+      field,
+      oldValue,
+      newValue,
+    });
+  };
   if (fields.adminComment !== undefined) claim.adminComment = fields.adminComment;
-  if (fields.laborHours !== undefined) claim.detail.laborHours = fields.laborHours;
-  if (fields.drivingKm !== undefined) claim.detail.drivingKm = fields.drivingKm;
-  if (fields.totalPrice !== undefined) claim.totalPrice = fields.totalPrice;
+  if (fields.laborHours !== undefined) {
+    if (trackAudit) log("Arbejdstimer", claim.detail.laborHours, fields.laborHours);
+    claim.detail.laborHours = fields.laborHours;
+  }
+  if (fields.drivingKm !== undefined) {
+    if (trackAudit) log("Kørte km", claim.detail.drivingKm, fields.drivingKm);
+    claim.detail.drivingKm = fields.drivingKm;
+  }
+  if (fields.totalPrice !== undefined) {
+    if (trackAudit) log("Samlet pris", String(claim.totalPrice), String(fields.totalPrice));
+    claim.totalPrice = fields.totalPrice;
+  }
+  return claim;
+}
+
+/**
+ * True once Timan has approved the claim — i.e. the dealer is locked out
+ * and any later edits made by Timan must appear in the audit log.
+ */
+export function isPastApproval(status: ClaimStatus): boolean {
+  return (
+    status === "approved" ||
+    status === "dealer_in_progress" ||
+    status === "awaiting_timan_close" ||
+    status === "awaiting_timan_comment" ||
+    status === "rejected" ||
+    status === "closed"
+  );
+}
+
+/**
+ * Mutate the claim status. Used by both Dealer and Timan workflows.
+ * Returns the updated record or undefined if not found.
+ */
+export function setClaimStatus(id: string, status: ClaimStatus): ClaimRecord | undefined {
+  const claim = RECORDS.find((c) => c.id === id);
+  if (!claim) return undefined;
+  claim.status = status;
+  if (status === "approved" && !claim.approvedDate) {
+    claim.approvedDate = new Date().toISOString().slice(0, 10);
+  }
+  return claim;
+}
+
+/**
+ * Append a dealer comment. Used by the "Ikke accepteret" / disagreement
+ * flow and on rejected claims so the dealer can reply to Timan.
+ */
+export function addDealerComment(
+  id: string,
+  text: string,
+  author = "Forhandler",
+): ClaimRecord | undefined {
+  const claim = RECORDS.find((c) => c.id === id);
+  if (!claim) return undefined;
+  if (!claim.dealerComments) claim.dealerComments = [];
+  claim.dealerComments.push({
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    at: new Date().toISOString(),
+    author,
+    text: text.trim(),
+  });
   return claim;
 }
 
@@ -824,10 +983,18 @@ export interface DealerClaimsSummary {
   latest: ClaimRecord[];
 }
 
+const OPEN_STATUSES: ClaimStatus[] = [
+  "open",
+  "in_progress",
+  "waiting",
+  "approved",
+  "dealer_in_progress",
+  "awaiting_timan_close",
+  "awaiting_timan_comment",
+];
+
 export function summarizeDealerClaims(records: ClaimRecord[]): DealerClaimsSummary {
-  const open = records.filter(
-    (r) => r.status === "open" || r.status === "waiting" || r.status === "in_progress",
-  ).length;
+  const open = records.filter((r) => OPEN_STATUSES.includes(r.status)).length;
   const approved = records.filter((r) => r.status === "approved").length;
   const rejected = records.filter((r) => r.status === "rejected").length;
   const latest = [...records]
@@ -844,9 +1011,7 @@ export interface AdminClaimsSummary {
 }
 
 export function summarizeAdminClaims(records: ClaimRecord[]): AdminClaimsSummary {
-  const open = records.filter(
-    (r) => r.status === "open" || r.status === "waiting" || r.status === "in_progress",
-  ).length;
+  const open = records.filter((r) => OPEN_STATUSES.includes(r.status)).length;
   const approved = records.filter((r) => r.status === "approved").length;
   const totalAmount = records.reduce((sum, r) => sum + (r.totalPrice || 0), 0);
   return { total: records.length, open, approved, totalAmount };
