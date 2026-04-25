@@ -384,12 +384,22 @@ export function ClaimTool({ initialClaim, readOnly = false }: ClaimToolProps = {
       </div>
 
       <main className="mx-auto max-w-5xl space-y-8 px-4 py-8">
-        {showErrors && (
+        {readOnly && (
+          <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-slate-700 no-print">
+            <AlertTriangle className="h-5 w-5 text-slate-500" />
+            <p className="text-sm font-bold">
+              Denne sag er låst og kan kun ses. Status tillader ikke redigering.
+            </p>
+          </div>
+        )}
+        {showErrors && !readOnly && (
           <div className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700 no-print">
             <AlertTriangle className="h-5 w-5" />
             <p className="text-sm font-bold">{t("validationError")}</p>
           </div>
         )}
+
+        <fieldset disabled={readOnly} className="contents">
 
         <div className="rounded-2xl border border-slate-200 border-l-8 border-l-green-700 bg-white p-6 shadow-sm print:border-none print:p-0 print:shadow-none">
           <label className="mb-2 block text-[10px] font-black uppercase tracking-widest text-green-800">
