@@ -180,16 +180,31 @@ export interface ClaimToolProps {
   initialClaim?: ClaimRecord;
   /** When true, the entire form is rendered read-only and submission is hidden. */
   readOnly?: boolean;
+  /**
+   * Timan-Admin mode. When true, the admin comment field becomes editable
+   * and a small set of price-overview fields (working hours, driving km,
+   * total price) remain editable even if the claim is otherwise read-only
+   * (e.g. closed/rejected). Replaces the dealer "Generer PDF" submit with
+   * an admin "Gem ændringer" save action.
+   */
+  adminMode?: boolean;
 }
 
-export function ClaimTool({ initialClaim, readOnly = false }: ClaimToolProps = {}) {
+export function ClaimTool({
+  initialClaim,
+  readOnly = false,
+  adminMode = false,
+}: ClaimToolProps = {}) {
   const [portalLang] = usePortalLanguage();
   const lang = mapPortalLang(portalLang);
   const [showErrors, setShowErrors] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
+  const [isSavingAdmin, setIsSavingAdmin] = useState(false);
+  const [adminSaved, setAdminSaved] = useState(false);
   // Skip the intro modal when opening an existing claim (view/edit), or in
   // read-only mode where no submission is possible anyway.
   const [showIntro, setShowIntro] = useState(!initialClaim && !readOnly);
+  const [adminComment, setAdminComment] = useState(initialClaim?.adminComment ?? "");
 
   const t = (key: string): string => {
     const parts = key.split(".");
