@@ -15,11 +15,13 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import {
+  CalendarRange,
   dealerOverview,
   mostUsedMachineType,
   thisMonthCount,
   totalCount,
   useWarrantyRecords,
+  yearlyOverview,
 } from "@/lib/warranty-store";
 
 export type WarrantyScope = "admin" | "dealer";
