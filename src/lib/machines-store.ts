@@ -355,17 +355,7 @@ export function getDuplicateSerials(list: MachineRecord[]): Set<string> {
   return dups;
 }
 
-export function formatSyncTs(iso?: string): string {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  return d.toLocaleString("da-DK", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
+export { formatDateTime as formatSyncTs } from "./format-date";
 
 export const SOURCE_SYSTEM_LABEL: Record<MachineSourceSystem, string> = {
   sharepoint: "SharePoint",

@@ -578,11 +578,7 @@ export function deadlineLabel(iso: string): { label: string; tone?: "warning" | 
   return { label: `${days} dage` };
 }
 
-export function formatDate(iso?: string): string {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  return d.toLocaleDateString("da-DK", { day: "2-digit", month: "short", year: "numeric" });
-}
+export { formatDate } from "./format-date";
 
 /** TSBs activated and accepted for a given dealer (used by dealer "Mine sager"). */
 export function getTsbsForDealer(dealerId: string): Array<{

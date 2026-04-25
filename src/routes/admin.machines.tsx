@@ -64,14 +64,7 @@ const FILTERS: { id: Filter; label: string }[] = [
   { id: "manuelle", label: "Manuelt oprettet" },
 ];
 
-function formatDate(iso?: string): string {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("da-DK", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
+import { formatDate } from "@/lib/format-date";
 
 function AdminMachinesPage() {
   const machines = useMachines();
