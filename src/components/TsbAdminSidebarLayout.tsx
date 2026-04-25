@@ -16,6 +16,7 @@ import type { ReactNode } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import {
   Building2,
+  Globe,
   LayoutDashboard,
   FileText,
   Settings,
@@ -41,6 +42,7 @@ const ADMIN_NAV: NavItem[] = [
   { to: "/admin/dealers", label: "Forhandlere", icon: Building2, match: "/admin/dealers" },
   { to: "/admin/machines", label: "Maskiner", icon: Wrench, match: "/admin/machines" },
   { to: "/admin/users", label: "Brugere", icon: Users, match: "/admin/users" },
+  { to: "/admin/countries", label: "Landeliste", icon: Globe, match: "/admin/countries" },
   { to: "/admin/settings", label: "Indstillinger", icon: Settings, match: "/admin/settings" },
 ];
 
