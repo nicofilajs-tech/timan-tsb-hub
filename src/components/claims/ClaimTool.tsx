@@ -173,12 +173,21 @@ function mapPortalLang(p: PortalLang): LanguageCode {
   return p === "DK" ? "dk" : "gb";
 }
 
-export function ClaimTool() {
+export interface ClaimToolProps {
+  /** When provided, the form is prefilled with this claim's detail. */
+  initialClaim?: ClaimRecord;
+  /** When true, the entire form is rendered read-only and submission is hidden. */
+  readOnly?: boolean;
+}
+
+export function ClaimTool({ initialClaim, readOnly = false }: ClaimToolProps = {}) {
   const [portalLang] = usePortalLanguage();
   const lang = mapPortalLang(portalLang);
   const [showErrors, setShowErrors] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
-  const [showIntro, setShowIntro] = useState(true);
+  // Skip the intro modal when opening an existing claim (view/edit), or in
+  // read-only mode where no submission is possible anyway.
+  const [showIntro, setShowIntro] = useState(!initialClaim && !readOnly);
 
   const t = (key: string): string => {
     const parts = key.split(".");
@@ -193,36 +202,41 @@ export function ClaimTool() {
     return typeof translation === "string" ? translation : key;
   };
 
-  const [formData, setFormData] = useState({
-    guaranteeNo: "",
-    dealer: "",
-    dealerCountry: "",
-    dealerContact: "",
-    dealerPhone: "",
-    dealerEmail: "",
-    owner: "",
-    ownerCountry: "",
-    ownerAddress: "",
-    ownerPostal: "",
-    ownerPhone: "",
-    ownerEmail: "",
-    machineType: "",
-    serialNo: "",
-    hours: "",
-    saleDate: "",
-    damageDate: "",
-    approvedDate: "",
-    repairDate: "",
-    faultDesc: "",
-    repairDesc: "",
-    parts: [
-      { id: 1, qty: "1", partNo: "", desc: "", unitPrice: "" },
-      { id: 2, qty: "1", partNo: "", desc: "", unitPrice: "" },
-      { id: 3, qty: "1", partNo: "", desc: "", unitPrice: "" },
-    ] as PartLine[],
-    laborHours: "0",
-    drivingKm: "0",
-    currency: "DKK",
+  const [formData, setFormData] = useState(() => {
+    const d = initialClaim?.detail;
+    return {
+      guaranteeNo: initialClaim?.warrantyNo ?? "",
+      dealer: d?.dealer ?? "",
+      dealerCountry: d?.dealerCountry ?? "",
+      dealerContact: d?.dealerContact ?? "",
+      dealerPhone: d?.dealerPhone ?? "",
+      dealerEmail: d?.dealerEmail ?? "",
+      owner: d?.owner ?? "",
+      ownerCountry: d?.ownerCountry ?? "",
+      ownerAddress: d?.ownerAddress ?? "",
+      ownerPostal: d?.ownerPostal ?? "",
+      ownerPhone: "",
+      ownerEmail: "",
+      machineType: d?.machineType ?? "",
+      serialNo: d?.serialNo ?? "",
+      hours: d?.hours ?? "",
+      saleDate: d?.saleDate ?? "",
+      damageDate: d?.damageDate ?? "",
+      approvedDate: d?.approvedDate ?? "",
+      repairDate: d?.repairDate ?? "",
+      faultDesc: d?.faultDesc ?? "",
+      repairDesc: d?.repairDesc ?? "",
+      parts: (d?.parts && d.parts.length > 0
+        ? d.parts.map((p, idx) => ({ id: idx + 1, ...p }))
+        : [
+            { id: 1, qty: "1", partNo: "", desc: "", unitPrice: "" },
+            { id: 2, qty: "1", partNo: "", desc: "", unitPrice: "" },
+            { id: 3, qty: "1", partNo: "", desc: "", unitPrice: "" },
+          ]) as PartLine[],
+      laborHours: d?.laborHours ?? "0",
+      drivingKm: d?.drivingKm ?? "0",
+      currency: d?.currency ?? "DKK",
+    };
   });
 
   const stepStatus = useMemo(() => {
