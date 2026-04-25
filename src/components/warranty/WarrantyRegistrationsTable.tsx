@@ -109,7 +109,7 @@ export function WarrantyRegistrationsTable({
       <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
         <div
           className={`grid grid-cols-1 gap-3 md:grid-cols-2 ${
-            scope === "admin" ? "lg:grid-cols-5" : "lg:grid-cols-4"
+            scope === "admin" ? "lg:grid-cols-5" : "lg:grid-cols-3"
           }`}
         >
           <div className="relative lg:col-span-2">
@@ -136,12 +136,14 @@ export function WarrantyRegistrationsTable({
             placeholder="Alle maskintyper"
             options={MACHINE_TYPES.map((m) => m as string)}
           />
-          <Select
-            value={language}
-            onChange={setLanguage}
-            placeholder="Alle sprog"
-            options={languages}
-          />
+          {scope === "admin" && (
+            <Select
+              value={language}
+              onChange={setLanguage}
+              placeholder="Alle sprog"
+              options={languages}
+            />
+          )}
         </div>
       </div>
 

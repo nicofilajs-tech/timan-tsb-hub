@@ -8,6 +8,7 @@ import { useMemo } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   ArrowRight,
+  CalendarRange,
   ClipboardList,
   Factory,
   PlusCircle,
@@ -20,6 +21,7 @@ import {
   thisMonthCount,
   totalCount,
   useWarrantyRecords,
+  yearlyOverview,
 } from "@/lib/warranty-store";
 
 export type WarrantyScope = "admin" | "dealer";
@@ -70,6 +72,7 @@ export function WarrantyDashboardBody({ scope, dealerName }: Props) {
       topMachine: mostUsedMachineType(records),
       latest: records.slice(0, 5),
       dealers: dealerOverview(records).slice(0, 8),
+      yearly: yearlyOverview(records),
     };
   }, [records]);
 
@@ -114,6 +117,8 @@ export function WarrantyDashboardBody({ scope, dealerName }: Props) {
           />
         )}
       </div>
+
+      {scope === "dealer" && <YearlyOverviewCard data={stats.yearly} />}
 
       <div
         className={`grid grid-cols-1 gap-6 ${
@@ -227,4 +232,52 @@ function Kpi({
 
 function EmptyState({ text }: { text: string }) {
   return <div className="px-6 py-10 text-center text-sm text-slate-500">{text}</div>;
+}
+
+function YearlyOverviewCard({
+  data,
+}: {
+  data: { year: number; count: number }[];
+}) {
+  const max = data.reduce((m, d) => Math.max(m, d.count), 0);
+  const total = data.reduce((s, d) => s + d.count, 0);
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+        <div className="flex items-center gap-2">
+          <CalendarRange className="h-5 w-5 text-violet-600" />
+          <h2 className="text-lg font-black">Registreringer pr. år</h2>
+        </div>
+        <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-black text-slate-700">
+          {total} i alt
+        </span>
+      </div>
+      {data.length === 0 ? (
+        <EmptyState text="Du har endnu ingen registreringer." />
+      ) : (
+        <ul className="divide-y divide-slate-100">
+          {data.map((d) => {
+            const pct = max > 0 ? Math.round((d.count / max) * 100) : 0;
+            return (
+              <li key={d.year} className="px-6 py-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-black text-slate-700">{d.year}</span>
+                  <span className="text-slate-600">
+                    <span className="font-black text-slate-900">{d.count}</span>{" "}
+                    registreringer
+                  </span>
+                </div>
+                <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                  <div
+                    className="h-full rounded-full bg-violet-500"
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
 }
