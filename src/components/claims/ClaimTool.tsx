@@ -18,6 +18,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { usePortalLanguage, type PortalLang } from "@/components/PortalHeader";
+import type { ClaimRecord } from "@/lib/claims-store";
 
 const LANGUAGES = [
   { code: "dk", name: "Dansk", flag: "DK" },
