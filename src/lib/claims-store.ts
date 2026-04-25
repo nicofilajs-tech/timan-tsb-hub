@@ -52,7 +52,19 @@ export interface ClaimDetail {
 }
 
 export interface ClaimRecord {
+  /**
+   * Unique storage id. For grouped claims this is `${groupId}-${subIndex}`,
+   * e.g. "CL-9013-2". The user-facing display id uses a slash:
+   * "CL-9013/2" — see {@link claimDisplayId}.
+   */
   id: string;
+  /**
+   * Main case number shared by all connected claims in a group, e.g.
+   * "CL-9013". A standalone claim has groupId = id and subIndex = 1.
+   */
+  groupId: string;
+  /** 1-based position within the group. */
+  subIndex: number;
   /** Warranty / guarantee number issued by Timan, e.g. "T-001234". */
   warrantyNo: string;
   title: string;
@@ -77,6 +89,11 @@ export interface ClaimRecord {
   adminComment?: string;
 }
 
+/** Format the user-facing display id, e.g. "CL-9013/2". */
+export function claimDisplayId(claim: Pick<ClaimRecord, "groupId" | "subIndex">): string {
+  return `${claim.groupId}/${claim.subIndex}`;
+}
+
 export const CLAIM_STATUS_LABEL: Record<ClaimStatus, string> = {
   open: "Åben",
   waiting: "Afventer accept",
@@ -97,7 +114,11 @@ export function isClaimEditable(status: ClaimStatus): boolean {
 
 const NORDIC_DEALER = "Nordic Machinery Aps";
 
-const MOCK: ClaimRecord[] = [
+// Entries may omit groupId/subIndex; they are backfilled below so each
+// standalone claim becomes its own single-machine group.
+type SeedClaim = Omit<ClaimRecord, "groupId" | "subIndex"> &
+  Partial<Pick<ClaimRecord, "groupId" | "subIndex">>;
+const MOCK: SeedClaim[] = [
   {
     id: "CL-9013",
     warrantyNo: "T-001931",
@@ -462,12 +483,240 @@ const MOCK: ClaimRecord[] = [
   },
 ];
 
+// ---------------------------------------------------------------------------
+// Grouped / connected claims
+// ---------------------------------------------------------------------------
+//
+// Demo case: a Danish municipality reports the same hydraulic-block leak on
+// three identical RC-1000 machines from the same delivery batch. The dealer
+// files one main case ("CL-9050") and adds two connected machines under it,
+// resulting in CL-9050/1, CL-9050/2 and CL-9050/3.
+const GROUP_DEMO: ClaimRecord[] = [
+  {
+    id: "CL-9050-1",
+    groupId: "CL-9050",
+    subIndex: 1,
+    warrantyNo: "T-002010",
+    title: "Hydraulik lækage — fælles batch RC-1000 (maskine 1)",
+    dealer: NORDIC_DEALER,
+    country: "DK",
+    customer: "Vejle Park & Materielgård",
+    machineType: "RC-1000",
+    serial: "RC1000-23001",
+    createdAt: "2026-04-20",
+    damageDate: "2026-04-19",
+    approvedDate: null,
+    totalPrice: 8420,
+    status: "waiting",
+    detail: {
+      dealer: NORDIC_DEALER,
+      dealerCountry: "DK",
+      dealerContact: "Mads Holm",
+      dealerPhone: "+45 22 14 88 02",
+      dealerEmail: "service@nordicmachinery.dk",
+      owner: "Vejle Park & Materielgård",
+      ownerCountry: "DK",
+      ownerAddress: "Materielvej 4",
+      ownerPostal: "7100 Vejle",
+      machineType: "RC-1000",
+      serialNo: "RC1000-23001",
+      hours: "640",
+      saleDate: "2025-09-02",
+      damageDate: "2026-04-19",
+      approvedDate: "",
+      repairDate: "2026-04-22",
+      faultDesc:
+        "Olielækage ved hovedhydraulikblok. Samme fejlmønster konstateret på tre RC-1000 fra samme leveringsbatch.",
+      repairDesc:
+        "Udskiftning af pakningssæt og O-ringe på hovedblok. Trykprøvet ved 210 bar uden lækage.",
+      parts: [
+        { qty: "1", partNo: "HYD-PK-220", desc: "Pakningssæt hovedblok", unitPrice: "1450.00" },
+        { qty: "4", partNo: "OR-18x2", desc: "O-ring 18x2 NBR", unitPrice: "45.00" },
+        { qty: "6", partNo: "HYD-OIL-46", desc: "Hydraulikolie HVLP46 (l)", unitPrice: "85.00" },
+      ],
+      laborHours: "5.5",
+      drivingKm: "40",
+      currency: "DKK",
+    },
+  },
+  {
+    id: "CL-9050-2",
+    groupId: "CL-9050",
+    subIndex: 2,
+    warrantyNo: "T-002010",
+    title: "Hydraulik lækage — fælles batch RC-1000 (maskine 2)",
+    dealer: NORDIC_DEALER,
+    country: "DK",
+    customer: "Vejle Park & Materielgård",
+    machineType: "RC-1000",
+    serial: "RC1000-23002",
+    createdAt: "2026-04-20",
+    damageDate: "2026-04-19",
+    approvedDate: null,
+    totalPrice: 8420,
+    status: "waiting",
+    detail: {
+      dealer: NORDIC_DEALER,
+      dealerCountry: "DK",
+      dealerContact: "Mads Holm",
+      dealerPhone: "+45 22 14 88 02",
+      dealerEmail: "service@nordicmachinery.dk",
+      owner: "Vejle Park & Materielgård",
+      ownerCountry: "DK",
+      ownerAddress: "Materielvej 4",
+      ownerPostal: "7100 Vejle",
+      machineType: "RC-1000",
+      serialNo: "RC1000-23002",
+      hours: "612",
+      saleDate: "2025-09-02",
+      damageDate: "2026-04-19",
+      approvedDate: "",
+      repairDate: "2026-04-22",
+      faultDesc:
+        "Identisk olielækage ved hovedhydraulikblok som søstermaskine RC1000-23001.",
+      repairDesc:
+        "Udskiftning af pakningssæt og O-ringe på hovedblok. Trykprøvet uden lækage.",
+      parts: [
+        { qty: "1", partNo: "HYD-PK-220", desc: "Pakningssæt hovedblok", unitPrice: "1450.00" },
+        { qty: "4", partNo: "OR-18x2", desc: "O-ring 18x2 NBR", unitPrice: "45.00" },
+        { qty: "6", partNo: "HYD-OIL-46", desc: "Hydraulikolie HVLP46 (l)", unitPrice: "85.00" },
+      ],
+      laborHours: "5.5",
+      drivingKm: "0",
+      currency: "DKK",
+    },
+  },
+  {
+    id: "CL-9050-3",
+    groupId: "CL-9050",
+    subIndex: 3,
+    warrantyNo: "T-002010",
+    title: "Hydraulik lækage — fælles batch RC-1000 (maskine 3)",
+    dealer: NORDIC_DEALER,
+    country: "DK",
+    customer: "Vejle Park & Materielgård",
+    machineType: "RC-1000",
+    serial: "RC1000-23003",
+    createdAt: "2026-04-20",
+    damageDate: "2026-04-19",
+    approvedDate: "2026-04-24",
+    totalPrice: 8420,
+    status: "in_progress",
+    detail: {
+      dealer: NORDIC_DEALER,
+      dealerCountry: "DK",
+      dealerContact: "Mads Holm",
+      dealerPhone: "+45 22 14 88 02",
+      dealerEmail: "service@nordicmachinery.dk",
+      owner: "Vejle Park & Materielgård",
+      ownerCountry: "DK",
+      ownerAddress: "Materielvej 4",
+      ownerPostal: "7100 Vejle",
+      machineType: "RC-1000",
+      serialNo: "RC1000-23003",
+      hours: "705",
+      saleDate: "2025-09-02",
+      damageDate: "2026-04-19",
+      approvedDate: "2026-04-24",
+      repairDate: "2026-04-23",
+      faultDesc:
+        "Tredje maskine fra samme batch med identisk hydraulik-lækage.",
+      repairDesc:
+        "Udskiftning af pakningssæt og O-ringe. Funktionstestet ok.",
+      parts: [
+        { qty: "1", partNo: "HYD-PK-220", desc: "Pakningssæt hovedblok", unitPrice: "1450.00" },
+        { qty: "4", partNo: "OR-18x2", desc: "O-ring 18x2 NBR", unitPrice: "45.00" },
+        { qty: "6", partNo: "HYD-OIL-46", desc: "Hydraulikolie HVLP46 (l)", unitPrice: "85.00" },
+      ],
+      laborHours: "5.5",
+      drivingKm: "0",
+      currency: "DKK",
+    },
+  },
+];
+MOCK.push(...GROUP_DEMO);
+
+// Backfill standalone records (no explicit groupId): each becomes its own
+// single-machine group where groupId == id and subIndex == 1.
+for (const c of MOCK) {
+  if (!c.groupId) {
+    c.groupId = c.id;
+    c.subIndex = 1;
+  }
+}
+
+// Normalized array — every entry now satisfies the full ClaimRecord shape.
+const RECORDS: ClaimRecord[] = MOCK as ClaimRecord[];
+
 export function getAllClaims(): ClaimRecord[] {
-  return MOCK;
+  return RECORDS;
 }
 
 export function getClaimById(id: string): ClaimRecord | undefined {
-  return MOCK.find((c) => c.id === id);
+  return RECORDS.find((c) => c.id === id);
+}
+
+/**
+ * True when the claim is part of a multi-machine grouped case (has siblings).
+ */
+export function isClaimGrouped(claim: Pick<ClaimRecord, "groupId">): boolean {
+  return RECORDS.filter((c) => c.groupId === claim.groupId).length > 1;
+}
+
+/**
+ * All claims that share a main-case number (groupId), sorted by sub-index.
+ * For a standalone claim this returns just that single record.
+ */
+export function getGroupClaims(groupId: string): ClaimRecord[] {
+  return RECORDS.filter((c) => c.groupId === groupId).sort(
+    (a, b) => a.subIndex - b.subIndex,
+  );
+}
+
+/**
+ * Create a new connected claim under the same main case as `sourceId`,
+ * copying common dealer/owner/machine-type/dates/description data from the
+ * source so the dealer doesn't have to retype everything. Per-machine fields
+ * (serialNo, hours) are intentionally cleared so the dealer must fill them
+ * in for the new machine. Returns the newly created record.
+ */
+export function addConnectedClaim(sourceId: string): ClaimRecord | undefined {
+  const source = RECORDS.find((c) => c.id === sourceId);
+  if (!source) return undefined;
+  const siblings = getGroupClaims(source.groupId);
+  const nextIndex = siblings.reduce((max, c) => Math.max(max, c.subIndex), 0) + 1;
+  const newId = `${source.groupId}-${nextIndex}`;
+  const today = new Date().toISOString().slice(0, 10);
+  const created: ClaimRecord = {
+    id: newId,
+    groupId: source.groupId,
+    subIndex: nextIndex,
+    warrantyNo: source.warrantyNo,
+    title: source.title,
+    dealer: source.dealer,
+    country: source.country,
+    customer: source.customer,
+    machineType: source.machineType,
+    serial: "",
+    createdAt: today,
+    damageDate: source.damageDate,
+    approvedDate: null,
+    totalPrice: 0,
+    status: "waiting",
+    detail: {
+      ...source.detail,
+      // Per-machine fields the dealer must review/update:
+      serialNo: "",
+      hours: "",
+      approvedDate: "",
+      // Reset price-overview fields for the new machine.
+      laborHours: "0",
+      drivingKm: "0",
+      parts: source.detail.parts.map((p) => ({ ...p })),
+    },
+  };
+  RECORDS.push(created);
+  return created;
 }
 
 /**
@@ -485,7 +734,7 @@ export function updateAdminFields(
     totalPrice?: number;
   },
 ): ClaimRecord | undefined {
-  const claim = MOCK.find((c) => c.id === id);
+  const claim = RECORDS.find((c) => c.id === id);
   if (!claim) return undefined;
   if (fields.adminComment !== undefined) claim.adminComment = fields.adminComment;
   if (fields.laborHours !== undefined) claim.detail.laborHours = fields.laborHours;
@@ -495,12 +744,12 @@ export function updateAdminFields(
 }
 
 export function getDealerClaims(dealerName: string): ClaimRecord[] {
-  if (!dealerName) return MOCK;
+  if (!dealerName) return RECORDS;
   const needle = dealerName.toLowerCase();
-  const scoped = MOCK.filter((c) => c.dealer.toLowerCase() === needle);
+  const scoped = RECORDS.filter((c) => c.dealer.toLowerCase() === needle);
   // In preview, if the current dealer has no records yet, fall back to the
   // demo dealer so the page is not empty.
-  return scoped.length > 0 ? scoped : MOCK.filter((c) => c.dealer === NORDIC_DEALER);
+  return scoped.length > 0 ? scoped : RECORDS.filter((c) => c.dealer === NORDIC_DEALER);
 }
 
 export interface DealerClaimsSummary {

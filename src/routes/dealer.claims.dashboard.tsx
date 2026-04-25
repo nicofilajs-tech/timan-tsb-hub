@@ -15,8 +15,10 @@ import { ClaimsAdminSidebarLayout } from "@/components/ClaimsAdminSidebarLayout"
 import { useDealerName } from "@/components/warranty/useDealerName";
 import {
   CLAIM_STATUS_LABEL,
+  claimDisplayId,
   getDealerClaims,
   isClaimEditable,
+  isClaimGrouped,
   summarizeDealerClaims,
   type ClaimStatus,
 } from "@/lib/claims-store";
@@ -114,9 +116,14 @@ function DashboardBody({ dealerName }: { dealerName: string }) {
               >
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded bg-slate-100 px-2 py-0.5 text-xs font-black tracking-widest text-slate-500">
-                      {r.id}
+                    <span className="rounded bg-slate-100 px-2 py-0.5 font-mono text-xs font-black tracking-widest text-slate-500">
+                      {claimDisplayId(r)}
                     </span>
+                    {isClaimGrouped(r) && (
+                      <span className="rounded bg-indigo-100 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-indigo-700">
+                        Samlet sag
+                      </span>
+                    )}
                     <span className="truncate font-bold">{r.title}</span>
                   </div>
                   <div className="mt-1 truncate text-sm text-slate-500">

@@ -6,9 +6,12 @@
  */
 
 import { useMemo, useState, type ReactNode } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   AlertTriangle,
   Check,
+  Copy,
+  Layers,
   Loader2,
   MessageSquare,
   Phone,
@@ -20,7 +23,13 @@ import {
   Wrench,
 } from "lucide-react";
 import { usePortalLanguage, type PortalLang } from "@/components/PortalHeader";
-import { updateAdminFields, type ClaimRecord } from "@/lib/claims-store";
+import {
+  addConnectedClaim,
+  claimDisplayId,
+  getGroupClaims,
+  updateAdminFields,
+  type ClaimRecord,
+} from "@/lib/claims-store";
 
 const LANGUAGES = [
   { code: "dk", name: "Dansk", flag: "DK" },
@@ -205,6 +214,24 @@ export function ClaimTool({
   // read-only mode where no submission is possible anyway.
   const [showIntro, setShowIntro] = useState(!initialClaim && !readOnly);
   const [adminComment, setAdminComment] = useState(initialClaim?.adminComment ?? "");
+  const navigate = useNavigate();
+
+  // Connected (grouped) claims — siblings of the current claim sharing the
+  // same main case number (groupId). Only meaningful when an existing claim
+  // is open.
+  const groupClaims = useMemo(
+    () => (initialClaim ? getGroupClaims(initialClaim.groupId) : []),
+    [initialClaim],
+  );
+  const isGrouped = groupClaims.length > 1;
+
+  function handleAddConnectedMachine() {
+    if (!initialClaim) return;
+    const created = addConnectedClaim(initialClaim.id);
+    if (!created) return;
+    const target = adminMode ? "/admin/claims/$claimId" : "/dealer/claims/$claimId";
+    navigate({ to: target, params: { claimId: created.id } });
+  }
 
   const t = (key: string): string => {
     const parts = key.split(".");
@@ -401,6 +428,105 @@ export function ClaimTool({
       </div>
 
       <main className="mx-auto max-w-5xl space-y-8 px-4 py-8">
+        {/* Connected / grouped claims panel — siblings under the same main case. */}
+        {initialClaim && isGrouped && (
+          <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5 no-print">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-indigo-700">
+                  <Layers className="h-3.5 w-3.5" />
+                  Samlet sag · {initialClaim.groupId}
+                </div>
+                <p className="mt-1 text-sm text-indigo-900">
+                  Denne reklamation er en del af en samlet sag med{" "}
+                  <span className="font-black">{groupClaims.length} maskiner</span>.
+                  Hver maskine har sin egen claim, men de hører til samme hovedsag.
+                </p>
+              </div>
+              {!adminMode && !readOnly && (
+                <button
+                  type="button"
+                  onClick={handleAddConnectedMachine}
+                  className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:bg-indigo-700"
+                >
+                  <Plus className="h-4 w-4" /> Tilføj endnu en maskine
+                </button>
+              )}
+            </div>
+            <ul className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {groupClaims.map((sibling) => {
+                const current = sibling.id === initialClaim.id;
+                const target = adminMode
+                  ? "/admin/claims/$claimId"
+                  : "/dealer/claims/$claimId";
+                return (
+                  <li key={sibling.id}>
+                    <Link
+                      to={target}
+                      params={{ claimId: sibling.id }}
+                      className={`flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-xs transition-colors ${
+                        current
+                          ? "border-indigo-400 bg-white shadow-sm"
+                          : "border-indigo-200 bg-white/60 hover:bg-white"
+                      }`}
+                    >
+                      <span className="min-w-0">
+                        <span className="font-mono font-black text-slate-900">
+                          {claimDisplayId(sibling)}
+                        </span>
+                        <span className="ml-2 truncate text-slate-500">
+                          {sibling.serial || "— intet serienr —"}
+                        </span>
+                      </span>
+                      {current && (
+                        <span className="shrink-0 rounded bg-indigo-600 px-1.5 py-0.5 text-[10px] font-black uppercase text-white">
+                          Aktuel
+                        </span>
+                      )}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
+
+        {/* Onboarding banner shown when a connected claim was just created
+            via "Tilføj endnu en maskine" — common data is copied, but the
+            dealer must review per-machine fields. Detected by empty serial. */}
+        {initialClaim && isGrouped && !readOnly && !adminMode && !initialClaim.serial && (
+          <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-900 no-print">
+            <Copy className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+            <div className="text-sm">
+              <p className="font-black">
+                Fælles data er kopieret fra første claim i sagen.
+              </p>
+              <p className="mt-1">
+                Husk at gennemgå og opdatere:{" "}
+                <span className="font-bold">Serienummer</span>,{" "}
+                <span className="font-bold">Ejer / kunde</span>,{" "}
+                <span className="font-bold">Maskin info</span>,{" "}
+                <span className="font-bold">Datoer</span> og{" "}
+                <span className="font-bold">Beskrivelse</span> hvis nødvendigt.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* "Add machine" button when viewing/editing a standalone claim that
+            doesn't yet have siblings — lets the dealer start grouping. */}
+        {initialClaim && !isGrouped && !readOnly && !adminMode && (
+          <div className="flex justify-end no-print">
+            <button
+              type="button"
+              onClick={handleAddConnectedMachine}
+              className="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-white px-3.5 py-2 text-xs font-bold text-indigo-700 hover:bg-indigo-50"
+            >
+              <Plus className="h-4 w-4" /> Tilføj endnu en maskine til samme sag
+            </button>
+          </div>
+        )}
+
         {readOnly && !adminMode && (
           <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-slate-700 no-print">
             <AlertTriangle className="h-5 w-5 text-slate-500" />
