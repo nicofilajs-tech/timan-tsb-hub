@@ -365,6 +365,8 @@ const MOCK: ClaimRecord[] = [
       drivingKm: "210",
       currency: "DKK",
     },
+    adminComment:
+      "Afvist 2026-03-05: Service-historik mangler for perioden 2024-2025, og garantiperioden er udløbet. Ejer er informeret og har accepteret reparation for egen regning.",
   },
   {
     id: "CL-8801",
