@@ -118,6 +118,8 @@ export function WarrantyDashboardBody({ scope, dealerName }: Props) {
         )}
       </div>
 
+      {scope === "dealer" && <YearlyOverviewCard data={stats.yearly} />}
+
       <div
         className={`grid grid-cols-1 gap-6 ${
           scope === "admin" ? "xl:grid-cols-3" : ""
