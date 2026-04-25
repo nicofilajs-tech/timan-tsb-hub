@@ -10,15 +10,17 @@ import {
   AlertTriangle,
   Check,
   Loader2,
+  MessageSquare,
   Phone,
   Plus,
   Printer,
+  Save,
   Trash2,
   User,
   Wrench,
 } from "lucide-react";
 import { usePortalLanguage, type PortalLang } from "@/components/PortalHeader";
-import type { ClaimRecord } from "@/lib/claims-store";
+import { updateAdminFields, type ClaimRecord } from "@/lib/claims-store";
 
 const LANGUAGES = [
   { code: "dk", name: "Dansk", flag: "DK" },
