@@ -1570,9 +1570,7 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
 
 /**
  * MachineTypeSelect — fixed dropdown of supported Timan machine types.
- *
- * Replaces the free-text Maskintype input in the claim form. Same styling
- * as CountrySelect for visual consistency.
+ * Same styling as CountrySelect for visual consistency.
  */
 const MACHINE_TYPE_OPTIONS = [
   "RC-750",
@@ -1627,6 +1625,7 @@ function MachineTypeSelect({
     </div>
   );
 }
+
 
 /**
  * CountrySelect — grouped dropdown of standardized country names.
