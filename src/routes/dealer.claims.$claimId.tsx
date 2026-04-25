@@ -5,7 +5,8 @@ import { ClaimsAdminSidebarLayout } from "@/components/ClaimsAdminSidebarLayout"
 import { ClaimTool } from "@/components/claims/ClaimTool";
 import {
   CLAIM_STATUS_LABEL,
-  getAllClaims,
+  getClaimById,
+  isClaimEditable,
   type ClaimRecord,
   type ClaimStatus,
 } from "@/lib/claims-store";
@@ -19,7 +20,7 @@ export const Route = createFileRoute("/dealer/claims/$claimId")({
 
 function DealerClaimDetailRoute() {
   const { claimId } = useParams({ strict: false }) as { claimId: string };
-  const claim = getAllClaims().find((c) => c.id === claimId);
+  const claim = getClaimById(claimId);
 
   if (!claim) {
     return (
@@ -42,18 +43,20 @@ function DealerClaimDetailRoute() {
     );
   }
 
+  const readOnly = !isClaimEditable(claim.status);
+
   return (
     <ProtectedRoute>
-      <ClaimsAdminSidebarLayout intro={<DetailIntro claim={claim} />}>
+      <ClaimsAdminSidebarLayout intro={<DetailIntro claim={claim} readOnly={readOnly} />}>
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <ClaimTool />
+          <ClaimTool initialClaim={claim} readOnly={readOnly} />
         </div>
       </ClaimsAdminSidebarLayout>
     </ProtectedRoute>
   );
 }
 
-function DetailIntro({ claim }: { claim: ClaimRecord }) {
+function DetailIntro({ claim, readOnly }: { claim: ClaimRecord; readOnly: boolean }) {
   return (
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div className="min-w-0">
@@ -66,6 +69,11 @@ function DetailIntro({ claim }: { claim: ClaimRecord }) {
         <div className="mt-1 flex flex-wrap items-center gap-3">
           <h1 className="text-3xl font-black tracking-tight">{claim.id}</h1>
           <StatusPill status={claim.status} />
+          {readOnly && (
+            <span className="inline-flex rounded-full bg-slate-900 px-2.5 py-0.5 text-xs font-black text-white">
+              Skrivebeskyttet
+            </span>
+          )}
         </div>
         <p className="mt-1 truncate text-sm text-slate-500">
           {claim.title} • {claim.customer} • {claim.machineType} ({claim.serial})
