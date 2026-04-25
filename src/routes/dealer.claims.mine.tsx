@@ -6,6 +6,7 @@ import { ClaimsAdminSidebarLayout } from "@/components/ClaimsAdminSidebarLayout"
 import { useDealerName } from "@/components/warranty/useDealerName";
 import {
   CLAIM_STATUS_LABEL,
+  CLAIM_STATUS_PILL,
   claimDisplayId,
   getDealerClaims,
   isClaimEditable,
@@ -209,17 +210,9 @@ function MineBody({ dealerName }: { dealerName: string }) {
 }
 
 function StatusPill({ status }: { status: ClaimStatus }) {
-  const cls: Record<ClaimStatus, string> = {
-    open: "bg-blue-50 text-blue-700",
-    waiting: "bg-amber-50 text-amber-700",
-    in_progress: "bg-indigo-50 text-indigo-700",
-    approved: "bg-emerald-50 text-emerald-700",
-    rejected: "bg-red-50 text-red-700",
-    closed: "bg-slate-100 text-slate-600",
-  };
   return (
     <span
-      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-black ${cls[status]}`}
+      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-black ${CLAIM_STATUS_PILL[status]}`}
     >
       {CLAIM_STATUS_LABEL[status]}
     </span>
