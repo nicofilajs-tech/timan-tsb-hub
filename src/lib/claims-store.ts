@@ -16,11 +16,19 @@ export type ClaimStatus =
 
 export interface ClaimRecord {
   id: string;
+  /** Warranty / guarantee number issued by Timan, e.g. "T-001234". */
+  warrantyNo: string;
   title: string;
+  dealer: string;
+  country: string;
   customer: string;
   machineType: string;
   serial: string;
-  createdAt: string; // ISO date
+  createdAt: string; // ISO date — submitted/created
+  damageDate: string; // ISO date
+  approvedDate: string | null; // ISO date or null
+  /** Total claim amount in DKK (parts + labor). */
+  totalPrice: number;
   status: ClaimStatus;
 }
 
