@@ -814,6 +814,7 @@ export function ClaimTool({
                       <TableInput
                         value={part.qty}
                         onChange={(value) => updatePart(part.id, "qty", value)}
+                        numeric
                       />
                     </td>
                     <td className="px-4 py-3">
@@ -836,6 +837,8 @@ export function ClaimTool({
                           updatePart(part.id, "unitPrice", value)
                         }
                         alignRight
+                        numeric
+                        decimals
                       />
                     </td>
                     <td className="px-4 py-3 text-right font-bold text-green-700">
@@ -889,6 +892,9 @@ export function ClaimTool({
                   onChange={(value) =>
                     setFormData({ ...formData, laborHours: value })
                   }
+                  numeric
+                  decimals
+                  unit="h"
                 />
                 <FormInput
                   label={t("labels.drivingKm")}
@@ -896,6 +902,8 @@ export function ClaimTool({
                   onChange={(value) =>
                     setFormData({ ...formData, drivingKm: value })
                   }
+                  numeric
+                  unit="km"
                 />
               </div>
               <p className="mt-8 text-[10px] font-bold italic leading-relaxed text-red-600 opacity-80">
