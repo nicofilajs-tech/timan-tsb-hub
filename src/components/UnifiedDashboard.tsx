@@ -151,7 +151,7 @@ export function UnifiedDashboard({
       title: "Service / Claims",
       desc: "Opret og håndter reklamationssager, følg status og se historik på maskiner.",
       action: "Åbn reklamationer",
-      href: "/service",
+      href: isAdmin ? "/service" : "/dealer/claims/dashboard",
       color: "green",
       icon: Wrench,
     },
