@@ -983,10 +983,18 @@ export interface DealerClaimsSummary {
   latest: ClaimRecord[];
 }
 
+const OPEN_STATUSES: ClaimStatus[] = [
+  "open",
+  "in_progress",
+  "waiting",
+  "approved",
+  "dealer_in_progress",
+  "awaiting_timan_close",
+  "awaiting_timan_comment",
+];
+
 export function summarizeDealerClaims(records: ClaimRecord[]): DealerClaimsSummary {
-  const open = records.filter(
-    (r) => r.status === "open" || r.status === "waiting" || r.status === "in_progress",
-  ).length;
+  const open = records.filter((r) => OPEN_STATUSES.includes(r.status)).length;
   const approved = records.filter((r) => r.status === "approved").length;
   const rejected = records.filter((r) => r.status === "rejected").length;
   const latest = [...records]
@@ -1003,9 +1011,7 @@ export interface AdminClaimsSummary {
 }
 
 export function summarizeAdminClaims(records: ClaimRecord[]): AdminClaimsSummary {
-  const open = records.filter(
-    (r) => r.status === "open" || r.status === "waiting" || r.status === "in_progress",
-  ).length;
+  const open = records.filter((r) => OPEN_STATUSES.includes(r.status)).length;
   const approved = records.filter((r) => r.status === "approved").length;
   const totalAmount = records.reduce((sum, r) => sum + (r.totalPrice || 0), 0);
   return { total: records.length, open, approved, totalAmount };
