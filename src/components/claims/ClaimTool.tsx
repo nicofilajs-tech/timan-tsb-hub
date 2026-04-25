@@ -854,13 +854,14 @@ export function ClaimTool({
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 print:grid-cols-2 print:gap-2">
           <SectionBox title={t("sections.machine")}>
-            <FormInput
+            <MachineTypeSelect
               label={t("labels.machineType")}
               value={formData.machineType}
               onChange={(value) =>
                 setFormData({ ...formData, machineType: value })
               }
               required
+              disabled={readOnly && !adminMode}
             />
             <div className="mt-3 grid grid-cols-2 gap-3">
               <FormInput
@@ -1563,6 +1564,66 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
     <div className="flex items-center justify-between">
       <span className="font-medium text-slate-400">{label}</span>
       <span className="font-mono text-lg">{value}</span>
+    </div>
+  );
+}
+
+/**
+ * MachineTypeSelect — fixed dropdown of supported Timan machine types.
+ *
+ * Replaces the free-text Maskintype input in the claim form. Same styling
+ * as CountrySelect for visual consistency.
+ */
+const MACHINE_TYPE_OPTIONS = [
+  "RC-750",
+  "RC-751",
+  "RC-1000",
+  "Timan 3330",
+  "Timan 2620",
+  "Timan Tool-Trac",
+] as const;
+
+function MachineTypeSelect({
+  label,
+  value,
+  onChange,
+  required,
+  disabled,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  required?: boolean;
+  disabled?: boolean;
+}) {
+  const missing = required && !value.trim();
+  return (
+    <div className="w-full">
+      <label className="mb-1 block text-[9px] font-bold uppercase text-slate-400 print:text-black">
+        {label} {required && "*"}
+      </label>
+      <Select
+        value={value || undefined}
+        onValueChange={onChange}
+        disabled={disabled}
+      >
+        <SelectTrigger
+          className={`h-auto w-full rounded-lg border px-3 py-2 text-sm shadow-none ${
+            missing
+              ? "border-red-200 bg-red-50"
+              : "border-slate-200 bg-slate-50"
+          } print:border-black print:bg-white`}
+        >
+          <SelectValue placeholder="Vælg maskintype" />
+        </SelectTrigger>
+        <SelectContent>
+          {MACHINE_TYPE_OPTIONS.map((m) => (
+            <SelectItem key={m} value={m}>
+              {m}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }
