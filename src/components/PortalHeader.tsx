@@ -107,16 +107,16 @@ export function PortalHeader({
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white">
-      <div className="relative mx-auto flex h-[96px] max-w-7xl items-center justify-between gap-4 px-6">
-        <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          <img
-            src={timanLogo}
-            alt="Timan Logo"
-            className="h-[50px] w-auto md:h-[64px]"
-          />
-        </div>
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+        <img
+          src={timanLogo}
+          alt="Timan Logo"
+          className="h-[50px] w-auto md:h-[64px]"
+        />
+      </div>
 
-        <div className="flex min-w-0 items-center gap-4">
+      <div className="relative mx-auto grid h-[96px] max-w-[1400px] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 px-6 lg:grid-cols-[16rem_minmax(0,1fr)_auto] lg:gap-6">
+        <div className="flex min-w-0 items-center justify-start lg:justify-center">
           {backTo ? (
             <Link
               to={backTo as "/dashboard"}
@@ -126,21 +126,24 @@ export function PortalHeader({
               <span className="hidden md:inline">{backLabel}</span>
             </Link>
           ) : null}
-          {moduleTitle ? (
-            <div className="hidden min-w-0 md:block">
-              <p className="truncate text-sm font-black leading-tight text-slate-950">
-                {moduleTitle}
-              </p>
-              {moduleSubtitle && (
-                <p className="truncate text-xs text-slate-500">
-                  {moduleSubtitle}
-                </p>
-              )}
-            </div>
-          ) : null}
         </div>
 
-        <div className="flex items-center gap-4 md:gap-6">
+        {moduleTitle ? (
+          <div className="hidden min-w-0 lg:block">
+            <p className="truncate text-sm font-black leading-tight text-slate-950">
+              {moduleTitle}
+            </p>
+            {moduleSubtitle && (
+              <p className="truncate text-xs text-slate-500">
+                {moduleSubtitle}
+              </p>
+            )}
+          </div>
+        ) : (
+          <div />
+        )}
+
+        <div className="flex items-center justify-end gap-4 md:gap-6">
           <div className="hidden rounded-full bg-slate-100 p-1 text-sm font-bold text-slate-500 md:flex">
             {PORTAL_LANGUAGES.map((code) => (
               <button
