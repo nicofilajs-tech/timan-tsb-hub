@@ -860,8 +860,10 @@ export function addConnectedClaim(sourceId: string): ClaimRecord | undefined {
 /**
  * Persist Timan-Admin-only changes back to the in-memory mock store.
  * Updates the admin comment plus the editable price-overview fields
- * (working hours, driving km, total price). Returns the updated record
- * or undefined if not found.
+ * (working hours, driving km, total price). When the claim is already
+ * past Timan approval and a tracked field actually changes value,
+ * appends entries to the audit log so the dealer can see what changed.
+ * Returns the updated record or undefined if not found.
  */
 export function updateAdminFields(
   id: string,
@@ -871,13 +873,87 @@ export function updateAdminFields(
     drivingKm?: string;
     totalPrice?: number;
   },
+  /** Display name for the audit log entry, e.g. "Timan Admin". */
+  changedBy = "Timan Admin",
 ): ClaimRecord | undefined {
   const claim = RECORDS.find((c) => c.id === id);
   if (!claim) return undefined;
+  const trackAudit = isPastApproval(claim.status);
+  const log = (field: string, oldValue: string, newValue: string) => {
+    if (oldValue === newValue) return;
+    if (!claim.auditLog) claim.auditLog = [];
+    claim.auditLog.push({
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      at: new Date().toISOString(),
+      by: changedBy,
+      field,
+      oldValue,
+      newValue,
+    });
+  };
   if (fields.adminComment !== undefined) claim.adminComment = fields.adminComment;
-  if (fields.laborHours !== undefined) claim.detail.laborHours = fields.laborHours;
-  if (fields.drivingKm !== undefined) claim.detail.drivingKm = fields.drivingKm;
-  if (fields.totalPrice !== undefined) claim.totalPrice = fields.totalPrice;
+  if (fields.laborHours !== undefined) {
+    if (trackAudit) log("Arbejdstimer", claim.detail.laborHours, fields.laborHours);
+    claim.detail.laborHours = fields.laborHours;
+  }
+  if (fields.drivingKm !== undefined) {
+    if (trackAudit) log("Kørte km", claim.detail.drivingKm, fields.drivingKm);
+    claim.detail.drivingKm = fields.drivingKm;
+  }
+  if (fields.totalPrice !== undefined) {
+    if (trackAudit) log("Samlet pris", String(claim.totalPrice), String(fields.totalPrice));
+    claim.totalPrice = fields.totalPrice;
+  }
+  return claim;
+}
+
+/**
+ * True once Timan has approved the claim — i.e. the dealer is locked out
+ * and any later edits made by Timan must appear in the audit log.
+ */
+export function isPastApproval(status: ClaimStatus): boolean {
+  return (
+    status === "approved" ||
+    status === "dealer_in_progress" ||
+    status === "awaiting_timan_close" ||
+    status === "awaiting_timan_comment" ||
+    status === "rejected" ||
+    status === "closed"
+  );
+}
+
+/**
+ * Mutate the claim status. Used by both Dealer and Timan workflows.
+ * Returns the updated record or undefined if not found.
+ */
+export function setClaimStatus(id: string, status: ClaimStatus): ClaimRecord | undefined {
+  const claim = RECORDS.find((c) => c.id === id);
+  if (!claim) return undefined;
+  claim.status = status;
+  if (status === "approved" && !claim.approvedDate) {
+    claim.approvedDate = new Date().toISOString().slice(0, 10);
+  }
+  return claim;
+}
+
+/**
+ * Append a dealer comment. Used by the "Ikke accepteret" / disagreement
+ * flow and on rejected claims so the dealer can reply to Timan.
+ */
+export function addDealerComment(
+  id: string,
+  text: string,
+  author = "Forhandler",
+): ClaimRecord | undefined {
+  const claim = RECORDS.find((c) => c.id === id);
+  if (!claim) return undefined;
+  if (!claim.dealerComments) claim.dealerComments = [];
+  claim.dealerComments.push({
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    at: new Date().toISOString(),
+    author,
+    text: text.trim(),
+  });
   return claim;
 }
 
