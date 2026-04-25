@@ -814,6 +814,7 @@ export function ClaimTool({
                       <TableInput
                         value={part.qty}
                         onChange={(value) => updatePart(part.id, "qty", value)}
+                        numeric
                       />
                     </td>
                     <td className="px-4 py-3">
@@ -836,6 +837,8 @@ export function ClaimTool({
                           updatePart(part.id, "unitPrice", value)
                         }
                         alignRight
+                        numeric
+                        decimals
                       />
                     </td>
                     <td className="px-4 py-3 text-right font-bold text-green-700">
@@ -889,6 +892,9 @@ export function ClaimTool({
                   onChange={(value) =>
                     setFormData({ ...formData, laborHours: value })
                   }
+                  numeric
+                  decimals
+                  unit="h"
                 />
                 <FormInput
                   label={t("labels.drivingKm")}
@@ -896,6 +902,8 @@ export function ClaimTool({
                   onChange={(value) =>
                     setFormData({ ...formData, drivingKm: value })
                   }
+                  numeric
+                  unit="km"
                 />
               </div>
               <p className="mt-8 text-[10px] font-bold italic leading-relaxed text-red-600 opacity-80">
@@ -1093,35 +1101,103 @@ function TextAreaBox({
   );
 }
 
+/**
+ * Whether `value` is a valid number string for a numeric input.
+ * Empty string is considered valid (handled by `required` separately).
+ * Accepts `.` or `,` as decimal separator. When `decimals` is false,
+ * only integers are accepted.
+ */
+function isValidNumber(value: string, decimals: boolean): boolean {
+  if (!value) return true;
+  const pattern = decimals ? /^\d+([.,]\d+)?$/ : /^\d+$/;
+  return pattern.test(value);
+}
+
+/**
+ * Sanitise live keyboard input so the user can never enter letters.
+ * Returns the previous value if the new input is malformed.
+ */
+function sanitiseNumeric(
+  next: string,
+  prev: string,
+  decimals: boolean,
+): string {
+  if (next === "") return "";
+  // Only digits and (optionally) a single decimal separator allowed at all.
+  const allowed = decimals ? /^[\d.,]*$/ : /^\d*$/;
+  if (!allowed.test(next)) return prev;
+  if (decimals) {
+    // Disallow more than one decimal separator.
+    const sepCount = (next.match(/[.,]/g) || []).length;
+    if (sepCount > 1) return prev;
+  }
+  return next;
+}
+
 function FormInput({
   label,
   value,
   onChange,
   required,
   type = "text",
+  numeric,
+  decimals = false,
+  unit,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   required?: boolean;
   type?: string;
+  /** Restrict input to numbers only. */
+  numeric?: boolean;
+  /** When numeric, allow a decimal separator. */
+  decimals?: boolean;
+  /** Optional unit suffix shown next to the label, e.g. "h" or "km". */
+  unit?: string;
 }) {
   const missing = isFieldMissing(value, required, type);
+  const numericInvalid = numeric ? !isValidNumber(value, decimals) : false;
+  const error = missing || numericInvalid;
   return (
     <div className="w-full">
       <label className="mb-1 block text-[9px] font-bold uppercase text-slate-400 print:text-black">
         {label} {required && "*"}
+        {unit && (
+          <span className="ml-1 font-normal normal-case text-slate-400">
+            ({unit})
+          </span>
+        )}
       </label>
       <input
         type={type}
+        inputMode={numeric ? (decimals ? "decimal" : "numeric") : undefined}
         className={`w-full rounded-lg border px-3 py-2 text-sm outline-none transition-all ${
-          missing
-            ? "border-red-200 bg-red-50"
+          error
+            ? "border-red-300 bg-red-50"
             : "border-slate-200 bg-slate-50 focus:border-green-600"
         } print:border-black print:bg-white`}
         value={value}
-        onChange={(event) => onChange(event.target.value)}
+        onChange={(event) => {
+          if (numeric) {
+            const cleaned = sanitiseNumeric(
+              event.target.value,
+              value,
+              decimals,
+            );
+            onChange(cleaned);
+            return;
+          }
+          onChange(event.target.value);
+        }}
       />
+      {numericInvalid && (
+        <p className="mt-1 text-[10px] font-bold text-red-600">
+          {decimals
+            ? "Indtast et tal — fx 5,5 eller 12.0."
+            : "Indtast kun hele tal."}
+        </p>
+      )}
     </div>
   );
 }
@@ -1131,20 +1207,48 @@ function TableInput({
   onChange,
   italic,
   alignRight,
+  numeric,
+  decimals = false,
 }: {
   value: string;
   onChange: (value: string) => void;
   italic?: boolean;
   alignRight?: boolean;
+  /** Restrict input to numbers only. */
+  numeric?: boolean;
+  /** When numeric, allow a decimal separator. */
+  decimals?: boolean;
 }) {
+  const numericInvalid = numeric ? !isValidNumber(value, decimals) : false;
   return (
-    <input
-      className={`w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 outline-none focus:border-green-600 ${
-        italic ? "italic" : ""
-      } ${alignRight ? "text-right" : ""}`}
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
-    />
+    <div className="w-full">
+      <input
+        inputMode={numeric ? (decimals ? "decimal" : "numeric") : undefined}
+        className={`w-full rounded-md border bg-white px-2 py-1.5 outline-none ${
+          numericInvalid
+            ? "border-red-300 bg-red-50"
+            : "border-slate-200 focus:border-green-600"
+        } ${italic ? "italic" : ""} ${alignRight ? "text-right" : ""}`}
+        value={value}
+        onChange={(event) => {
+          if (numeric) {
+            const cleaned = sanitiseNumeric(
+              event.target.value,
+              value,
+              decimals,
+            );
+            onChange(cleaned);
+            return;
+          }
+          onChange(event.target.value);
+        }}
+      />
+      {numericInvalid && (
+        <p className="mt-1 text-[10px] font-bold text-red-600">
+          {decimals ? "Kun tal — fx 1450,00." : "Kun hele tal."}
+        </p>
+      )}
+    </div>
   );
 }
 
