@@ -106,5 +106,18 @@
         "action": "Vedi informazioni"
       }
     }
+  },
+  "serviceInfo": {
+    "intro": "Trova le informazioni di contatto per il supporto tecnico e le richieste generali qui sotto.",
+    "technicalSupport": {
+      "title": "Supporto tecnico",
+      "phoneLabel": "Telefono",
+      "emailLabel": "Email"
+    },
+    "contact": {
+      "title": "Contattaci",
+      "companyLabel": "Azienda",
+      "addressLabel": "Indirizzo"
+    }
   }
 }
