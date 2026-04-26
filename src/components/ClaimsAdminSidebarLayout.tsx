@@ -9,6 +9,7 @@
 import type { ReactNode } from "react";
 import { Component, type ErrorInfo } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import {
   ClipboardList,
   LayoutDashboard,
@@ -20,47 +21,28 @@ export type ClaimsLayoutScope = "admin" | "dealer";
 
 interface NavItem {
   to: string;
-  label: string;
+  /** i18n key under "sidebar.*" */
+  labelKey: string;
   icon: LucideIcon;
   match: string;
 }
 
 const ADMIN_NAV: NavItem[] = [
-  {
-    to: "/admin/claims/dashboard",
-    label: "Dashboard",
-    icon: LayoutDashboard,
-    match: "/admin/claims/dashboard",
-  },
-  {
-    to: "/admin/claims/all",
-    label: "Alle claims",
-    icon: ClipboardList,
-    match: "/admin/claims/all",
-  },
+  { to: "/admin/claims/dashboard", labelKey: "dashboard", icon: LayoutDashboard, match: "/admin/claims/dashboard" },
+  { to: "/admin/claims/all", labelKey: "allClaims", icon: ClipboardList, match: "/admin/claims/all" },
 ];
 
 const DEALER_NAV: NavItem[] = [
-  {
-    to: "/dealer/claims/dashboard",
-    label: "Dashboard",
-    icon: LayoutDashboard,
-    match: "/dealer/claims/dashboard",
-  },
-  {
-    to: "/dealer/claims/mine",
-    label: "Mine claims",
-    icon: ClipboardList,
-    match: "/dealer/claims/mine",
-  },
+  { to: "/dealer/claims/dashboard", labelKey: "dashboard", icon: LayoutDashboard, match: "/dealer/claims/dashboard" },
+  { to: "/dealer/claims/mine", labelKey: "myClaims", icon: ClipboardList, match: "/dealer/claims/mine" },
 ];
 
 interface ClaimsErrorBoundaryState {
   error: Error | null;
 }
 
-class ClaimsErrorBoundary extends Component<
-  { children: ReactNode },
+class ClaimsErrorBoundaryInner extends Component<
+  { children: ReactNode; tErrorTitle: string; tErrorBody: string; tRetry: string },
   ClaimsErrorBoundaryState
 > {
   state: ClaimsErrorBoundaryState = { error: null };
@@ -80,19 +62,15 @@ class ClaimsErrorBoundary extends Component<
     if (this.state.error) {
       return (
         <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-red-900">
-          <h2 className="text-xl font-black">Noget gik galt</h2>
-          <p className="mt-2 text-sm">
-            Der opstod en fejl ved indlæsning af claims-modulet. Prøv igen.
-          </p>
-          <p className="mt-3 font-mono text-xs opacity-70">
-            {this.state.error.message}
-          </p>
+          <h2 className="text-xl font-black">{this.props.tErrorTitle}</h2>
+          <p className="mt-2 text-sm">{this.props.tErrorBody}</p>
+          <p className="mt-3 font-mono text-xs opacity-70">{this.state.error.message}</p>
           <button
             type="button"
             onClick={this.reset}
             className="mt-5 rounded-lg bg-red-600 px-4 py-2 text-sm font-bold text-white hover:bg-red-700"
           >
-            Prøv igen
+            {this.props.tRetry}
           </button>
         </div>
       );
@@ -114,20 +92,21 @@ export function ClaimsAdminSidebarLayout({
   children,
 }: ClaimsAdminSidebarLayoutProps) {
   const location = useLocation();
+  const { t } = useTranslation();
   const nav = scope === "admin" ? ADMIN_NAV : DEALER_NAV;
 
   const headerProps =
     scope === "admin"
       ? {
-          displayName: "Timan Admin",
-          company: "Timan Intern",
-          user: { initials: "TA", name: "Timan Admin", role: "Intern" },
+          displayName: t("header.admin"),
+          company: t("header.intern"),
+          user: { initials: "TA", name: t("header.admin"), role: t("header.role.intern") },
           backTo: "/admin/dashboard",
         }
       : {
-          displayName: "Forhandler",
-          company: "Service / Claims",
-          user: { initials: "FH", name: "Forhandler", role: "Dealer" },
+          displayName: t("header.dealer"),
+          company: t("modules.claims.title"),
+          user: { initials: "FH", name: t("header.dealer"), role: t("header.role.dealer") },
           backTo: "/dashboard",
         };
 
@@ -135,8 +114,8 @@ export function ClaimsAdminSidebarLayout({
     <div className="min-h-screen bg-slate-50 text-slate-950">
       <PortalHeader
         {...headerProps}
-        moduleTitle="Service / Claims"
-        moduleSubtitle="Officiel portal for forhandlere"
+        moduleTitle={t("modules.claims.title")}
+        moduleSubtitle={t("modules.claims.subtitle")}
       />
 
       <div className="mx-auto flex max-w-[1400px] gap-6 px-6 py-6">
@@ -158,7 +137,7 @@ export function ClaimsAdminSidebarLayout({
                   }`}
                 >
                   <Icon className="h-4 w-4 shrink-0" />
-                  <span>{item.label}</span>
+                  <span>{t(`sidebar.${item.labelKey}`)}</span>
                 </Link>
               );
             })}
@@ -167,7 +146,13 @@ export function ClaimsAdminSidebarLayout({
 
         <div className="min-w-0 flex-1">
           {intro && <div className="mb-5">{intro}</div>}
-          <ClaimsErrorBoundary>{children}</ClaimsErrorBoundary>
+          <ClaimsErrorBoundaryInner
+            tErrorTitle={t("modules.claims.errorTitle")}
+            tErrorBody={t("modules.claims.errorBody")}
+            tRetry={t("modules.claims.retry")}
+          >
+            {children}
+          </ClaimsErrorBoundaryInner>
         </div>
       </div>
     </div>
