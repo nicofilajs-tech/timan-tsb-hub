@@ -11,6 +11,7 @@
 
 import { useMemo } from "react";
 import { Link } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import {
   AlertCircle,
   BarChart3,
@@ -90,6 +91,7 @@ export function UnifiedDashboard({
   company,
   user,
 }: UnifiedDashboardProps) {
+  const { t } = useTranslation();
   const isAdmin = scope === "timan_admin";
   const tsbs = useTsbs();
 
@@ -148,33 +150,33 @@ export function UnifiedDashboard({
 
   const modules: ModuleCardItem[] = [
     {
-      title: "Service / Claims",
-      desc: "Opret og håndter reklamationssager, følg status og se historik på maskiner.",
-      action: "Åbn reklamationer",
+      title: t("dashboard.modulesCard.claims.title"),
+      desc: t("dashboard.modulesCard.claims.desc"),
+      action: t("dashboard.modulesCard.claims.action"),
       href: isAdmin ? "/admin/claims/dashboard" : "/dealer/claims/dashboard",
       color: "green",
       icon: Wrench,
     },
     {
-      title: "TSB Portal",
-      desc: "Tekniske Service Bulletins. Se påkrævede opdateringer og sikkerhedstjek.",
-      action: "Gå til TSB",
+      title: t("dashboard.modulesCard.tsb.title"),
+      desc: t("dashboard.modulesCard.tsb.desc"),
+      action: t("dashboard.modulesCard.tsb.action"),
       href: isAdmin ? "/admin/tsb" : "/cases",
       color: "blue",
       icon: FileText,
     },
     {
-      title: "Garantiregisteringer",
-      desc: "Registrer nye maskiner ved levering til kunden. Garantiregistrering skal oprettes ved overlevering. Der kan ikke behandles garanti eller reklamation på maskiner, som ikke er registreret.",
-      action: "Åbn registrering",
+      title: t("dashboard.modulesCard.warranty.title"),
+      desc: t("dashboard.modulesCard.warranty.desc"),
+      action: t("dashboard.modulesCard.warranty.action"),
       href: isAdmin ? "/admin/warranty/dashboard" : "/dealer/warranty/dashboard",
       color: "amber",
       icon: BookOpen,
     },
     {
-      title: "Serviceinformation",
-      desc: "Nyheder, tips og tricks samt generel information om vedligeholdelse af Timan produkter.",
-      action: "Se information",
+      title: t("dashboard.modulesCard.info.title"),
+      desc: t("dashboard.modulesCard.info.desc"),
+      action: t("dashboard.modulesCard.info.action"),
       href: "/service-info",
       color: "purple",
       icon: Info,
@@ -182,26 +184,26 @@ export function UnifiedDashboard({
   ];
 
   const tsbKpis: StatItem[] = [
-    { label: "Aktive TSB", value: tsbStats.active },
-    { label: "Afventer accept", value: tsbStats.waiting, color: "text-amber-600" },
-    { label: "Nær deadline", value: tsbStats.nearDeadline, color: "text-indigo-600" },
-    { label: "Forsinket", value: tsbStats.overdue, color: "text-red-600" },
+    { label: t("dashboard.kpi.activeTsb"), value: tsbStats.active },
+    { label: t("dashboard.kpi.waitingAccept"), value: tsbStats.waiting, color: "text-amber-600" },
+    { label: t("dashboard.kpi.nearDeadline"), value: tsbStats.nearDeadline, color: "text-indigo-600" },
+    { label: t("dashboard.kpi.overdue"), value: tsbStats.overdue, color: "text-red-600" },
     ...(isAdmin
-      ? [{ label: "Berørte forhandlere", value: tsbStats.affectedDealers, color: "text-amber-600" }]
+      ? [{ label: t("dashboard.kpi.affectedDealers"), value: tsbStats.affectedDealers, color: "text-amber-600" }]
       : []),
-    { label: "Berørte maskiner", value: tsbStats.affectedMachines },
+    { label: t("dashboard.kpi.affectedMachines"), value: tsbStats.affectedMachines },
   ];
 
   const claimKpis: StatItem[] = [
-    { label: "Åbne claims", value: claimStats.open },
-    { label: "Afventer accept", value: claimStats.waiting, color: "text-amber-600" },
-    { label: "I gang", value: claimStats.inProgress, color: "text-indigo-600" },
-    { label: "Klar til lukning", value: claimStats.readyToClose, color: "text-green-600" },
-    { label: "Afsluttede", value: claimStats.completed },
+    { label: t("dashboard.kpi.openClaims"), value: claimStats.open },
+    { label: t("dashboard.kpi.waitingAccept"), value: claimStats.waiting, color: "text-amber-600" },
+    { label: t("dashboard.kpi.inProgress"), value: claimStats.inProgress, color: "text-indigo-600" },
+    { label: t("dashboard.kpi.readyToClose"), value: claimStats.readyToClose, color: "text-green-600" },
+    { label: t("dashboard.kpi.completed"), value: claimStats.completed },
     ...(isAdmin && "rejected" in claimStats
       ? [
-          { label: "Afviste", value: claimStats.rejected as number, color: "text-red-600" },
-          { label: "Gennemsnitlig behandlingstid", value: (claimStats as { avgTime: string }).avgTime },
+          { label: t("dashboard.kpi.rejected"), value: claimStats.rejected as number, color: "text-red-600" },
+          { label: t("dashboard.kpi.avgHandlingTime"), value: (claimStats as { avgTime: string }).avgTime },
         ]
       : []),
   ];
@@ -211,46 +213,46 @@ export function UnifiedDashboard({
     const items: UrgentItem[] = [];
 
     visibleTsbs
-      .filter((t) => t.status === "aktiv")
-      .forEach((t) => {
-        const d = daysUntil(t.deadline);
-        const link = !isAdmin ? t.dealers.find((x) => x.dealerId === dealerId) : undefined;
+      .filter((tsb) => tsb.status === "aktiv")
+      .forEach((tsb) => {
+        const d = daysUntil(tsb.deadline);
+        const link = !isAdmin ? tsb.dealers.find((x) => x.dealerId === dealerId) : undefined;
         const href = isAdmin ? "/admin/tsb/$id" : "/cases/$id";
         if (d < 0) {
           items.push({
             type: "TSB",
-            id: t.id,
-            title: t.title,
-            status: "Forsinket",
-            deadline: `Deadline: ${Math.abs(d)} dage siden`,
+            id: tsb.id,
+            title: tsb.title,
+            status: t("dashboard.status.overdue"),
+            deadline: t("dashboard.deadline.daysAgo", { count: Math.abs(d) }),
             icon: FileText,
             color: "red",
             href,
-            params: { id: t.id },
+            params: { id: tsb.id },
           });
         } else if (d <= 7) {
           items.push({
             type: "TSB",
-            id: t.id,
-            title: t.title,
-            status: "Nær deadline",
-            deadline: `Deadline: Om ${d} dage`,
+            id: tsb.id,
+            title: tsb.title,
+            status: t("dashboard.status.nearDeadline"),
+            deadline: t("dashboard.deadline.inDays", { count: d }),
             icon: FileText,
             color: "blue",
             href,
-            params: { id: t.id },
+            params: { id: tsb.id },
           });
         } else if (!isAdmin && link?.status === "afventer") {
           items.push({
             type: "TSB",
-            id: t.id,
-            title: t.title,
-            status: "Afventer accept",
-            deadline: "Modtagelse skal bekræftes",
+            id: tsb.id,
+            title: tsb.title,
+            status: t("dashboard.status.waitingAccept"),
+            deadline: t("dashboard.deadline.mustConfirm"),
             icon: FileText,
             color: "amber",
             href,
-            params: { id: t.id },
+            params: { id: tsb.id },
           });
         }
       });
@@ -260,8 +262,8 @@ export function UnifiedDashboard({
         type: "Claim",
         id: "CL-8821",
         title: "Defekt gearkasse - Serie 3400",
-        status: "Afventer accept",
-        deadline: "Deadline: I dag",
+        status: t("dashboard.status.waitingAccept"),
+        deadline: t("dashboard.deadline.today"),
         icon: Wrench,
         color: "amber",
         href: "/admin/claims/dashboard",
@@ -270,8 +272,8 @@ export function UnifiedDashboard({
         type: "Claim",
         id: "CL-8790",
         title: "Elektronik fejl i display",
-        status: "Manglende dokumentation",
-        deadline: "Deadline: I går",
+        status: t("dashboard.status.waitingAccept"),
+        deadline: t("dashboard.deadline.yesterday"),
         icon: Wrench,
         color: "red",
         href: "/admin/claims/dashboard",
@@ -281,8 +283,8 @@ export function UnifiedDashboard({
         type: "Claim",
         id: "CL-0051",
         title: "Reklamation — startmotor",
-        status: "Afventer accept",
-        deadline: "Modtaget i går",
+        status: t("dashboard.status.waitingAccept"),
+        deadline: t("dashboard.deadline.receivedYesterday"),
         icon: Wrench,
         color: "amber",
         href: "/dealer/claims/dashboard",
@@ -291,9 +293,9 @@ export function UnifiedDashboard({
 
     const order: Record<ColorKey, number> = { red: 0, amber: 1, blue: 2, purple: 3, green: 4 };
     return items.sort((a, b) => order[a.color] - order[b.color]).slice(0, 4);
-  }, [visibleTsbs, isAdmin, dealerId]);
+  }, [visibleTsbs, isAdmin, dealerId, t]);
 
-  // ---- Recent activity (mock) ----
+  // ---- Recent activity (mock — kept untranslated; these are sample audit entries) ----
   const recentActivity = isAdmin
     ? [
         { text: "Ny reklamation oprettet (CL-8901)", time: "10 min siden" },
@@ -321,11 +323,10 @@ export function UnifiedDashboard({
 
             <div className="relative mx-auto max-w-7xl">
               <h1 className="max-w-4xl text-5xl font-black tracking-tight md:text-6xl">
-                Velkommen til Timan Service Portal
+                {t("dashboard.heroTitle")}
               </h1>
               <p className="mt-6 max-w-3xl text-xl leading-relaxed text-slate-200">
-                Din centrale adgang til servicehåndtering, TSB-oversigt og teknisk dokumentation.
-                Her kan du nemt administrere sager, se KPI'er og få adgang til de nyeste ressourcer.
+                {t("dashboard.heroSubtitle")}
               </p>
             </div>
           </section>
@@ -339,18 +340,18 @@ export function UnifiedDashboard({
 
           {/* KPI panels */}
           <section className="mx-auto mt-14 grid max-w-7xl grid-cols-1 gap-8 px-6 xl:grid-cols-2">
-            <KpiPanel title="TSB KPI Oversigt" icon={BarChart3} items={tsbKpis} meta="Opdateret nu" />
-            <KpiPanel title="Reklamations KPI" icon={Wrench} items={claimKpis} meta="Sidste 30 dage" />
+            <KpiPanel title={t("dashboard.tsbKpiTitle")} icon={BarChart3} items={tsbKpis} meta={t("dashboard.updatedNow")} />
+            <KpiPanel title={t("dashboard.claimsKpiTitle")} icon={Wrench} items={claimKpis} meta={t("dashboard.last30Days")} />
           </section>
 
           {/* Attention + Activity */}
           <section className="mx-auto mt-10 grid max-w-7xl grid-cols-1 gap-8 px-6 pb-24 xl:grid-cols-3">
             <div className="rounded-2xl border border-slate-200 bg-white shadow-sm xl:col-span-2">
-              <PanelHeader title="Kræver opmærksomhed" icon={AlertCircle} action="Se alle" />
+              <PanelHeader title={t("dashboard.needsAttention")} icon={AlertCircle} action={t("dashboard.viewAll")} />
               <div className="divide-y divide-slate-100">
                 {urgentItems.length === 0 ? (
                   <div className="p-6 text-sm text-slate-500">
-                    Intet kræver opmærksomhed lige nu.
+                    {t("dashboard.nothingNeedsAttention")}
                   </div>
                 ) : (
                   urgentItems.map((item) => {
@@ -393,7 +394,7 @@ export function UnifiedDashboard({
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-              <PanelHeader title="Seneste aktivitet" icon={Clock} />
+              <PanelHeader title={t("dashboard.recentActivity")} icon={Clock} />
               <div className="p-6">
                 <div className="space-y-8 border-l border-slate-200 pl-6">
                   {recentActivity.map((item) => (
@@ -410,7 +411,7 @@ export function UnifiedDashboard({
                   type="button"
                   className="inline-flex items-center gap-2 font-black text-slate-500 transition-colors hover:text-slate-900"
                 >
-                  Vis fuld historik <ExternalLink className="h-4 w-4" />
+                  {t("dashboard.showFullHistory")} <ExternalLink className="h-4 w-4" />
                 </button>
               </div>
             </div>

@@ -8,14 +8,16 @@
  *         • initials avatar • logout.
  *
  * Language is persisted in localStorage under "timan.portal.lang" and
- * exposed via `usePortalLanguage()` so module pages (e.g. ClaimTool) can
- * react to the user's choice.
+ * also drives react-i18next, so any component that uses `useTranslation`
+ * automatically re-renders when the user picks a new language.
  */
 
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Bell, LogOut } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import i18n from "@/i18n";
 import { useAuth } from "@/contexts/AuthContext";
 import timanLogo from "@/assets/timan-logo.png";
 
@@ -24,20 +26,48 @@ export type PortalLang = (typeof PORTAL_LANGUAGES)[number];
 
 const LANG_STORAGE_KEY = "timan.portal.lang";
 
+/** Map UI lang code (DK/GB/DE/IT/HU) ↔ i18next code (da/en/de/it/hu). */
+const PORTAL_TO_I18N: Record<PortalLang, string> = {
+  DK: "da",
+  GB: "en",
+  DE: "de",
+  IT: "it",
+  HU: "hu",
+};
+const I18N_TO_PORTAL: Record<string, PortalLang> = {
+  da: "DK",
+  en: "GB",
+  de: "DE",
+  it: "IT",
+  hu: "HU",
+};
+
 function readStoredLang(): PortalLang {
   if (typeof window === "undefined") return "DK";
   const v = window.localStorage.getItem(LANG_STORAGE_KEY);
-  return (PORTAL_LANGUAGES as readonly string[]).includes(v ?? "")
-    ? (v as PortalLang)
-    : "DK";
+  if ((PORTAL_LANGUAGES as readonly string[]).includes(v ?? "")) {
+    return v as PortalLang;
+  }
+  // Fall back to whatever i18next already resolved (covers detector hits).
+  const resolved = i18n.resolvedLanguage ?? i18n.language ?? "da";
+  return I18N_TO_PORTAL[resolved] ?? "DK";
 }
 
 /**
  * React hook returning the currently selected portal language and a
- * setter that persists the choice and broadcasts it to other listeners.
+ * setter that persists the choice, broadcasts it, and switches i18next.
  */
 export function usePortalLanguage(): [PortalLang, (next: PortalLang) => void] {
   const [lang, setLang] = useState<PortalLang>(() => readStoredLang());
+
+  // On mount, make sure i18next is in sync with the stored UI choice.
+  useEffect(() => {
+    const target = PORTAL_TO_I18N[lang];
+    if (target && i18n.language !== target) {
+      void i18n.changeLanguage(target);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const onStorage = (event: StorageEvent) => {
@@ -58,6 +88,7 @@ export function usePortalLanguage(): [PortalLang, (next: PortalLang) => void] {
       window.localStorage.setItem(LANG_STORAGE_KEY, next);
       window.dispatchEvent(new Event("timan:lang-change"));
     }
+    void i18n.changeLanguage(PORTAL_TO_I18N[next]);
   };
 
   return [lang, update];
@@ -91,17 +122,20 @@ export function PortalHeader({
   company,
   user,
   backTo,
-  backLabel = "Tilbage til dashboard",
+  backLabel,
   moduleTitle,
   moduleSubtitle,
 }: PortalHeaderProps) {
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const { t } = useTranslation();
   const [lang, setLang] = usePortalLanguage();
+
+  const resolvedBackLabel = backLabel ?? t("header.back");
 
   const handleLogout = async () => {
     await logout();
-    toast.success("Du er nu logget ud");
+    toast.success(t("header.logout"));
     navigate({ to: "/login" });
   };
 
@@ -123,7 +157,7 @@ export function PortalHeader({
               className="inline-flex shrink-0 items-center gap-2 rounded-full border border-slate-200 px-3 py-2 text-xs font-bold uppercase tracking-widest text-slate-500 transition-colors hover:border-slate-300 hover:text-slate-900"
             >
               <ArrowLeft className="h-4 w-4" />
-              <span className="hidden md:inline">{backLabel}</span>
+              <span className="hidden md:inline">{resolvedBackLabel}</span>
             </Link>
           ) : null}
         </div>
@@ -165,7 +199,7 @@ export function PortalHeader({
           <button
             type="button"
             className="relative rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100"
-            aria-label="Notifikationer"
+            aria-label={t("header.notifications")}
           >
             <Bell className="h-5 w-5" />
             <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500" />
@@ -185,8 +219,8 @@ export function PortalHeader({
           <button
             type="button"
             onClick={handleLogout}
-            title="Log ud"
-            aria-label="Log ud"
+            title={t("header.logout")}
+            aria-label={t("header.logout")}
             className="rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100"
           >
             <LogOut className="h-5 w-5" />

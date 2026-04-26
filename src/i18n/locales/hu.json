@@ -1,0 +1,110 @@
+{
+  "header": {
+    "back": "Vissza az irányítópultra",
+    "notifications": "Értesítések",
+    "logout": "Kijelentkezés",
+    "intern": "Timan Belső",
+    "admin": "Timan Admin",
+    "dealer": "Kereskedő",
+    "role": {
+      "intern": "Belső",
+      "dealer": "Kereskedő"
+    }
+  },
+  "modules": {
+    "claims": {
+      "title": "Szerviz / Reklamációk",
+      "subtitle": "Hivatalos portál kereskedőknek",
+      "errorTitle": "Valami hiba történt",
+      "errorBody": "Hiba történt a reklamáció modul betöltése közben. Próbáld újra.",
+      "retry": "Újrapróbálkozás"
+    },
+    "tsb": {
+      "title": "TSB portál",
+      "subtitle": "Technical Service Bulletins"
+    },
+    "warranty": {
+      "title": "Garancia regisztráció",
+      "subtitle": "Warranty Registration",
+      "errorTitle": "Valami hiba történt",
+      "errorBody": "Hiba történt a garancia regisztráció betöltése közben. Próbáld újra.",
+      "retry": "Újrapróbálkozás"
+    }
+  },
+  "sidebar": {
+    "dashboard": "Irányítópult",
+    "allClaims": "Összes reklamáció",
+    "myClaims": "Saját reklamációim",
+    "tsbs": "TSB-k",
+    "dealers": "Kereskedők",
+    "machines": "Gépek",
+    "users": "Felhasználók",
+    "countries": "Országlista",
+    "settings": "Beállítások",
+    "registeredCertificates": "Regisztrált garancialevelek",
+    "myRegistrations": "Saját regisztrációim",
+    "newRegistration": "Új regisztráció"
+  },
+  "dashboard": {
+    "heroTitle": "Üdvözlünk a Timan Service Portálon",
+    "heroSubtitle": "Központi hozzáférés a szervizkezeléshez, TSB-áttekintéshez és műszaki dokumentációhoz. Egyszerűen kezeld az ügyeket, nézd meg a KPI-ket és férj hozzá a legújabb forrásokhoz.",
+    "tsbKpiTitle": "TSB KPI áttekintés",
+    "claimsKpiTitle": "Reklamáció KPI",
+    "updatedNow": "Most frissítve",
+    "last30Days": "Elmúlt 30 nap",
+    "needsAttention": "Figyelmet igényel",
+    "recentActivity": "Legutóbbi tevékenység",
+    "viewAll": "Mind megtekintése",
+    "showFullHistory": "Teljes előzmény megjelenítése",
+    "nothingNeedsAttention": "Jelenleg semmi nem igényel figyelmet.",
+    "kpi": {
+      "activeTsb": "Aktív TSB-k",
+      "waitingAccept": "Elfogadásra vár",
+      "nearDeadline": "Határidő közeleg",
+      "overdue": "Lejárt",
+      "affectedDealers": "Érintett kereskedők",
+      "affectedMachines": "Érintett gépek",
+      "openClaims": "Nyitott reklamációk",
+      "inProgress": "Folyamatban",
+      "readyToClose": "Lezárásra kész",
+      "completed": "Lezárt",
+      "rejected": "Elutasított",
+      "avgHandlingTime": "Átlagos kezelési idő"
+    },
+    "status": {
+      "overdue": "Lejárt",
+      "nearDeadline": "Határidő közeleg",
+      "waitingAccept": "Elfogadásra vár"
+    },
+    "deadline": {
+      "daysAgo": "Határidő: {{count}} napja",
+      "inDays": "Határidő: {{count}} nap múlva",
+      "today": "Határidő: ma",
+      "yesterday": "Határidő: tegnap",
+      "mustConfirm": "Az átvételt meg kell erősíteni",
+      "receivedYesterday": "Tegnap érkezett"
+    },
+    "modulesCard": {
+      "claims": {
+        "title": "Szerviz / Reklamációk",
+        "desc": "Reklamációs ügyek létrehozása és kezelése, állapot nyomon követése és gépelőzmények megtekintése.",
+        "action": "Reklamációk megnyitása"
+      },
+      "tsb": {
+        "title": "TSB portál",
+        "desc": "Technical Service Bulletins. Tekintsd meg a szükséges frissítéseket és biztonsági ellenőrzéseket.",
+        "action": "Tovább a TSB-re"
+      },
+      "warranty": {
+        "title": "Garancia regisztrációk",
+        "desc": "Új gépek regisztrálása a vevőnek történő átadáskor. A garancia regisztrációt az átadáskor el kell készíteni. Nem regisztrált gépekre nem dolgozható fel garancia vagy reklamáció.",
+        "action": "Regisztráció megnyitása"
+      },
+      "info": {
+        "title": "Szervizinformáció",
+        "desc": "Hírek, tippek és általános információk a Timan termékek karbantartásáról.",
+        "action": "Információk megtekintése"
+      }
+    }
+  }
+}
