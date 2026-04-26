@@ -1,23 +1,110 @@
 {
-  "app": { "title": "TSB Portal", "intern": "Intern" },
-  "nav": {
+  "header": {
+    "back": "Zurück zum Dashboard",
+    "notifications": "Benachrichtigungen",
+    "logout": "Abmelden",
+    "intern": "Timan Intern",
+    "admin": "Timan Admin",
+    "dealer": "Händler",
+    "role": {
+      "intern": "Intern",
+      "dealer": "Händler"
+    }
+  },
+  "modules": {
+    "claims": {
+      "title": "Service / Reklamationen",
+      "subtitle": "Offizielles Portal für Händler",
+      "errorTitle": "Etwas ist schiefgelaufen",
+      "errorBody": "Beim Laden des Reklamationsmoduls ist ein Fehler aufgetreten. Bitte erneut versuchen.",
+      "retry": "Erneut versuchen"
+    },
+    "tsb": {
+      "title": "TSB-Portal",
+      "subtitle": "Technical Service Bulletins"
+    },
+    "warranty": {
+      "title": "Garantieregistrierung",
+      "subtitle": "Warranty Registration",
+      "errorTitle": "Etwas ist schiefgelaufen",
+      "errorBody": "Beim Laden der Garantieregistrierung ist ein Fehler aufgetreten. Bitte erneut versuchen.",
+      "retry": "Erneut versuchen"
+    }
+  },
+  "sidebar": {
     "dashboard": "Dashboard",
-    "myCases": "Meine Fälle",
-    "history": "Verlauf",
-    "tsb": "TSBs",
+    "allClaims": "Alle Reklamationen",
+    "myClaims": "Meine Reklamationen",
+    "tsbs": "TSBs",
     "dealers": "Händler",
     "machines": "Maschinen",
     "users": "Benutzer",
-    "settings": "Einstellungen"
+    "countries": "Länderliste",
+    "settings": "Einstellungen",
+    "registeredCertificates": "Registrierte Garantiezertifikate",
+    "myRegistrations": "Meine Registrierungen",
+    "newRegistration": "Neue Registrierung"
   },
-  "login": {
-    "heading": "Anmeldung beim TSB Portal",
-    "email": "E-Mail",
-    "password": "Passwort",
-    "submit": "Anmelden",
-    "or": "oder",
-    "microsoft": "Mit Microsoft anmelden",
-    "forgot": "Passwort vergessen?"
-  },
-  "common": { "search": "Suchen", "comingSoon": "Demnächst", "logout": "Abmelden" }
+  "dashboard": {
+    "heroTitle": "Willkommen im Timan Service Portal",
+    "heroSubtitle": "Ihr zentraler Zugang zu Servicemanagement, TSB-Übersicht und technischer Dokumentation. Verwalten Sie Vorgänge, sehen Sie KPIs und greifen Sie auf die neuesten Ressourcen zu.",
+    "tsbKpiTitle": "TSB-KPI-Übersicht",
+    "claimsKpiTitle": "Reklamations-KPI",
+    "updatedNow": "Gerade aktualisiert",
+    "last30Days": "Letzte 30 Tage",
+    "needsAttention": "Erfordert Aufmerksamkeit",
+    "recentActivity": "Letzte Aktivität",
+    "viewAll": "Alle anzeigen",
+    "showFullHistory": "Vollständige Historie anzeigen",
+    "nothingNeedsAttention": "Aktuell erfordert nichts Ihre Aufmerksamkeit.",
+    "kpi": {
+      "activeTsb": "Aktive TSBs",
+      "waitingAccept": "Wartet auf Annahme",
+      "nearDeadline": "Nahe Deadline",
+      "overdue": "Überfällig",
+      "affectedDealers": "Betroffene Händler",
+      "affectedMachines": "Betroffene Maschinen",
+      "openClaims": "Offene Reklamationen",
+      "inProgress": "In Bearbeitung",
+      "readyToClose": "Bereit zum Abschluss",
+      "completed": "Abgeschlossen",
+      "rejected": "Abgelehnt",
+      "avgHandlingTime": "Durchschnittliche Bearbeitungszeit"
+    },
+    "status": {
+      "overdue": "Überfällig",
+      "nearDeadline": "Nahe Deadline",
+      "waitingAccept": "Wartet auf Annahme"
+    },
+    "deadline": {
+      "daysAgo": "Deadline: vor {{count}} Tagen",
+      "inDays": "Deadline: in {{count}} Tagen",
+      "today": "Deadline: heute",
+      "yesterday": "Deadline: gestern",
+      "mustConfirm": "Empfang muss bestätigt werden",
+      "receivedYesterday": "Gestern erhalten"
+    },
+    "modulesCard": {
+      "claims": {
+        "title": "Service / Reklamationen",
+        "desc": "Reklamationsfälle erstellen und verwalten, Status verfolgen und Maschinenhistorie einsehen.",
+        "action": "Reklamationen öffnen"
+      },
+      "tsb": {
+        "title": "TSB-Portal",
+        "desc": "Technical Service Bulletins. Erforderliche Updates und Sicherheitsprüfungen anzeigen.",
+        "action": "Zu TSB"
+      },
+      "warranty": {
+        "title": "Garantieregistrierungen",
+        "desc": "Neue Maschinen bei Lieferung an den Kunden registrieren. Die Garantieregistrierung muss bei der Übergabe erstellt werden. Garantie- oder Reklamationsfälle können für nicht registrierte Maschinen nicht bearbeitet werden.",
+        "action": "Registrierung öffnen"
+      },
+      "info": {
+        "title": "Service-Informationen",
+        "desc": "Neuigkeiten, Tipps und Tricks sowie allgemeine Informationen zur Wartung von Timan-Produkten.",
+        "action": "Informationen ansehen"
+      }
+    }
+  }
 }

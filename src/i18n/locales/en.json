@@ -1,23 +1,110 @@
 {
-  "app": { "title": "TSB Portal", "intern": "Internal" },
-  "nav": {
+  "header": {
+    "back": "Back to dashboard",
+    "notifications": "Notifications",
+    "logout": "Sign out",
+    "intern": "Timan Internal",
+    "admin": "Timan Admin",
+    "dealer": "Dealer",
+    "role": {
+      "intern": "Internal",
+      "dealer": "Dealer"
+    }
+  },
+  "modules": {
+    "claims": {
+      "title": "Service / Claims",
+      "subtitle": "Official portal for dealers",
+      "errorTitle": "Something went wrong",
+      "errorBody": "An error occurred while loading the claims module. Please try again.",
+      "retry": "Try again"
+    },
+    "tsb": {
+      "title": "TSB Portal",
+      "subtitle": "Technical Service Bulletins"
+    },
+    "warranty": {
+      "title": "Warranty Registration",
+      "subtitle": "Warranty Registration",
+      "errorTitle": "Something went wrong",
+      "errorBody": "An error occurred while loading warranty registration. Please try again.",
+      "retry": "Try again"
+    }
+  },
+  "sidebar": {
     "dashboard": "Dashboard",
-    "myCases": "My cases",
-    "history": "History",
-    "tsb": "TSBs",
+    "allClaims": "All claims",
+    "myClaims": "My claims",
+    "tsbs": "TSBs",
     "dealers": "Dealers",
     "machines": "Machines",
     "users": "Users",
-    "settings": "Settings"
+    "countries": "Country list",
+    "settings": "Settings",
+    "registeredCertificates": "Registered warranty certificates",
+    "myRegistrations": "My registrations",
+    "newRegistration": "New registration"
   },
-  "login": {
-    "heading": "Sign in to TSB Portal",
-    "email": "Email",
-    "password": "Password",
-    "submit": "Sign in",
-    "or": "or",
-    "microsoft": "Sign in with Microsoft",
-    "forgot": "Forgot password?"
-  },
-  "common": { "search": "Search", "comingSoon": "Coming soon", "logout": "Sign out" }
+  "dashboard": {
+    "heroTitle": "Welcome to the Timan Service Portal",
+    "heroSubtitle": "Your central access to service management, TSB overview and technical documentation. Easily manage cases, view KPIs and access the latest resources.",
+    "tsbKpiTitle": "TSB KPI Overview",
+    "claimsKpiTitle": "Claims KPI",
+    "updatedNow": "Updated now",
+    "last30Days": "Last 30 days",
+    "needsAttention": "Needs attention",
+    "recentActivity": "Recent activity",
+    "viewAll": "View all",
+    "showFullHistory": "Show full history",
+    "nothingNeedsAttention": "Nothing needs attention right now.",
+    "kpi": {
+      "activeTsb": "Active TSBs",
+      "waitingAccept": "Awaiting acceptance",
+      "nearDeadline": "Near deadline",
+      "overdue": "Overdue",
+      "affectedDealers": "Affected dealers",
+      "affectedMachines": "Affected machines",
+      "openClaims": "Open claims",
+      "inProgress": "In progress",
+      "readyToClose": "Ready to close",
+      "completed": "Completed",
+      "rejected": "Rejected",
+      "avgHandlingTime": "Average handling time"
+    },
+    "status": {
+      "overdue": "Overdue",
+      "nearDeadline": "Near deadline",
+      "waitingAccept": "Awaiting acceptance"
+    },
+    "deadline": {
+      "daysAgo": "Deadline: {{count}} days ago",
+      "inDays": "Deadline: in {{count}} days",
+      "today": "Deadline: today",
+      "yesterday": "Deadline: yesterday",
+      "mustConfirm": "Receipt must be confirmed",
+      "receivedYesterday": "Received yesterday"
+    },
+    "modulesCard": {
+      "claims": {
+        "title": "Service / Claims",
+        "desc": "Create and manage claim cases, track status and see machine history.",
+        "action": "Open claims"
+      },
+      "tsb": {
+        "title": "TSB Portal",
+        "desc": "Technical Service Bulletins. View required updates and safety checks.",
+        "action": "Go to TSB"
+      },
+      "warranty": {
+        "title": "Warranty Registrations",
+        "desc": "Register new machines on delivery to the customer. Warranty registration must be created at handover. Warranty or claims cannot be processed for machines that are not registered.",
+        "action": "Open registration"
+      },
+      "info": {
+        "title": "Service Information",
+        "desc": "News, tips and tricks, and general information about maintenance of Timan products.",
+        "action": "View information"
+      }
+    }
+  }
 }

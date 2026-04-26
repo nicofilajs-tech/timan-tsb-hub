@@ -1,0 +1,110 @@
+{
+  "header": {
+    "back": "Torna al dashboard",
+    "notifications": "Notifiche",
+    "logout": "Esci",
+    "intern": "Timan Interno",
+    "admin": "Timan Admin",
+    "dealer": "Concessionario",
+    "role": {
+      "intern": "Interno",
+      "dealer": "Concessionario"
+    }
+  },
+  "modules": {
+    "claims": {
+      "title": "Assistenza / Reclami",
+      "subtitle": "Portale ufficiale per i concessionari",
+      "errorTitle": "Qualcosa è andato storto",
+      "errorBody": "Si è verificato un errore durante il caricamento del modulo reclami. Riprova.",
+      "retry": "Riprova"
+    },
+    "tsb": {
+      "title": "Portale TSB",
+      "subtitle": "Technical Service Bulletins"
+    },
+    "warranty": {
+      "title": "Registrazione garanzia",
+      "subtitle": "Warranty Registration",
+      "errorTitle": "Qualcosa è andato storto",
+      "errorBody": "Si è verificato un errore durante il caricamento della registrazione garanzia. Riprova.",
+      "retry": "Riprova"
+    }
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "allClaims": "Tutti i reclami",
+    "myClaims": "I miei reclami",
+    "tsbs": "TSB",
+    "dealers": "Concessionari",
+    "machines": "Macchine",
+    "users": "Utenti",
+    "countries": "Elenco paesi",
+    "settings": "Impostazioni",
+    "registeredCertificates": "Certificati di garanzia registrati",
+    "myRegistrations": "Le mie registrazioni",
+    "newRegistration": "Nuova registrazione"
+  },
+  "dashboard": {
+    "heroTitle": "Benvenuto nel Timan Service Portal",
+    "heroSubtitle": "Il tuo accesso centrale alla gestione dell'assistenza, panoramica TSB e documentazione tecnica. Gestisci facilmente i casi, visualizza i KPI e accedi alle ultime risorse.",
+    "tsbKpiTitle": "Panoramica KPI TSB",
+    "claimsKpiTitle": "KPI Reclami",
+    "updatedNow": "Aggiornato ora",
+    "last30Days": "Ultimi 30 giorni",
+    "needsAttention": "Richiede attenzione",
+    "recentActivity": "Attività recente",
+    "viewAll": "Vedi tutto",
+    "showFullHistory": "Mostra cronologia completa",
+    "nothingNeedsAttention": "Nulla richiede attenzione al momento.",
+    "kpi": {
+      "activeTsb": "TSB attivi",
+      "waitingAccept": "In attesa di accettazione",
+      "nearDeadline": "Vicino alla scadenza",
+      "overdue": "In ritardo",
+      "affectedDealers": "Concessionari interessati",
+      "affectedMachines": "Macchine interessate",
+      "openClaims": "Reclami aperti",
+      "inProgress": "In corso",
+      "readyToClose": "Pronto da chiudere",
+      "completed": "Completati",
+      "rejected": "Rifiutati",
+      "avgHandlingTime": "Tempo medio di gestione"
+    },
+    "status": {
+      "overdue": "In ritardo",
+      "nearDeadline": "Vicino alla scadenza",
+      "waitingAccept": "In attesa di accettazione"
+    },
+    "deadline": {
+      "daysAgo": "Scadenza: {{count}} giorni fa",
+      "inDays": "Scadenza: tra {{count}} giorni",
+      "today": "Scadenza: oggi",
+      "yesterday": "Scadenza: ieri",
+      "mustConfirm": "La ricezione deve essere confermata",
+      "receivedYesterday": "Ricevuto ieri"
+    },
+    "modulesCard": {
+      "claims": {
+        "title": "Assistenza / Reclami",
+        "desc": "Crea e gestisci i casi di reclamo, monitora lo stato e visualizza lo storico delle macchine.",
+        "action": "Apri reclami"
+      },
+      "tsb": {
+        "title": "Portale TSB",
+        "desc": "Technical Service Bulletins. Visualizza gli aggiornamenti richiesti e i controlli di sicurezza.",
+        "action": "Vai a TSB"
+      },
+      "warranty": {
+        "title": "Registrazioni garanzia",
+        "desc": "Registra nuove macchine al momento della consegna al cliente. La registrazione della garanzia deve essere creata alla consegna. Garanzie o reclami non possono essere elaborati per macchine non registrate.",
+        "action": "Apri registrazione"
+      },
+      "info": {
+        "title": "Informazioni di servizio",
+        "desc": "Novità, suggerimenti e informazioni generali sulla manutenzione dei prodotti Timan.",
+        "action": "Vedi informazioni"
+      }
+    }
+  }
+}

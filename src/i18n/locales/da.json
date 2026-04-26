@@ -1,30 +1,110 @@
 {
-  "app": {
-    "title": "TSB Portal",
-    "intern": "Intern"
+  "header": {
+    "back": "Tilbage til dashboard",
+    "notifications": "Notifikationer",
+    "logout": "Log ud",
+    "intern": "Timan Intern",
+    "admin": "Timan Admin",
+    "dealer": "Forhandler",
+    "role": {
+      "intern": "Intern",
+      "dealer": "Dealer"
+    }
   },
-  "nav": {
+  "modules": {
+    "claims": {
+      "title": "Service / Claims",
+      "subtitle": "Officiel portal for forhandlere",
+      "errorTitle": "Noget gik galt",
+      "errorBody": "Der opstod en fejl ved indlæsning af claims-modulet. Prøv igen.",
+      "retry": "Prøv igen"
+    },
+    "tsb": {
+      "title": "TSB Portal",
+      "subtitle": "Technical Service Bulletins"
+    },
+    "warranty": {
+      "title": "Garantiregistrering",
+      "subtitle": "Warranty Registration",
+      "errorTitle": "Noget gik galt",
+      "errorBody": "Der opstod en fejl ved indlæsning af garantiregistrering. Prøv igen.",
+      "retry": "Prøv igen"
+    }
+  },
+  "sidebar": {
     "dashboard": "Dashboard",
-    "myCases": "Mine sager",
-    "history": "Historik",
-    "tsb": "TSB'er",
+    "allClaims": "Alle claims",
+    "myClaims": "Mine claims",
+    "tsbs": "TSB'er",
     "dealers": "Forhandlere",
     "machines": "Maskiner",
     "users": "Brugere",
-    "settings": "Indstillinger"
+    "countries": "Landeliste",
+    "settings": "Indstillinger",
+    "registeredCertificates": "Registrerede garantibeviser",
+    "myRegistrations": "Mine registreringer",
+    "newRegistration": "Ny registrering"
   },
-  "login": {
-    "heading": "Log ind på TSB Portal",
-    "email": "E-mail",
-    "password": "Adgangskode",
-    "submit": "Log ind",
-    "or": "eller",
-    "microsoft": "Log ind med Microsoft",
-    "forgot": "Glemt adgangskode?"
-  },
-  "common": {
-    "search": "Søg",
-    "comingSoon": "Kommer snart",
-    "logout": "Log ud"
+  "dashboard": {
+    "heroTitle": "Velkommen til Timan Service Portal",
+    "heroSubtitle": "Din centrale adgang til servicehåndtering, TSB-oversigt og teknisk dokumentation. Her kan du nemt administrere sager, se KPI'er og få adgang til de nyeste ressourcer.",
+    "tsbKpiTitle": "TSB KPI Oversigt",
+    "claimsKpiTitle": "Reklamations KPI",
+    "updatedNow": "Opdateret nu",
+    "last30Days": "Sidste 30 dage",
+    "needsAttention": "Kræver opmærksomhed",
+    "recentActivity": "Seneste aktivitet",
+    "viewAll": "Se alle",
+    "showFullHistory": "Vis fuld historik",
+    "nothingNeedsAttention": "Intet kræver opmærksomhed lige nu.",
+    "kpi": {
+      "activeTsb": "Aktive TSB",
+      "waitingAccept": "Afventer accept",
+      "nearDeadline": "Nær deadline",
+      "overdue": "Forsinket",
+      "affectedDealers": "Berørte forhandlere",
+      "affectedMachines": "Berørte maskiner",
+      "openClaims": "Åbne claims",
+      "inProgress": "I gang",
+      "readyToClose": "Klar til lukning",
+      "completed": "Afsluttede",
+      "rejected": "Afviste",
+      "avgHandlingTime": "Gennemsnitlig behandlingstid"
+    },
+    "status": {
+      "overdue": "Forsinket",
+      "nearDeadline": "Nær deadline",
+      "waitingAccept": "Afventer accept"
+    },
+    "deadline": {
+      "daysAgo": "Deadline: {{count}} dage siden",
+      "inDays": "Deadline: Om {{count}} dage",
+      "today": "Deadline: I dag",
+      "yesterday": "Deadline: I går",
+      "mustConfirm": "Modtagelse skal bekræftes",
+      "receivedYesterday": "Modtaget i går"
+    },
+    "modulesCard": {
+      "claims": {
+        "title": "Service / Claims",
+        "desc": "Opret og håndter reklamationssager, følg status og se historik på maskiner.",
+        "action": "Åbn reklamationer"
+      },
+      "tsb": {
+        "title": "TSB Portal",
+        "desc": "Tekniske Service Bulletins. Se påkrævede opdateringer og sikkerhedstjek.",
+        "action": "Gå til TSB"
+      },
+      "warranty": {
+        "title": "Garantiregisteringer",
+        "desc": "Registrer nye maskiner ved levering til kunden. Garantiregistrering skal oprettes ved overlevering. Der kan ikke behandles garanti eller reklamation på maskiner, som ikke er registreret.",
+        "action": "Åbn registrering"
+      },
+      "info": {
+        "title": "Serviceinformation",
+        "desc": "Nyheder, tips og tricks samt generel information om vedligeholdelse af Timan produkter.",
+        "action": "Se information"
+      }
+    }
   }
 }
