@@ -323,11 +323,10 @@ export function UnifiedDashboard({
 
             <div className="relative mx-auto max-w-7xl">
               <h1 className="max-w-4xl text-5xl font-black tracking-tight md:text-6xl">
-                Velkommen til Timan Service Portal
+                {t("dashboard.heroTitle")}
               </h1>
               <p className="mt-6 max-w-3xl text-xl leading-relaxed text-slate-200">
-                Din centrale adgang til servicehåndtering, TSB-oversigt og teknisk dokumentation.
-                Her kan du nemt administrere sager, se KPI'er og få adgang til de nyeste ressourcer.
+                {t("dashboard.heroSubtitle")}
               </p>
             </div>
           </section>
@@ -341,18 +340,18 @@ export function UnifiedDashboard({
 
           {/* KPI panels */}
           <section className="mx-auto mt-14 grid max-w-7xl grid-cols-1 gap-8 px-6 xl:grid-cols-2">
-            <KpiPanel title="TSB KPI Oversigt" icon={BarChart3} items={tsbKpis} meta="Opdateret nu" />
-            <KpiPanel title="Reklamations KPI" icon={Wrench} items={claimKpis} meta="Sidste 30 dage" />
+            <KpiPanel title={t("dashboard.tsbKpiTitle")} icon={BarChart3} items={tsbKpis} meta={t("dashboard.updatedNow")} />
+            <KpiPanel title={t("dashboard.claimsKpiTitle")} icon={Wrench} items={claimKpis} meta={t("dashboard.last30Days")} />
           </section>
 
           {/* Attention + Activity */}
           <section className="mx-auto mt-10 grid max-w-7xl grid-cols-1 gap-8 px-6 pb-24 xl:grid-cols-3">
             <div className="rounded-2xl border border-slate-200 bg-white shadow-sm xl:col-span-2">
-              <PanelHeader title="Kræver opmærksomhed" icon={AlertCircle} action="Se alle" />
+              <PanelHeader title={t("dashboard.needsAttention")} icon={AlertCircle} action={t("dashboard.viewAll")} />
               <div className="divide-y divide-slate-100">
                 {urgentItems.length === 0 ? (
                   <div className="p-6 text-sm text-slate-500">
-                    Intet kræver opmærksomhed lige nu.
+                    {t("dashboard.nothingNeedsAttention")}
                   </div>
                 ) : (
                   urgentItems.map((item) => {
@@ -395,7 +394,7 @@ export function UnifiedDashboard({
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-              <PanelHeader title="Seneste aktivitet" icon={Clock} />
+              <PanelHeader title={t("dashboard.recentActivity")} icon={Clock} />
               <div className="p-6">
                 <div className="space-y-8 border-l border-slate-200 pl-6">
                   {recentActivity.map((item) => (
@@ -412,7 +411,7 @@ export function UnifiedDashboard({
                   type="button"
                   className="inline-flex items-center gap-2 font-black text-slate-500 transition-colors hover:text-slate-900"
                 >
-                  Vis fuld historik <ExternalLink className="h-4 w-4" />
+                  {t("dashboard.showFullHistory")} <ExternalLink className="h-4 w-4" />
                 </button>
               </div>
             </div>
