@@ -3,8 +3,8 @@
  *
  * - Reuses the shared PortalHeader (logo, back-to-dashboard, language,
  *   notifications, user, logout).
- * - Adds a compact left-side admin navigation: Dashboard, TSB'er,
- *   Forhandlere, Maskiner, Brugere, Indstillinger.
+ * - Adds a compact left-side admin navigation: Dashboard, TSBs,
+ *   Dealers, Machines, Users, Settings.
  * - Renders the page content to the right of the sidebar.
  *
  * Used only by Timan Admin TSB pages (`/admin/tsb`). Dealer routes
@@ -14,6 +14,7 @@
 
 import type { ReactNode } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import {
   Building2,
   Globe,
@@ -28,7 +29,7 @@ import { PortalHeader } from "@/components/PortalHeader";
 
 interface NavItem {
   to: string;
-  label: string;
+  labelKey: string;
   icon: LucideIcon;
   /** Active when location.pathname starts with this prefix */
   match: string;
@@ -37,13 +38,13 @@ interface NavItem {
 }
 
 const ADMIN_NAV: NavItem[] = [
-  { to: "/admin/tsb/dashboard", label: "Dashboard", icon: LayoutDashboard, match: "/admin/tsb/dashboard" },
-  { to: "/admin/tsb", label: "TSB'er", icon: FileText, match: "/admin/tsb", exact: true },
-  { to: "/admin/dealers", label: "Forhandlere", icon: Building2, match: "/admin/dealers" },
-  { to: "/admin/machines", label: "Maskiner", icon: Wrench, match: "/admin/machines" },
-  { to: "/admin/users", label: "Brugere", icon: Users, match: "/admin/users" },
-  { to: "/admin/countries", label: "Landeliste", icon: Globe, match: "/admin/countries" },
-  { to: "/admin/settings", label: "Indstillinger", icon: Settings, match: "/admin/settings" },
+  { to: "/admin/tsb/dashboard", labelKey: "dashboard", icon: LayoutDashboard, match: "/admin/tsb/dashboard" },
+  { to: "/admin/tsb", labelKey: "tsbs", icon: FileText, match: "/admin/tsb", exact: true },
+  { to: "/admin/dealers", labelKey: "dealers", icon: Building2, match: "/admin/dealers" },
+  { to: "/admin/machines", labelKey: "machines", icon: Wrench, match: "/admin/machines" },
+  { to: "/admin/users", labelKey: "users", icon: Users, match: "/admin/users" },
+  { to: "/admin/countries", labelKey: "countries", icon: Globe, match: "/admin/countries" },
+  { to: "/admin/settings", labelKey: "settings", icon: Settings, match: "/admin/settings" },
 ];
 
 interface TsbAdminSidebarLayoutProps {
@@ -54,16 +55,17 @@ interface TsbAdminSidebarLayoutProps {
 
 export function TsbAdminSidebarLayout({ intro, children }: TsbAdminSidebarLayoutProps) {
   const location = useLocation();
+  const { t } = useTranslation();
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-950">
       <PortalHeader
-        displayName="Timan Admin"
-        company="Timan Intern"
-        user={{ initials: "TA", name: "Timan Admin", role: "Intern" }}
+        displayName={t("header.admin")}
+        company={t("header.intern")}
+        user={{ initials: "TA", name: t("header.admin"), role: t("header.role.intern") }}
         backTo="/admin/dashboard"
-        moduleTitle="TSB Portal"
-        moduleSubtitle="Technical Service Bulletins"
+        moduleTitle={t("modules.tsb.title")}
+        moduleSubtitle={t("modules.tsb.subtitle")}
       />
 
       <div className="mx-auto flex max-w-[1400px] gap-6 px-6 py-6">
@@ -87,7 +89,7 @@ export function TsbAdminSidebarLayout({ intro, children }: TsbAdminSidebarLayout
                   }`}
                 >
                   <Icon className="h-4 w-4 shrink-0" />
-                  <span>{item.label}</span>
+                  <span>{t(`sidebar.${item.labelKey}`)}</span>
                 </Link>
               );
             })}
