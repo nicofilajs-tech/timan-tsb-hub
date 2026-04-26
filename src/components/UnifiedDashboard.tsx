@@ -150,33 +150,33 @@ export function UnifiedDashboard({
 
   const modules: ModuleCardItem[] = [
     {
-      title: "Service / Claims",
-      desc: "Opret og håndter reklamationssager, følg status og se historik på maskiner.",
-      action: "Åbn reklamationer",
+      title: t("dashboard.modulesCard.claims.title"),
+      desc: t("dashboard.modulesCard.claims.desc"),
+      action: t("dashboard.modulesCard.claims.action"),
       href: isAdmin ? "/admin/claims/dashboard" : "/dealer/claims/dashboard",
       color: "green",
       icon: Wrench,
     },
     {
-      title: "TSB Portal",
-      desc: "Tekniske Service Bulletins. Se påkrævede opdateringer og sikkerhedstjek.",
-      action: "Gå til TSB",
+      title: t("dashboard.modulesCard.tsb.title"),
+      desc: t("dashboard.modulesCard.tsb.desc"),
+      action: t("dashboard.modulesCard.tsb.action"),
       href: isAdmin ? "/admin/tsb" : "/cases",
       color: "blue",
       icon: FileText,
     },
     {
-      title: "Garantiregisteringer",
-      desc: "Registrer nye maskiner ved levering til kunden. Garantiregistrering skal oprettes ved overlevering. Der kan ikke behandles garanti eller reklamation på maskiner, som ikke er registreret.",
-      action: "Åbn registrering",
+      title: t("dashboard.modulesCard.warranty.title"),
+      desc: t("dashboard.modulesCard.warranty.desc"),
+      action: t("dashboard.modulesCard.warranty.action"),
       href: isAdmin ? "/admin/warranty/dashboard" : "/dealer/warranty/dashboard",
       color: "amber",
       icon: BookOpen,
     },
     {
-      title: "Serviceinformation",
-      desc: "Nyheder, tips og tricks samt generel information om vedligeholdelse af Timan produkter.",
-      action: "Se information",
+      title: t("dashboard.modulesCard.info.title"),
+      desc: t("dashboard.modulesCard.info.desc"),
+      action: t("dashboard.modulesCard.info.action"),
       href: "/service-info",
       color: "purple",
       icon: Info,
@@ -184,26 +184,26 @@ export function UnifiedDashboard({
   ];
 
   const tsbKpis: StatItem[] = [
-    { label: "Aktive TSB", value: tsbStats.active },
-    { label: "Afventer accept", value: tsbStats.waiting, color: "text-amber-600" },
-    { label: "Nær deadline", value: tsbStats.nearDeadline, color: "text-indigo-600" },
-    { label: "Forsinket", value: tsbStats.overdue, color: "text-red-600" },
+    { label: t("dashboard.kpi.activeTsb"), value: tsbStats.active },
+    { label: t("dashboard.kpi.waitingAccept"), value: tsbStats.waiting, color: "text-amber-600" },
+    { label: t("dashboard.kpi.nearDeadline"), value: tsbStats.nearDeadline, color: "text-indigo-600" },
+    { label: t("dashboard.kpi.overdue"), value: tsbStats.overdue, color: "text-red-600" },
     ...(isAdmin
-      ? [{ label: "Berørte forhandlere", value: tsbStats.affectedDealers, color: "text-amber-600" }]
+      ? [{ label: t("dashboard.kpi.affectedDealers"), value: tsbStats.affectedDealers, color: "text-amber-600" }]
       : []),
-    { label: "Berørte maskiner", value: tsbStats.affectedMachines },
+    { label: t("dashboard.kpi.affectedMachines"), value: tsbStats.affectedMachines },
   ];
 
   const claimKpis: StatItem[] = [
-    { label: "Åbne claims", value: claimStats.open },
-    { label: "Afventer accept", value: claimStats.waiting, color: "text-amber-600" },
-    { label: "I gang", value: claimStats.inProgress, color: "text-indigo-600" },
-    { label: "Klar til lukning", value: claimStats.readyToClose, color: "text-green-600" },
-    { label: "Afsluttede", value: claimStats.completed },
+    { label: t("dashboard.kpi.openClaims"), value: claimStats.open },
+    { label: t("dashboard.kpi.waitingAccept"), value: claimStats.waiting, color: "text-amber-600" },
+    { label: t("dashboard.kpi.inProgress"), value: claimStats.inProgress, color: "text-indigo-600" },
+    { label: t("dashboard.kpi.readyToClose"), value: claimStats.readyToClose, color: "text-green-600" },
+    { label: t("dashboard.kpi.completed"), value: claimStats.completed },
     ...(isAdmin && "rejected" in claimStats
       ? [
-          { label: "Afviste", value: claimStats.rejected as number, color: "text-red-600" },
-          { label: "Gennemsnitlig behandlingstid", value: (claimStats as { avgTime: string }).avgTime },
+          { label: t("dashboard.kpi.rejected"), value: claimStats.rejected as number, color: "text-red-600" },
+          { label: t("dashboard.kpi.avgHandlingTime"), value: (claimStats as { avgTime: string }).avgTime },
         ]
       : []),
   ];
