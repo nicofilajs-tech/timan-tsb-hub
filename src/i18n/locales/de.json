@@ -106,5 +106,18 @@
         "action": "Informationen ansehen"
       }
     }
+  },
+  "serviceInfo": {
+    "intro": "Hier finden Sie Kontaktinformationen für den technischen Support und allgemeine Anfragen.",
+    "technicalSupport": {
+      "title": "Technischer Support",
+      "phoneLabel": "Telefon",
+      "emailLabel": "E-Mail"
+    },
+    "contact": {
+      "title": "Kontaktieren Sie uns",
+      "companyLabel": "Unternehmen",
+      "addressLabel": "Adresse"
+    }
   }
 }

@@ -106,5 +106,18 @@
         "action": "View information"
       }
     }
+  },
+  "serviceInfo": {
+    "intro": "Find contact information for technical support and general inquiries below.",
+    "technicalSupport": {
+      "title": "Technical support",
+      "phoneLabel": "Phone",
+      "emailLabel": "Email"
+    },
+    "contact": {
+      "title": "Contact us",
+      "companyLabel": "Company",
+      "addressLabel": "Address"
+    }
   }
 }

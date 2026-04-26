@@ -106,5 +106,18 @@
         "action": "Információk megtekintése"
       }
     }
+  },
+  "serviceInfo": {
+    "intro": "Az alábbiakban található a műszaki támogatás és az általános megkeresések elérhetősége.",
+    "technicalSupport": {
+      "title": "Műszaki támogatás",
+      "phoneLabel": "Telefon",
+      "emailLabel": "E-mail"
+    },
+    "contact": {
+      "title": "Kapcsolat",
+      "companyLabel": "Cég",
+      "addressLabel": "Cím"
+    }
   }
 }

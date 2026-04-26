@@ -106,5 +106,18 @@
         "action": "Se information"
       }
     }
+  },
+  "serviceInfo": {
+    "intro": "Find kontaktinformation til teknisk support og generelle henvendelser nedenfor.",
+    "technicalSupport": {
+      "title": "Teknisk support",
+      "phoneLabel": "Telefon",
+      "emailLabel": "E-mail"
+    },
+    "contact": {
+      "title": "Kontakt os",
+      "companyLabel": "Virksomhed",
+      "addressLabel": "Adresse"
+    }
   }
 }
