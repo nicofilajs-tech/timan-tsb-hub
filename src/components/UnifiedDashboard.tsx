@@ -223,8 +223,8 @@ export function UnifiedDashboard({
             type: "TSB",
             id: t.id,
             title: t.title,
-            status: "Forsinket",
-            deadline: `Deadline: ${Math.abs(d)} dage siden`,
+            status: t("dashboard.status.overdue"),
+            deadline: t("dashboard.deadline.daysAgo", { count: Math.abs(d) }),
             icon: FileText,
             color: "red",
             href,
@@ -235,8 +235,8 @@ export function UnifiedDashboard({
             type: "TSB",
             id: t.id,
             title: t.title,
-            status: "Nær deadline",
-            deadline: `Deadline: Om ${d} dage`,
+            status: t("dashboard.status.nearDeadline"),
+            deadline: t("dashboard.deadline.inDays", { count: d }),
             icon: FileText,
             color: "blue",
             href,
@@ -247,8 +247,8 @@ export function UnifiedDashboard({
             type: "TSB",
             id: t.id,
             title: t.title,
-            status: "Afventer accept",
-            deadline: "Modtagelse skal bekræftes",
+            status: t("dashboard.status.waitingAccept"),
+            deadline: t("dashboard.deadline.mustConfirm"),
             icon: FileText,
             color: "amber",
             href,
@@ -262,8 +262,8 @@ export function UnifiedDashboard({
         type: "Claim",
         id: "CL-8821",
         title: "Defekt gearkasse - Serie 3400",
-        status: "Afventer accept",
-        deadline: "Deadline: I dag",
+        status: t("dashboard.status.waitingAccept"),
+        deadline: t("dashboard.deadline.today"),
         icon: Wrench,
         color: "amber",
         href: "/admin/claims/dashboard",
@@ -272,8 +272,8 @@ export function UnifiedDashboard({
         type: "Claim",
         id: "CL-8790",
         title: "Elektronik fejl i display",
-        status: "Manglende dokumentation",
-        deadline: "Deadline: I går",
+        status: t("dashboard.status.waitingAccept"),
+        deadline: t("dashboard.deadline.yesterday"),
         icon: Wrench,
         color: "red",
         href: "/admin/claims/dashboard",
@@ -283,8 +283,8 @@ export function UnifiedDashboard({
         type: "Claim",
         id: "CL-0051",
         title: "Reklamation — startmotor",
-        status: "Afventer accept",
-        deadline: "Modtaget i går",
+        status: t("dashboard.status.waitingAccept"),
+        deadline: t("dashboard.deadline.receivedYesterday"),
         icon: Wrench,
         color: "amber",
         href: "/dealer/claims/dashboard",
@@ -293,9 +293,9 @@ export function UnifiedDashboard({
 
     const order: Record<ColorKey, number> = { red: 0, amber: 1, blue: 2, purple: 3, green: 4 };
     return items.sort((a, b) => order[a.color] - order[b.color]).slice(0, 4);
-  }, [visibleTsbs, isAdmin, dealerId]);
+  }, [visibleTsbs, isAdmin, dealerId, t]);
 
-  // ---- Recent activity (mock) ----
+  // ---- Recent activity (mock — kept untranslated; these are sample audit entries) ----
   const recentActivity = isAdmin
     ? [
         { text: "Ny reklamation oprettet (CL-8901)", time: "10 min siden" },
