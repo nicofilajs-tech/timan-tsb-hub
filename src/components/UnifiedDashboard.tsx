@@ -213,46 +213,46 @@ export function UnifiedDashboard({
     const items: UrgentItem[] = [];
 
     visibleTsbs
-      .filter((t) => t.status === "aktiv")
-      .forEach((t) => {
-        const d = daysUntil(t.deadline);
-        const link = !isAdmin ? t.dealers.find((x) => x.dealerId === dealerId) : undefined;
+      .filter((tsb) => tsb.status === "aktiv")
+      .forEach((tsb) => {
+        const d = daysUntil(tsb.deadline);
+        const link = !isAdmin ? tsb.dealers.find((x) => x.dealerId === dealerId) : undefined;
         const href = isAdmin ? "/admin/tsb/$id" : "/cases/$id";
         if (d < 0) {
           items.push({
             type: "TSB",
-            id: t.id,
-            title: t.title,
+            id: tsb.id,
+            title: tsb.title,
             status: t("dashboard.status.overdue"),
             deadline: t("dashboard.deadline.daysAgo", { count: Math.abs(d) }),
             icon: FileText,
             color: "red",
             href,
-            params: { id: t.id },
+            params: { id: tsb.id },
           });
         } else if (d <= 7) {
           items.push({
             type: "TSB",
-            id: t.id,
-            title: t.title,
+            id: tsb.id,
+            title: tsb.title,
             status: t("dashboard.status.nearDeadline"),
             deadline: t("dashboard.deadline.inDays", { count: d }),
             icon: FileText,
             color: "blue",
             href,
-            params: { id: t.id },
+            params: { id: tsb.id },
           });
         } else if (!isAdmin && link?.status === "afventer") {
           items.push({
             type: "TSB",
-            id: t.id,
-            title: t.title,
+            id: tsb.id,
+            title: tsb.title,
             status: t("dashboard.status.waitingAccept"),
             deadline: t("dashboard.deadline.mustConfirm"),
             icon: FileText,
             color: "amber",
             href,
-            params: { id: t.id },
+            params: { id: tsb.id },
           });
         }
       });
