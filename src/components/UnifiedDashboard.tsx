@@ -11,6 +11,7 @@
 
 import { useMemo } from "react";
 import { Link } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import {
   AlertCircle,
   BarChart3,
@@ -90,6 +91,7 @@ export function UnifiedDashboard({
   company,
   user,
 }: UnifiedDashboardProps) {
+  const { t } = useTranslation();
   const isAdmin = scope === "timan_admin";
   const tsbs = useTsbs();
 
